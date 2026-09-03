@@ -1,1 +1,81 @@
 @import "tailwindcss";
+
+/*
+ * Semantic brand variables live outside @theme, one level of indirection below the
+ * Tailwind tokens. A future mood theme only needs to override these on a wrapper
+ * (e.g. [data-mood="cozy"]) — every component built on the brand-* utilities picks up
+ * the change automatically, with no per-component edits.
+ *
+ * --brand-accent is the mid tone: borders, hover rings, and large-text highlights on
+ * light backgrounds (>=3:1, the WCAG threshold for large text and graphical UI parts).
+ * --brand-accent-strong is reserved for solid fills carrying white text/icons — it's
+ * deliberately darker so that combination clears 4.5:1 for normal-size text.
+ */
+:root {
+  --brand-accent: var(--color-accent-600);
+  --brand-accent-strong: var(--color-accent-700);
+  --brand-accent-soft: var(--color-accent-100);
+  --brand-glow: var(--color-accent-300);
+}
+
+@theme {
+  --font-display: "Baloo 2", ui-rounded, "Segoe UI", sans-serif;
+  --font-script: "Caveat", cursive;
+  --font-sans:
+    "Nunito", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Warm neutrals */
+  --color-cream: #fdf6ec;
+  --color-cream-soft: #fffaf3;
+  --color-surface: #fffdfa;
+  --color-tan-100: #f7e9d6;
+  --color-tan-200: #efdcc0;
+
+  /* Accent (warm orange/coral) scale */
+  --color-accent-50: #fff3e6;
+  --color-accent-100: #ffe3c6;
+  --color-accent-200: #ffcb9c;
+  --color-accent-300: #ffab66;
+  --color-accent-400: #fb8f4a;
+  --color-accent-500: #f5813a;
+  --color-accent-600: #e5652a;
+  --color-accent-700: #c05121;
+  --color-accent-800: #9c3f19;
+
+  /* Ink (warm brown text) scale */
+  --color-ink: #3b2a20;
+  --color-ink-soft: #6b5645;
+  --color-ink-muted: #9a8574;
+
+  /* Supporting sage tone for decorative leaf accents */
+  --color-sage: #8fae6b;
+  --color-sage-soft: #e6efd9;
+
+  /* Brand indirection so mood theming can override without touching components */
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-strong: var(--brand-accent-strong);
+  --color-brand-accent-soft: var(--brand-accent-soft);
+  --color-brand-glow: var(--brand-glow);
+
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
+  --radius-4xl: 2.25rem;
+
+  /* A faint inset top highlight on every soft/lift shadow gives cards a tactile,
+     slightly-domed paper-card feel instead of a flat drop shadow. */
+  --shadow-soft: inset 0 1px 0 0 rgb(255 255 255 / 0.7), 0 10px 30px -14px rgb(120 72 30 / 0.22);
+  --shadow-lift: inset 0 1px 0 0 rgb(255 255 255 / 0.7), 0 20px 48px -18px rgb(120 72 30 / 0.3);
+  --shadow-glow: 0 0 0 4px var(--color-accent-100), 0 12px 30px -12px rgb(229 101 42 / 0.45);
+}
+
+@layer base {
+  body {
+    @apply bg-cream text-ink font-sans antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-accent);
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+  }
+}
