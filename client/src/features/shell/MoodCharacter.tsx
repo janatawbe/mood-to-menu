@@ -154,6 +154,22 @@ function TiredMarkup({ active }: MoodMarkupProps) {
         </radialGradient>
       </defs>
       <GroundShadow />
+      <motion.g
+        animate={active ? { rotate: [-4, -1, -4] } : { rotate: -4 }}
+        style={{ transformOrigin: "50px 62px" }}
+        transition={active ? { duration: 3.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
+      >
+        <circle cx="50" cy="62" r="26" fill="url(#tiredBody)" />
+        <ellipse cx="40" cy="50" rx="9" ry="6" fill="#FFFFFF" opacity="0.26" />
+        <ellipse cx="36" cy="72" rx="5" ry="3.2" fill="#C9A9C7" opacity="0.4" />
+        <ellipse cx="64" cy="72" rx="5" ry="3.2" fill="#C9A9C7" opacity="0.4" />
+        <ellipse cx="41" cy="68" rx="5" ry="2" fill="#3E3350" opacity="0.14" />
+        <ellipse cx="59" cy="68" rx="5" ry="2" fill="#3E3350" opacity="0.14" />
+        <path d="M36 62 Q41 66 46 62" stroke="#3E3350" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+        <path d="M54 62 Q59 66 64 62" stroke="#3E3350" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+        <path d="M44 78 Q50 76 56 78" stroke="#3E3350" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      </motion.g>
+      {/* Zzz painted last (on top) so they're never covered by the body/face group above. */}
       <motion.text
         x="64"
         y="25"
@@ -190,21 +206,6 @@ function TiredMarkup({ active }: MoodMarkupProps) {
       >
         z
       </motion.text>
-      <motion.g
-        animate={active ? { rotate: [-4, -1, -4] } : { rotate: -4 }}
-        style={{ transformOrigin: "50px 62px" }}
-        transition={active ? { duration: 3.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
-      >
-        <circle cx="50" cy="62" r="26" fill="url(#tiredBody)" />
-        <ellipse cx="40" cy="50" rx="9" ry="6" fill="#FFFFFF" opacity="0.26" />
-        <ellipse cx="36" cy="72" rx="5" ry="3.2" fill="#C9A9C7" opacity="0.4" />
-        <ellipse cx="64" cy="72" rx="5" ry="3.2" fill="#C9A9C7" opacity="0.4" />
-        <ellipse cx="41" cy="68" rx="5" ry="2" fill="#3E3350" opacity="0.14" />
-        <ellipse cx="59" cy="68" rx="5" ry="2" fill="#3E3350" opacity="0.14" />
-        <path d="M36 62 Q41 66 46 62" stroke="#3E3350" strokeWidth="2.6" fill="none" strokeLinecap="round" />
-        <path d="M54 62 Q59 66 64 62" stroke="#3E3350" strokeWidth="2.6" fill="none" strokeLinecap="round" />
-        <path d="M44 78 Q50 76 56 78" stroke="#3E3350" strokeWidth="2.2" fill="none" strokeLinecap="round" />
-      </motion.g>
     </>
   );
 }
@@ -336,9 +337,8 @@ function CozyMarkup({ active }: MoodMarkupProps) {
       <GroundShadow />
       <HeartMark x={14} y={19} size={8.1} color="#F0846B" active={active} delay={0} />
       <HeartMark x={85} y={25} size={6.3} color="#F09777" active={active} delay={0.2} />
-      <HeartMark x={5} y={42} size={5} color="#F5A98A" active={active} delay={0.35} />
-      <HeartMark x={95} y={47} size={5.4} color="#F0846B" active={active} delay={0.15} />
-      <HeartMark x={22} y={6} size={4.4} color="#F09777" active={active} delay={0.5} />
+      <HeartMark x={5} y={76} size={7} color="#F5A98A" active={active} delay={0.35} />
+      <HeartMark x={93} y={81} size={7.3} color="#F0846B" active={active} delay={0.15} />
 
       {/* body */}
       <circle cx="50" cy="62" r="26" fill="url(#cozyBody)" />
