@@ -2,8 +2,9 @@ import { Panel } from "../../components/Panel";
 import { EmptyState } from "../../components/EmptyState";
 import { navEntries, type SectionKey } from "./navConfig";
 
-const descriptions: Record<Exclude<SectionKey, "vibe-check">, string> = {
-  "todays-menu": "Your daily recipe pick will show up here once meal generation is built.",
+type PlaceholderSection = Exclude<SectionKey, "vibe-check" | "todays-menu">;
+
+const descriptions: Record<PlaceholderSection, string> = {
   "grocery-list": "A shoppable ingredient list will live here in a later milestone.",
   favorites: "Recipes you love will be saved here for quick access.",
   "recipe-history": "A timeline of everything you've cooked with Mood-to-Menu.",
@@ -11,7 +12,7 @@ const descriptions: Record<Exclude<SectionKey, "vibe-check">, string> = {
 };
 
 interface SectionPlaceholderProps {
-  section: Exclude<SectionKey, "vibe-check">;
+  section: PlaceholderSection;
 }
 
 export function SectionPlaceholder({ section }: SectionPlaceholderProps) {

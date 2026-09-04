@@ -4,9 +4,10 @@ import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { IconButton } from "../../components/IconButton";
 import { Tag } from "../../components/Tag";
-import { ChefHatIcon, SendIcon, SparkleIcon } from "../../components/icons";
+import { ChefHatIcon, SendIcon } from "../../components/icons";
 import type { UseVibeCheckReturn } from "../../hooks/useVibeCheck";
 import { VIBE_CHECK_TEXT_LIMIT } from "../../hooks/useVibeCheck";
+import { getFriendlyErrorMessage } from "../../lib/errorMessages";
 import { darken, getMoodTheme, hexToRgba } from "../../lib/moodTheme";
 import { quickInputOptions } from "./quickInputData";
 
@@ -16,9 +17,14 @@ interface VibeCheckInputCardProps {
 
 /**
  * The Vibe Check card's interactive footer — swaps between the editable form, a short
- * frontend-only "chef is cooking" transition, and a captured-summary state, all inside
- * the same footprint (via `min-h`) so switching phases never shifts the heading, mood
- * grid, or food-line decoration below it.
+ * "chef is cooking" transition, and an error state, all inside the same footprint (via
+ * `min-h`) so switching phases never shifts the heading, mood grid, or food-line
+ * decoration below it.
+ *
+ * The form also renders for `phase === "captured"` (not just "idle"): once a recipe
+ * exists, the actual reveal lives on the Today's Menu screen (see
+ * ../todays-menu/TodaysMenuScreen), so returning to this card just means "edit and
+ * resubmit," not "look at a summary again."
  */
 export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
   const {
@@ -33,12 +39,12 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
     retry,
     editVibeCheck,
     selectedMood,
-    recipe,
     error,
   } = vibeCheck;
   const prefersReducedMotion = useReducedMotion();
   const fadeTransition = { duration: prefersReducedMotion ? 0.01 : 0.2 };
   const theme = getMoodTheme(selectedMood);
+  const showForm = phase === "idle" || phase === "captured";
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
@@ -63,7 +69,7 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
       }
     >
       <AnimatePresence mode="wait">
-        {phase === "idle" && (
+        {showForm && (
           <motion.div
             key="form"
             initial={{ opacity: 0 }}
@@ -165,41 +171,6 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
           </motion.div>
         )}
 
-        {phase === "captured" && recipe && (
-          <motion.div
-            key="captured"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={fadeTransition}
-            role="status"
-            className="flex flex-1 flex-col items-center justify-center gap-2 text-center"
-          >
-            <SparkleIcon width={22} height={22} className="text-brand-accent" />
-            <p className="font-display text-base font-bold text-ink">Got it — {recipe.dishName} is ready!</p>
-            <p className="max-w-xs text-sm text-ink-muted">{recipe.reasoning}</p>
-            {/* Milestone 4 only proves a valid structured recipe was received — the
-                polished reveal is Milestone 5. Dev-only, stripped from production
-                builds by Vite's import.meta.env.DEV dead-code elimination. */}
-            {import.meta.env.DEV && (
-              <div className="mt-1 w-full max-w-xs rounded-xl border border-dashed border-tan-200 bg-cream-soft/60 p-2 text-left text-[11px] text-ink-muted">
-                <p className="font-semibold text-ink-soft">[DEV] recipe received from /api/recipes/generate</p>
-                <p>
-                  {recipe.prepTime} · {recipe.mealIntent.prepEffort} effort · {recipe.mealIntent.style}
-                </p>
-                <p>
-                  {recipe.ingredients.length} ingredients · {recipe.instructions.length} steps
-                </p>
-                <p>Tags: {recipe.tags.join(", ") || "—"}</p>
-                <p>Chef tip: {recipe.chefTip}</p>
-              </div>
-            )}
-            <Button variant="secondary" size="sm" onClick={editVibeCheck} className="mt-1">
-              Edit Vibe Check
-            </Button>
-          </motion.div>
-        )}
-
         {phase === "error" && error && (
           <motion.div
             key="error"
@@ -212,7 +183,7 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
           >
             <ChefHatIcon width={30} height={30} className="text-ink-muted" />
             <p className="font-display text-base font-bold text-ink">Hmm, that didn't work.</p>
-            <p className="max-w-xs text-sm text-ink-muted">{error.message}</p>
+            <p className="max-w-xs text-sm text-ink-muted">{getFriendlyErrorMessage(error.code)}</p>
             <div className="mt-1 flex gap-2">
               <Button variant="primary" size="sm" onClick={retry} disabled={!canRetry}>
                 Try again

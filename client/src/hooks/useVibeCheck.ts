@@ -11,23 +11,38 @@ export interface VibeCheckError {
   message: string;
 }
 
+function toVibeCheckError(err: unknown): VibeCheckError {
+  return err instanceof RecipeApiError
+    ? { code: err.code, message: err.message }
+    : { code: "INTERNAL_ERROR", message: "Something went wrong in the kitchen. Please try again." };
+}
+
 /**
  * Owns the Vibe Check's interaction state — mood selection, free text, quick-input
- * chips, and the submit/loading/captured/error phase — so it can be lifted to a common
- * ancestor (AppShell) and shared between the Vibe Check card and the sidebar's chef,
- * without reaching for a full state-management library.
+ * chips, the submit/loading/captured/error phase, and the current recipe — so it can be
+ * lifted to a common ancestor (AppShell) and shared between the Vibe Check card, the
+ * Today's Menu screen, and the sidebar's chef, without reaching for a full
+ * state-management library.
  *
- * Milestone 4: `submit`/`retry` now call the real POST /api/recipes/generate endpoint
- * (see ../services/api.ts) instead of a fake timer — loading starts when the request
- * goes out and ends only when a valid recipe arrives or the request fails.
+ * `submit`/`retry` call the real POST /api/recipes/generate endpoint (see
+ * ../services/api.ts) — loading starts when the request goes out and ends only when a
+ * valid recipe arrives or the request fails. `onGenerated` fires once, right after a
+ * successful *initial* generation (i.e. from the Vibe Check form, not a Today's Menu
+ * regeneration) — AppShell uses it to switch the active nav section to Today's Menu.
+ *
+ * `regenerate` is a separate action (Milestone 5, driven from Today's Menu) with its own
+ * `isRegenerating`/`regenerateError` state, deliberately kept apart from `phase`/`error`
+ * so a failed regeneration never destroys or hides the recipe currently on screen.
  */
-export function useVibeCheck() {
+export function useVibeCheck(onGenerated?: () => void) {
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [userText, setUserTextRaw] = useState("");
   const [quickInputs, setQuickInputs] = useState<string[]>([]);
   const [phase, setPhase] = useState<VibeCheckPhase>("idle");
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [error, setError] = useState<VibeCheckError | null>(null);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [regenerateError, setRegenerateError] = useState<VibeCheckError | null>(null);
 
   const toggleMood = useCallback((mood: Mood) => {
     setSelectedMood((current) => (current === mood ? null : mood));
@@ -44,10 +59,13 @@ export function useVibeCheck() {
   }, []);
 
   const hasMeaningfulText = userText.trim().length > 0;
-  const canSubmit =
-    phase === "idle" && (selectedMood !== null || hasMeaningfulText || quickInputs.length > 0);
-  const canRetry =
-    phase === "error" && (selectedMood !== null || hasMeaningfulText || quickInputs.length > 0);
+  const hasSignal = selectedMood !== null || hasMeaningfulText || quickInputs.length > 0;
+  // "captured" is included so editing/resubmitting an already-answered Vibe Check works
+  // the same way as the first submission (the card shows the same editable form for
+  // both — see VibeCheckInputCard).
+  const canSubmit = (phase === "idle" || phase === "captured") && hasSignal;
+  const canRetry = phase === "error" && hasSignal;
+  const canRegenerate = hasSignal && !isRegenerating;
 
   const runGeneration = useCallback(async () => {
     setError(null);
@@ -56,15 +74,12 @@ export function useVibeCheck() {
       const result = await generateRecipe({ selectedMood, userText, quickInputs });
       setRecipe(result);
       setPhase("captured");
+      onGenerated?.();
     } catch (err) {
-      const apiError =
-        err instanceof RecipeApiError
-          ? { code: err.code, message: err.message }
-          : { code: "INTERNAL_ERROR", message: "Something went wrong in the kitchen. Please try again." };
-      setError(apiError);
+      setError(toVibeCheckError(err));
       setPhase("error");
     }
-  }, [selectedMood, userText, quickInputs]);
+  }, [selectedMood, userText, quickInputs, onGenerated]);
 
   const submit = useCallback(() => {
     if (!canSubmit) return;
@@ -78,12 +93,30 @@ export function useVibeCheck() {
     void runGeneration();
   }, [canRetry, runGeneration]);
 
-  /** Returns to the editable form with everything the user already entered intact —
-   * this is a "go back and adjust," not a reset. */
+  /** Re-generates from Today's Menu using the same Vibe Check signals. Never touches
+   * `phase`/`error` (the initial-generation state machine) — the currently displayed
+   * recipe stays in place until a new one arrives, and stays in place (with a localized
+   * `regenerateError` instead) if the request fails. */
+  const regenerate = useCallback(async () => {
+    if (!canRegenerate) return;
+    setRegenerateError(null);
+    setIsRegenerating(true);
+    try {
+      const result = await generateRecipe({ selectedMood, userText, quickInputs });
+      setRecipe(result);
+    } catch (err) {
+      setRegenerateError(toVibeCheckError(err));
+    } finally {
+      setIsRegenerating(false);
+    }
+  }, [canRegenerate, selectedMood, userText, quickInputs]);
+
+  /** Returns to the editable form after a failed *initial* generation — mood/text/chips
+   * and any previously generated recipe are left untouched, this only clears the error
+   * and the failed phase. */
   const editVibeCheck = useCallback(() => {
     setPhase("idle");
     setError(null);
-    setRecipe(null);
   }, []);
 
   const vibeCheck: VibeCheck = useMemo(
@@ -99,14 +132,18 @@ export function useVibeCheck() {
     phase,
     recipe,
     error,
+    isRegenerating,
+    regenerateError,
     hasMeaningfulText,
     canSubmit,
     canRetry,
+    canRegenerate,
     toggleMood,
     setUserText,
     toggleQuickInput,
     submit,
     retry,
+    regenerate,
     editVibeCheck,
   };
 }

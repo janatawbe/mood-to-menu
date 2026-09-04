@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { AnimatePresence } from "motion/react";
 import { AppLogo } from "../../components/AppLogo";
 import { IconButton } from "../../components/IconButton";
 import { MenuIcon } from "../../components/icons";
 import { useVibeCheck } from "../../hooks/useVibeCheck";
+import { TodaysMenuScreen } from "../todays-menu/TodaysMenuScreen";
 import { ChefIntroOverlay } from "../chef-intro/ChefIntroOverlay";
 import type { ChefStatus } from "./ChefMascot";
 import { AmbientBackground } from "./decorative";
@@ -23,23 +24,39 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
   // Not persisted (by design, for now — see ChefIntroOverlay) so the intro replays on
   // every open/refresh. Swap in a sessionStorage-backed flag here if that should change.
   const [chefIntroDismissed, setChefIntroDismissed] = useState(false);
-  const vibeCheck = useVibeCheck();
-
-  const showChefIntro = chefIntroReady && !chefIntroDismissed;
-  const chefStatus: ChefStatus =
-    vibeCheck.phase === "loading" ? "cooking" : vibeCheck.selectedMood ? "attentive" : "welcoming";
 
   function handleSelectSection(section: SectionKey) {
     setActiveSection(section);
     setMobileNavOpen(false);
   }
 
+  // Fires once, right after a *successful initial* generation (Vibe Check submit/retry,
+  // not a Today's Menu regeneration) — the recipe reveal's real destination is Today's
+  // Menu, so a successful generation should take the user straight there.
+  const handleGenerated = useCallback(() => handleSelectSection("todays-menu"), []);
+  const vibeCheck = useVibeCheck(handleGenerated);
+
+  const showChefIntro = chefIntroReady && !chefIntroDismissed;
+  const chefStatus: ChefStatus =
+    vibeCheck.phase === "loading" || vibeCheck.isRegenerating
+      ? "cooking"
+      : activeSection === "todays-menu" && vibeCheck.recipe
+        ? "served"
+        : vibeCheck.selectedMood
+          ? "attentive"
+          : "welcoming";
+  // On Today's Menu, the chef's glow/reaction should reflect the recipe that was
+  // actually made (always a real mood), not the Vibe Check picker's own selection,
+  // which may since be null or changed.
+  const chefMood =
+    activeSection === "todays-menu" && vibeCheck.recipe ? vibeCheck.recipe.detectedMood : vibeCheck.selectedMood;
+
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <AmbientBackground mood={vibeCheck.selectedMood} />
 
       <div
-        className="relative z-[1] mx-auto flex min-h-screen w-full max-w-[1440px] flex-col gap-4 p-3 sm:p-4 lg:flex-row lg:gap-4 lg:p-3"
+        className="relative z-[1] mx-auto flex min-h-screen w-full max-w-[1440px] flex-col gap-4 p-3 sm:p-4 lg:h-screen lg:flex-row lg:gap-4 lg:p-3"
         inert={showChefIntro}
       >
         <header className="flex items-center justify-between rounded-3xl border border-tan-200/60 bg-surface/95 px-4 py-3 shadow-soft lg:hidden">
@@ -58,7 +75,7 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
               onSelectSection={handleSelectSection}
               chefArrived={chefIntroDismissed}
               chefStatus={chefStatus}
-              mood={vibeCheck.selectedMood}
+              mood={chefMood}
             />
           </div>
         </aside>
@@ -78,7 +95,7 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
                 onCloseMobile={() => setMobileNavOpen(false)}
                 chefArrived={chefIntroDismissed}
                 chefStatus={chefStatus}
-                mood={vibeCheck.selectedMood}
+                mood={chefMood}
               />
             </div>
           </div>
@@ -87,6 +104,8 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
         <main id="main-content" className="min-w-0 flex-1">
           {activeSection === "vibe-check" ? (
             <VibeCheckPreview vibeCheck={vibeCheck} />
+          ) : activeSection === "todays-menu" ? (
+            <TodaysMenuScreen vibeCheck={vibeCheck} onGoToVibeCheck={() => handleSelectSection("vibe-check")} />
           ) : (
             <SectionPlaceholder section={activeSection} />
           )}
