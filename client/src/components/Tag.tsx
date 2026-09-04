@@ -14,7 +14,7 @@ export function Tag({ label, selected = false, className = "", ...props }: TagPr
       aria-pressed={selected}
       className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200 ${
         selected
-          ? "border-brand-accent-strong bg-brand-accent-strong text-white shadow-soft"
+          ? "border-brand-accent-strong bg-brand-accent-strong text-white"
           : "border-tan-200 bg-cream-soft text-ink-soft hover:border-brand-accent hover:text-brand-accent-strong"
       } ${className}`}
       {...props}

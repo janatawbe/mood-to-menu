@@ -336,6 +336,9 @@ function CozyMarkup({ active }: MoodMarkupProps) {
       <GroundShadow />
       <HeartMark x={14} y={19} size={8.1} color="#F0846B" active={active} delay={0} />
       <HeartMark x={85} y={25} size={6.3} color="#F09777" active={active} delay={0.2} />
+      <HeartMark x={5} y={42} size={5} color="#F5A98A" active={active} delay={0.35} />
+      <HeartMark x={95} y={47} size={5.4} color="#F0846B" active={active} delay={0.15} />
+      <HeartMark x={22} y={6} size={4.4} color="#F09777" active={active} delay={0.5} />
 
       {/* body */}
       <circle cx="50" cy="62" r="26" fill="url(#cozyBody)" />
