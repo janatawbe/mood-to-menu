@@ -175,22 +175,23 @@ function TiredMarkup({ active }: MoodMarkupProps) {
         <path d="M44 78 Q50 76 56 78" stroke="#3E3350" strokeWidth="2.2" fill="none" strokeLinecap="round" />
       </motion.g>
       {/* Zzz painted last (on top) so they're never covered by the body/face group above.
-          Moved further up and to the right of the head, with more clearance from the
-          face than before, staggered so the trio rises toward the upper-right. */}
+          Each glyph gets its own fixed x-slot with a wide, constant gap to the next —
+          since only y (not x) is ever animated, that horizontal separation guarantees
+          none of the three can overlap at any point in the animation, not just at rest. */}
       <motion.text
-        x="72"
-        y="21"
+        x="60"
+        y="22"
         fontFamily="'Baloo 2', sans-serif"
         fontWeight="700"
         fontSize="20"
         fill="#8B7699"
-        animate={active ? { y: [21, 16, 21], opacity: [1, 0.3, 1] } : { y: 21, opacity: 1 }}
+        animate={active ? { y: [22, 16, 22], opacity: [1, 0.3, 1] } : { y: 22, opacity: 1 }}
         transition={active ? { duration: 2.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.2 }}
       >
         Z
       </motion.text>
       <motion.text
-        x="86"
+        x="77"
         y="13"
         fontFamily="'Baloo 2', sans-serif"
         fontWeight="700"
@@ -203,12 +204,12 @@ function TiredMarkup({ active }: MoodMarkupProps) {
       </motion.text>
       <motion.text
         x="90"
-        y="10"
+        y="9"
         fontFamily="'Baloo 2', sans-serif"
         fontWeight="700"
         fontSize="10.5"
         fill="#B9A8C9"
-        animate={active ? { y: [10, 7, 10], opacity: [1, 0.3, 1] } : { y: 10, opacity: 1 }}
+        animate={active ? { y: [9, 6.5, 9], opacity: [1, 0.3, 1] } : { y: 9, opacity: 1 }}
         transition={active ? { duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 } : { duration: 0.2 }}
       >
         z
