@@ -13,8 +13,11 @@ function getPort(): number {
  * gemini-2.5-flash (the model documented in the SDK's own README at integration time)
  * was confirmed via a live request during Milestone 4 to be retired for new API
  * keys/projects — Gemini's own error response named gemini-3.6-flash as the direct
- * replacement, which a models.list() check confirmed is available to this project. */
-const DEFAULT_GEMINI_MODEL = "gemini-3.6-flash";
+ * replacement. gemini-3.6-flash was then swapped for gemini-3.7-flash (the current
+ * stable Flash release) during Milestone 5 after repeated live 504 DEADLINE_EXCEEDED /
+ * 503 UNAVAILABLE ("high demand") failures — a specific stable id on purpose, not
+ * gemini-flash-latest, so behavior never changes silently underneath this app. */
+const DEFAULT_GEMINI_MODEL = "gemini-3.7-flash";
 
 export const env = {
   port: getPort(),

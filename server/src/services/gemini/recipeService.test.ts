@@ -86,8 +86,27 @@ describe("generateRecipe", () => {
     expect(generateContentMock).toHaveBeenCalledTimes(1);
   });
 
-  it("propagates a provider server error as PROVIDER_UNAVAILABLE, without retrying", async () => {
-    generateContentMock.mockRejectedValueOnce(new ApiError({ message: "Server error", status: 503 }));
+  it("propagates a 503 UNAVAILABLE (high demand) error as PROVIDER_UNAVAILABLE, without retrying", async () => {
+    generateContentMock.mockRejectedValueOnce(
+      new ApiError({
+        message: "This model is currently experiencing high demand. Spikes in demand are usually temporary.",
+        status: 503,
+      }),
+    );
+
+    await expect(generateRecipe(INPUT)).rejects.toMatchObject({ code: "PROVIDER_UNAVAILABLE", httpStatus: 503 });
+    expect(generateContentMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("propagates a 504 DEADLINE_EXCEEDED error as TIMEOUT (not PROVIDER_UNAVAILABLE), without retrying", async () => {
+    generateContentMock.mockRejectedValueOnce(new ApiError({ message: "Deadline exceeded", status: 504 }));
+
+    await expect(generateRecipe(INPUT)).rejects.toMatchObject({ code: "TIMEOUT", httpStatus: 504 });
+    expect(generateContentMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("other 5xx provider errors still fall back to PROVIDER_UNAVAILABLE, without retrying", async () => {
+    generateContentMock.mockRejectedValueOnce(new ApiError({ message: "Internal error", status: 500 }));
 
     await expect(generateRecipe(INPUT)).rejects.toMatchObject({ code: "PROVIDER_UNAVAILABLE" });
     expect(generateContentMock).toHaveBeenCalledTimes(1);
