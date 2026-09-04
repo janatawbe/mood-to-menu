@@ -66,14 +66,19 @@ function HeartMark({
 }) {
   const s = size / 10;
   return (
-    <motion.path
-      transform={`translate(${x - 5 * s} ${y - 4.5 * s}) scale(${s})`}
-      d="M5 8.5C2 6.3 0 4.6 0 2.6 0 1 1.2 0 2.6 0c.9 0 1.8.5 2.4 1.3C5.6.5 6.5 0 7.4 0 8.8 0 10 1 10 2.6c0 2-2 3.7-5 5.9Z"
-      fill={color}
-      style={{ transformOrigin: `${x}px ${y}px` }}
-      animate={active ? { scale: [1, 1.22, 1] } : { scale: 1 }}
-      transition={active ? { duration: 0.9, repeat: Infinity, ease: "easeInOut", delay } : { duration: 0.2 }}
-    />
+    // Positioning lives on a plain (non-motion) <g> via the SVG `transform` attribute.
+    // Motion's own scale animation is applied to the inner path via CSS instead — a CSS
+    // `transform` on the same element would otherwise silently override the attribute
+    // one, per spec, collapsing every heart onto the same (wrong) local coordinates.
+    <g transform={`translate(${x - 5 * s} ${y - 4.5 * s}) scale(${s})`}>
+      <motion.path
+        d="M5 8.5C2 6.3 0 4.6 0 2.6 0 1 1.2 0 2.6 0c.9 0 1.8.5 2.4 1.3C5.6.5 6.5 0 7.4 0 8.8 0 10 1 10 2.6c0 2-2 3.7-5 5.9Z"
+        fill={color}
+        style={{ transformOrigin: "5px 4.5px" }}
+        animate={active ? { scale: [1, 1.22, 1] } : { scale: 1 }}
+        transition={active ? { duration: 0.9, repeat: Infinity, ease: "easeInOut", delay } : { duration: 0.2 }}
+      />
+    </g>
   );
 }
 
@@ -169,39 +174,41 @@ function TiredMarkup({ active }: MoodMarkupProps) {
         <path d="M54 62 Q59 66 64 62" stroke="#3E3350" strokeWidth="2.6" fill="none" strokeLinecap="round" />
         <path d="M44 78 Q50 76 56 78" stroke="#3E3350" strokeWidth="2.2" fill="none" strokeLinecap="round" />
       </motion.g>
-      {/* Zzz painted last (on top) so they're never covered by the body/face group above. */}
+      {/* Zzz painted last (on top) so they're never covered by the body/face group above.
+          Moved further up and to the right of the head, with more clearance from the
+          face than before, staggered so the trio rises toward the upper-right. */}
       <motion.text
-        x="64"
-        y="25"
+        x="72"
+        y="21"
         fontFamily="'Baloo 2', sans-serif"
         fontWeight="700"
-        fontSize="18"
+        fontSize="20"
         fill="#8B7699"
-        animate={active ? { y: [25, 17, 25], opacity: [1, 0.3, 1] } : { y: 25, opacity: 1 }}
+        animate={active ? { y: [21, 16, 21], opacity: [1, 0.3, 1] } : { y: 21, opacity: 1 }}
         transition={active ? { duration: 2.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.2 }}
       >
         Z
       </motion.text>
       <motion.text
-        x="79"
-        y="14"
+        x="86"
+        y="13"
         fontFamily="'Baloo 2', sans-serif"
         fontWeight="700"
-        fontSize="13.5"
+        fontSize="15"
         fill="#A793BB"
-        animate={active ? { y: [14, 7, 14], opacity: [1, 0.3, 1] } : { y: 14, opacity: 1 }}
+        animate={active ? { y: [13, 9, 13], opacity: [1, 0.3, 1] } : { y: 13, opacity: 1 }}
         transition={active ? { duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: 0.4 } : { duration: 0.2 }}
       >
         z
       </motion.text>
       <motion.text
-        x="56"
-        y="8"
+        x="90"
+        y="10"
         fontFamily="'Baloo 2', sans-serif"
         fontWeight="700"
-        fontSize="9.5"
+        fontSize="10.5"
         fill="#B9A8C9"
-        animate={active ? { y: [8, 2, 8], opacity: [1, 0.3, 1] } : { y: 8, opacity: 1 }}
+        animate={active ? { y: [10, 7, 10], opacity: [1, 0.3, 1] } : { y: 10, opacity: 1 }}
         transition={active ? { duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 } : { duration: 0.2 }}
       >
         z
@@ -335,10 +342,9 @@ function CozyMarkup({ active }: MoodMarkupProps) {
         </linearGradient>
       </defs>
       <GroundShadow />
-      <HeartMark x={14} y={19} size={8.1} color="#F0846B" active={active} delay={0} />
-      <HeartMark x={85} y={25} size={6.3} color="#F09777" active={active} delay={0.2} />
-      <HeartMark x={5} y={76} size={7} color="#F5A98A" active={active} delay={0.35} />
-      <HeartMark x={93} y={81} size={7.3} color="#F0846B" active={active} delay={0.15} />
+      {/* small — large — small arc above the character's head */}
+      <HeartMark x={27} y={15} size={6.5} color="#F09777" active={active} delay={0.2} />
+      <HeartMark x={73} y={15} size={6.5} color="#F09777" active={active} delay={0.35} />
 
       {/* body */}
       <circle cx="50" cy="62" r="26" fill="url(#cozyBody)" />
@@ -353,7 +359,7 @@ function CozyMarkup({ active }: MoodMarkupProps) {
         strokeWidth="1.1"
         opacity="0.55"
       />
-      <HeartMark x={50} y={17} size={10.1} color="#EC7357" active={active} delay={0.1} />
+      <HeartMark x={50} y={10} size={10.5} color="#EC7357" active={active} delay={0} />
 
       {/* wrapped blanket across the shoulders, with a ribbed knit texture */}
       <path
