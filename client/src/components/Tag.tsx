@@ -1,5 +1,5 @@
-import type { ButtonHTMLAttributes, CSSProperties } from "react";
-import { getMoodTheme } from "../lib/moodTheme";
+import { useState, type ButtonHTMLAttributes, type CSSProperties, type FocusEvent, type MouseEvent } from "react";
+import { getMoodTheme, hexToRgba } from "../lib/moodTheme";
 import type { Mood } from "../types/domain";
 
 interface TagProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -13,30 +13,62 @@ interface TagProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   mood?: Mood | null;
 }
 
-export function Tag({ label, selected = false, mood = null, className = "", ...props }: TagProps) {
+export function Tag({
+  label,
+  selected = false,
+  mood = null,
+  className = "",
+  onMouseEnter,
+  onMouseLeave,
+  onFocus,
+  onBlur,
+  ...props
+}: TagProps) {
+  const [isHovered, setIsHovered] = useState(false);
   const theme = getMoodTheme(mood);
+  const showMoodHover = isHovered && !selected && theme;
+
+  function handleMouseEnter(event: MouseEvent<HTMLButtonElement>) {
+    setIsHovered(true);
+    onMouseEnter?.(event);
+  }
+  function handleMouseLeave(event: MouseEvent<HTMLButtonElement>) {
+    setIsHovered(false);
+    onMouseLeave?.(event);
+  }
+  function handleFocus(event: FocusEvent<HTMLButtonElement>) {
+    setIsHovered(true);
+    onFocus?.(event);
+  }
+  function handleBlur(event: FocusEvent<HTMLButtonElement>) {
+    setIsHovered(false);
+    onBlur?.(event);
+  }
 
   const style: CSSProperties = selected
     ? theme
       ? { backgroundColor: theme.accentStrong, borderColor: theme.accentStrong }
       : {}
-    : theme
-      ? ({
-          "--mood-hover-accent": theme.accent,
-          "--mood-hover-accent-strong": theme.accentStrong,
-        } as CSSProperties)
+    : showMoodHover
+      ? { borderColor: theme.accent, backgroundColor: hexToRgba(theme.accent, 0.18), color: theme.accentStrong }
       : {};
 
   return (
     <button
       type="button"
       aria-pressed={selected}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200 ${
         selected
           ? theme
             ? "text-white"
             : "border-brand-accent-strong bg-brand-accent-strong text-white"
-          : "mood-hover-border mood-hover-text border-tan-200 bg-cream-soft text-ink-soft"
+          : theme
+            ? "border-tan-200 bg-cream-soft text-ink-soft"
+            : "border-tan-200 bg-cream-soft text-ink-soft hover:border-brand-accent hover:text-brand-accent-strong"
       } ${className}`}
       style={style}
       {...props}

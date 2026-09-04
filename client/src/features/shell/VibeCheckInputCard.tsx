@@ -80,8 +80,16 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
                 rows={2}
                 maxLength={VIBE_CHECK_TEXT_LIMIT}
                 aria-label="Tell me more about your day"
-                className="w-full resize-none rounded-2xl border border-tan-200 bg-surface p-4 pb-6 pr-14 text-sm text-ink placeholder:text-ink-muted"
-                style={theme ? { borderColor: hexToRgba(theme.accent, 0.45) } : undefined}
+                className="mood-focus-ring w-full resize-none rounded-2xl border border-tan-200 bg-surface p-4 pb-6 pr-14 text-sm text-ink placeholder:text-ink-muted"
+                style={
+                  theme
+                    ? ({
+                        borderColor: hexToRgba(theme.accent, 0.45),
+                        "--mood-focus-color": theme.accent,
+                        "--mood-focus-glow": hexToRgba(theme.accent, 0.3),
+                      } as CSSProperties)
+                    : undefined
+                }
               />
               <span className="absolute bottom-3 right-14 text-xs text-ink-muted">
                 {userText.length}/{VIBE_CHECK_TEXT_LIMIT}
