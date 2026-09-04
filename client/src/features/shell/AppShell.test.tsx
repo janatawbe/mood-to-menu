@@ -101,7 +101,7 @@ describe("AppShell regenerate", () => {
     generateRecipeMock.mockRejectedValueOnce(new RecipeApiError("RATE_LIMITED", "raw"));
     fireEvent.click(screen.getByRole("button", { name: /^regenerate$/i }));
 
-    await waitFor(() => expect(screen.getByText(/lot of orders right now/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/current ai request limit/i)).toBeInTheDocument());
     expect(screen.getByText("Stays Visible")).toBeInTheDocument();
   });
 });

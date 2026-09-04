@@ -1,49 +1,78 @@
 import { describe, expect, it } from "vitest";
-import { getFriendlyErrorMessage } from "./errorMessages";
+import { getFriendlyErrorMessage, getRecipeErrorCopy } from "./errorMessages";
 
-describe("getFriendlyErrorMessage", () => {
-  it("returns a distinct message for RATE_LIMITED", () => {
-    expect(getFriendlyErrorMessage("RATE_LIMITED")).toMatch(/lot of orders/i);
+describe("getRecipeErrorCopy", () => {
+  it("RATE_LIMITED", () => {
+    expect(getRecipeErrorCopy("RATE_LIMITED")).toEqual({
+      title: "The kitchen is handling too many orders right now.",
+      message: "You've hit the current AI request limit. Wait a little and try again.",
+    });
   });
 
-  it("returns a distinct message for TIMEOUT", () => {
-    expect(getFriendlyErrorMessage("TIMEOUT")).toMatch(/taking longer than expected/i);
+  it("TIMEOUT (also used for a Gemini 504 DEADLINE_EXCEEDED)", () => {
+    expect(getRecipeErrorCopy("TIMEOUT")).toEqual({
+      title: "This recipe took too long.",
+      message:
+        "The AI didn't finish before the request timed out. Your Vibe Check is still saved, so you can try again.",
+    });
   });
 
-  it("returns a distinct message for PROVIDER_UNAVAILABLE", () => {
-    expect(getFriendlyErrorMessage("PROVIDER_UNAVAILABLE")).toMatch(/temporarily unavailable/i);
+  it("PROVIDER_UNAVAILABLE (also used for a Gemini 503 high-demand error)", () => {
+    expect(getRecipeErrorCopy("PROVIDER_UNAVAILABLE")).toEqual({
+      title: "The AI service is temporarily unavailable.",
+      message: "Gemini is currently unavailable or under heavy demand. Try again in a few moments.",
+    });
   });
 
-  it("returns a distinct message for INVALID_OUTPUT", () => {
-    expect(getFriendlyErrorMessage("INVALID_OUTPUT")).toMatch(/couldn't finish that recipe/i);
+  it("INVALID_OUTPUT", () => {
+    expect(getRecipeErrorCopy("INVALID_OUTPUT")).toEqual({
+      title: "The recipe came back incomplete.",
+      message: "The AI returned a response that didn't match the recipe format we need. Try generating it again.",
+    });
   });
 
-  it("returns a message for INVALID_REQUEST that points back at the Vibe Check", () => {
-    expect(getFriendlyErrorMessage("INVALID_REQUEST")).toMatch(/vibe check/i);
+  it("INVALID_REQUEST", () => {
+    expect(getRecipeErrorCopy("INVALID_REQUEST")).toEqual({
+      title: "Your Vibe Check needs a small fix.",
+      message: "Please make sure you've selected a mood, entered some text, or chosen at least one quick option.",
+    });
   });
 
-  it("returns a distinct message for NETWORK_ERROR", () => {
-    expect(getFriendlyErrorMessage("NETWORK_ERROR")).toMatch(/couldn't reach the kitchen/i);
+  it("CONFIG_ERROR in development names the real cause, with no secrets", () => {
+    const copy = getRecipeErrorCopy("CONFIG_ERROR", true);
+    expect(copy).toEqual({
+      title: "The recipe service isn't configured correctly.",
+      message: "The backend is missing or misconfigured for the Gemini connection. Check the server environment setup.",
+    });
+    expect(copy.title + copy.message).not.toMatch(/GEMINI_API_KEY|AIza/i);
   });
 
-  it("returns a dev-safe configuration message for CONFIG_ERROR in development, with no secrets", () => {
-    const message = getFriendlyErrorMessage("CONFIG_ERROR", true);
-    expect(message).toMatch(/isn't configured correctly/i);
-    expect(message).not.toMatch(/GEMINI_API_KEY|AIza/i);
+  it("CONFIG_ERROR in production stays generic", () => {
+    expect(getRecipeErrorCopy("CONFIG_ERROR", false)).toEqual({
+      title: "The recipe service is temporarily unavailable.",
+      message: "There's a server configuration problem right now. Please try again later.",
+    });
   });
 
-  it("returns a generic safe message for CONFIG_ERROR in production", () => {
-    const message = getFriendlyErrorMessage("CONFIG_ERROR", false);
-    expect(message).toMatch(/kitchen/i);
-    expect(message).not.toMatch(/server|env|configured/i);
+  it("NETWORK_ERROR (Express itself unreachable)", () => {
+    expect(getRecipeErrorCopy("NETWORK_ERROR")).toEqual({
+      title: "I couldn't reach the kitchen.",
+      message: "The app couldn't connect to the recipe server. Check that the backend is running and try again.",
+    });
   });
 
-  it("falls back to a generic message for INTERNAL_ERROR or an unrecognized code", () => {
-    expect(getFriendlyErrorMessage("INTERNAL_ERROR")).toMatch(/went wrong in the kitchen/i);
-    expect(getFriendlyErrorMessage("SOMETHING_UNEXPECTED")).toMatch(/went wrong in the kitchen/i);
+  it("INTERNAL_ERROR", () => {
+    expect(getRecipeErrorCopy("INTERNAL_ERROR")).toEqual({
+      title: "Something went wrong in the kitchen.",
+      message: "An unexpected server error occurred. Your Vibe Check is still saved, so you can try again.",
+    });
   });
 
-  it("every message is distinct from every other message", () => {
+  it("falls back to the INTERNAL_ERROR copy for an unrecognized code", () => {
+    expect(getRecipeErrorCopy("SOMETHING_UNEXPECTED")).toEqual(getRecipeErrorCopy("INTERNAL_ERROR"));
+  });
+
+  it("every code (including both CONFIG_ERROR variants) has a distinct title and message", () => {
     const codes = [
       "RATE_LIMITED",
       "TIMEOUT",
@@ -53,7 +82,21 @@ describe("getFriendlyErrorMessage", () => {
       "NETWORK_ERROR",
       "INTERNAL_ERROR",
     ];
-    const messages = codes.map((code) => getFriendlyErrorMessage(code));
+    const copies = [
+      ...codes.map((code) => getRecipeErrorCopy(code)),
+      getRecipeErrorCopy("CONFIG_ERROR", true),
+      getRecipeErrorCopy("CONFIG_ERROR", false),
+    ];
+    const titles = copies.map((c) => c.title);
+    const messages = copies.map((c) => c.message);
+    expect(new Set(titles).size).toBe(titles.length);
     expect(new Set(messages).size).toBe(messages.length);
+  });
+});
+
+describe("getFriendlyErrorMessage", () => {
+  it("returns just the message half of the same copy", () => {
+    expect(getFriendlyErrorMessage("RATE_LIMITED")).toBe(getRecipeErrorCopy("RATE_LIMITED").message);
+    expect(getFriendlyErrorMessage("CONFIG_ERROR", true)).toBe(getRecipeErrorCopy("CONFIG_ERROR", true).message);
   });
 });
