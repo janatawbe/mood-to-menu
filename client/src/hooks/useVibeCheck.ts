@@ -1,31 +1,33 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import type { Mood, VibeCheck } from "../types/domain";
+import { useCallback, useMemo, useState } from "react";
+import { generateRecipe, RecipeApiError } from "../services/api";
+import type { Mood, Recipe, VibeCheck } from "../types/domain";
 
-export type VibeCheckPhase = "idle" | "loading" | "captured";
+export type VibeCheckPhase = "idle" | "loading" | "captured" | "error";
 
 export const VIBE_CHECK_TEXT_LIMIT = 200;
 
-/** How long the "chef is cooking" transition stays up before revealing the captured
- * summary. Frontend-only for Milestone 2 — no request is actually in flight. */
-const LOADING_DURATION_MS = 1800;
+export interface VibeCheckError {
+  code: string;
+  message: string;
+}
 
 /**
  * Owns the Vibe Check's interaction state — mood selection, free text, quick-input
- * chips, and the submit/loading/captured phase — so it can be lifted to a common
+ * chips, and the submit/loading/captured/error phase — so it can be lifted to a common
  * ancestor (AppShell) and shared between the Vibe Check card and the sidebar's chef,
  * without reaching for a full state-management library.
+ *
+ * Milestone 4: `submit`/`retry` now call the real POST /api/recipes/generate endpoint
+ * (see ../services/api.ts) instead of a fake timer — loading starts when the request
+ * goes out and ends only when a valid recipe arrives or the request fails.
  */
 export function useVibeCheck() {
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [userText, setUserTextRaw] = useState("");
   const [quickInputs, setQuickInputs] = useState<string[]>([]);
   const [phase, setPhase] = useState<VibeCheckPhase>("idle");
-
-  useEffect(() => {
-    if (phase !== "loading") return;
-    const timer = setTimeout(() => setPhase("captured"), LOADING_DURATION_MS);
-    return () => clearTimeout(timer);
-  }, [phase]);
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [error, setError] = useState<VibeCheckError | null>(null);
 
   const toggleMood = useCallback((mood: Mood) => {
     setSelectedMood((current) => (current === mood ? null : mood));
@@ -44,16 +46,44 @@ export function useVibeCheck() {
   const hasMeaningfulText = userText.trim().length > 0;
   const canSubmit =
     phase === "idle" && (selectedMood !== null || hasMeaningfulText || quickInputs.length > 0);
+  const canRetry =
+    phase === "error" && (selectedMood !== null || hasMeaningfulText || quickInputs.length > 0);
+
+  const runGeneration = useCallback(async () => {
+    setError(null);
+    setPhase("loading");
+    try {
+      const result = await generateRecipe({ selectedMood, userText, quickInputs });
+      setRecipe(result);
+      setPhase("captured");
+    } catch (err) {
+      const apiError =
+        err instanceof RecipeApiError
+          ? { code: err.code, message: err.message }
+          : { code: "INTERNAL_ERROR", message: "Something went wrong in the kitchen. Please try again." };
+      setError(apiError);
+      setPhase("error");
+    }
+  }, [selectedMood, userText, quickInputs]);
 
   const submit = useCallback(() => {
     if (!canSubmit) return;
-    setPhase("loading");
-  }, [canSubmit]);
+    void runGeneration();
+  }, [canSubmit, runGeneration]);
+
+  /** Retries the same submission after a failure — mood/text/chips are already intact
+   * since they live in their own state, untouched by the failed request. */
+  const retry = useCallback(() => {
+    if (!canRetry) return;
+    void runGeneration();
+  }, [canRetry, runGeneration]);
 
   /** Returns to the editable form with everything the user already entered intact —
    * this is a "go back and adjust," not a reset. */
   const editVibeCheck = useCallback(() => {
     setPhase("idle");
+    setError(null);
+    setRecipe(null);
   }, []);
 
   const vibeCheck: VibeCheck = useMemo(
@@ -67,12 +97,16 @@ export function useVibeCheck() {
     userText,
     quickInputs,
     phase,
+    recipe,
+    error,
     hasMeaningfulText,
     canSubmit,
+    canRetry,
     toggleMood,
     setUserText,
     toggleQuickInput,
     submit,
+    retry,
     editVibeCheck,
   };
 }
