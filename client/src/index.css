@@ -78,4 +78,25 @@
     outline-offset: 2px;
     border-radius: 0.5rem;
   }
+
+  /*
+   * Milestone 3: mood-aware interaction states for elements whose color must follow a
+   * runtime-computed mood accent (Tailwind's `hover:`/`focus-visible:` utilities only
+   * work with colors known at build time, not one coming from a React prop). Each
+   * element sets the relevant `--mood-*` custom property inline only when a mood is
+   * active; the `var(..., fallback)` second argument keeps the exact original
+   * brand-orange behavior when no mood is selected (the property is simply unset), so
+   * this never changes the default.
+   */
+  .mood-hover-bg:hover,
+  .mood-hover-bg:focus-visible {
+    background-color: var(--mood-hover-bg, var(--color-accent-800));
+  }
+
+  /* Higher specificity than the plain `:focus-visible` rule above, so it wins whenever
+   * present — outline-only (like the rule above), so it never shifts layout. */
+  .mood-focus-ring:focus-visible {
+    outline-color: var(--mood-focus-color, var(--color-brand-accent));
+    box-shadow: 0 0 0 3px var(--mood-focus-glow, transparent);
+  }
 }

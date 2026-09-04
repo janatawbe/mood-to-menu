@@ -399,11 +399,13 @@ function CozyMarkup({ active }: MoodMarkupProps) {
  * generic lift) so the six keep their separate personalities even while animating. */
 const rootReactions: Record<Mood, { animate: Record<string, number[]>; transition: Transition }> = {
   calm: { animate: { y: [0, -5, 0] }, transition: { duration: 2.4, repeat: Infinity, ease: "easeInOut" } },
+  // A gentle wobble that settles and pauses before repeating, rather than a continuous
+  // fast shake — reads as "comforted," not agitated.
   stressed: {
-    animate: { x: [0, -2, 2, -2, 0], y: [0, -2, -2, -2, 0] },
-    transition: { duration: 0.5, repeat: Infinity, ease: "easeInOut" },
+    animate: { rotate: [0, -3, 2, -1, 0, 0], y: [0, -1.5, -1, -0.5, 0, 0] },
+    transition: { duration: 3.6, repeat: Infinity, ease: "easeOut", times: [0, 0.12, 0.24, 0.36, 0.5, 1] },
   },
-  tired: { animate: { rotate: [-1.5, 1.5, -1.5], y: [0, -2, 0] }, transition: { duration: 3.4, repeat: Infinity, ease: "easeInOut" } },
+  tired: { animate: { rotate: [-1.5, 1.5, -1.5], y: [0, -2, 0] }, transition: { duration: 4.4, repeat: Infinity, ease: "easeInOut" } },
   happy: { animate: { y: [0, -7, 0] }, transition: { duration: 0.6, repeat: Infinity, ease: "easeOut" } },
   energetic: { animate: { y: [0, -8, 0] }, transition: { duration: 0.4, repeat: Infinity, ease: "easeOut" } },
   cozy: { animate: { y: [0, -3, 0], rotate: [-1, 1, -1] }, transition: { duration: 1.5, repeat: Infinity, ease: "easeInOut" } },

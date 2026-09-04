@@ -1,4 +1,4 @@
-import type { KeyboardEvent } from "react";
+import type { CSSProperties, KeyboardEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
@@ -7,6 +7,7 @@ import { Tag } from "../../components/Tag";
 import { ChefHatIcon, SendIcon, SparkleIcon } from "../../components/icons";
 import type { UseVibeCheckReturn } from "../../hooks/useVibeCheck";
 import { VIBE_CHECK_TEXT_LIMIT } from "../../hooks/useVibeCheck";
+import { darken, getMoodTheme, hexToRgba } from "../../lib/moodTheme";
 import { moodPreviewEntries } from "./moodPreviewData";
 import { quickInputOptions } from "./quickInputData";
 
@@ -35,6 +36,7 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
   const prefersReducedMotion = useReducedMotion();
   const moodLabel = moodPreviewEntries.find((entry) => entry.mood === selectedMood)?.label;
   const fadeTransition = { duration: prefersReducedMotion ? 0.01 : 0.2 };
+  const theme = getMoodTheme(selectedMood);
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
@@ -44,7 +46,20 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
   }
 
   return (
-    <Card tone="cream" className="relative mt-3 flex min-h-[185px] flex-col overflow-hidden">
+    <Card
+      tone="cream"
+      className="relative mt-3 flex min-h-[185px] flex-col overflow-hidden"
+      style={
+        theme
+          ? {
+              borderColor: hexToRgba(theme.accent, 0.35),
+              // Keeps shadow-soft's glossy top inset highlight, just retints the outer
+              // diffuse shadow toward the mood's accent instead of overwriting it.
+              boxShadow: `inset 0 1px 0 0 rgb(255 255 255 / 0.7), 0 10px 30px -14px ${hexToRgba(theme.accent, 0.28)}`,
+            }
+          : undefined
+      }
+    >
       <AnimatePresence mode="wait">
         {phase === "idle" && (
           <motion.div
@@ -65,7 +80,16 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
                 rows={2}
                 maxLength={VIBE_CHECK_TEXT_LIMIT}
                 aria-label="Tell me more about your day"
-                className="w-full resize-none rounded-2xl border border-tan-200 bg-surface p-4 pb-6 pr-14 text-sm text-ink placeholder:text-ink-muted"
+                className="mood-focus-ring w-full resize-none rounded-2xl border border-tan-200 bg-surface p-4 pb-6 pr-14 text-sm text-ink placeholder:text-ink-muted"
+                style={
+                  theme
+                    ? ({
+                        borderColor: hexToRgba(theme.accent, 0.45),
+                        "--mood-focus-color": theme.accent,
+                        "--mood-focus-glow": hexToRgba(theme.accent, 0.3),
+                      } as CSSProperties)
+                    : undefined
+                }
               />
               <span className="absolute bottom-3 right-14 text-xs text-ink-muted">
                 {userText.length}/{VIBE_CHECK_TEXT_LIMIT}
@@ -75,7 +99,17 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
                 label="Send Vibe Check"
                 disabled={!canSubmit}
                 onClick={submit}
-                className="absolute bottom-3 right-3 bg-brand-accent-strong text-white hover:bg-accent-800 hover:text-white disabled:cursor-not-allowed disabled:bg-tan-200 disabled:text-ink-muted"
+                className={`absolute bottom-3 right-3 text-white hover:text-white disabled:cursor-not-allowed disabled:bg-tan-200 disabled:text-ink-muted ${
+                  theme && canSubmit ? "mood-hover-bg" : "bg-brand-accent-strong hover:bg-accent-800"
+                }`}
+                style={
+                  theme && canSubmit
+                    ? ({
+                        backgroundColor: theme.accentStrong,
+                        "--mood-hover-bg": darken(theme.accentStrong, 0.15),
+                      } as CSSProperties)
+                    : undefined
+                }
               />
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -84,6 +118,7 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
                   key={chip}
                   label={chip}
                   selected={quickInputs.includes(chip)}
+                  mood={selectedMood}
                   onClick={() => toggleQuickInput(chip)}
                 />
               ))}
