@@ -1,4 +1,5 @@
 import { Panel } from "../../components/Panel";
+import type { UseGroceryListReturn } from "../../hooks/useGroceryList";
 import type { UseVibeCheckReturn } from "../../hooks/useVibeCheck";
 import { CookingState } from "./CookingState";
 import { RecipeReveal } from "./RecipeReveal";
@@ -6,6 +7,7 @@ import { TodaysMenuEmptyState } from "./TodaysMenuEmptyState";
 
 interface TodaysMenuScreenProps {
   vibeCheck: UseVibeCheckReturn;
+  groceryList: UseGroceryListReturn;
   onGoToVibeCheck: () => void;
 }
 
@@ -17,7 +19,7 @@ interface TodaysMenuScreenProps {
  * that gives this panel a definite height to scroll within without ever stretching or
  * distorting the sidebar).
  */
-export function TodaysMenuScreen({ vibeCheck, onGoToVibeCheck }: TodaysMenuScreenProps) {
+export function TodaysMenuScreen({ vibeCheck, groceryList, onGoToVibeCheck }: TodaysMenuScreenProps) {
   const { recipe, phase, isRegenerating, regenerateError, canRegenerate, regenerate } = vibeCheck;
 
   return (
@@ -30,6 +32,7 @@ export function TodaysMenuScreen({ vibeCheck, onGoToVibeCheck }: TodaysMenuScree
             regenerateError={regenerateError}
             canRegenerate={canRegenerate}
             onRegenerate={() => void regenerate()}
+            groceryList={groceryList}
           />
         ) : phase === "loading" ? (
           <CookingState />

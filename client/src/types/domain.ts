@@ -39,6 +39,26 @@ export interface Recipe {
   chefTip: string;
 }
 
+export interface GroceryItemSourceRecipe {
+  id: string;
+  dishName: string;
+}
+
+/**
+ * A single persisted grocery-list entry. Independent of `Recipe`/`RecipeIngredient` —
+ * this is Milestone 6's own long-lived record, not something regeneration or navigation
+ * ever clears (see ../lib/groceryStorage.ts and ../hooks/useGroceryList.ts).
+ */
+export interface GroceryItem {
+  id: string;
+  name: string;
+  amount: string;
+  checked: boolean;
+  sourceRecipe: GroceryItemSourceRecipe;
+  /** ISO timestamp, set once when the item is first added. */
+  addedAt: string;
+}
+
 export interface TastePreferences {
   favoriteComfortFoods: string[];
   likedIngredients: string[];

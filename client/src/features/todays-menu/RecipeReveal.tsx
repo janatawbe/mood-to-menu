@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
+import type { UseGroceryListReturn } from "../../hooks/useGroceryList";
 import type { VibeCheckError } from "../../hooks/useVibeCheck";
 import { moodThemes } from "../../lib/moodTheme";
-import type { Recipe } from "../../types/domain";
+import type { Recipe, RecipeIngredient } from "../../types/domain";
 import { ChefTipCard } from "./ChefTipCard";
 import { IngredientsList } from "./IngredientsList";
 import { InstructionsList } from "./InstructionsList";
@@ -16,6 +17,7 @@ interface RecipeRevealProps {
   regenerateError: VibeCheckError | null;
   canRegenerate: boolean;
   onRegenerate: () => void;
+  groceryList: UseGroceryListReturn;
 }
 
 const itemVariants: Variants = {
@@ -40,9 +42,20 @@ function RevealItem({ children }: { children: ReactNode }) {
  * jump-cutting to new content. The card itself stays the normal cream surface regardless
  * of mood — only bounded sub-sections (e.g. the reasoning panel) carry a mood tint.
  */
-export function RecipeReveal({ recipe, isRegenerating, regenerateError, canRegenerate, onRegenerate }: RecipeRevealProps) {
+export function RecipeReveal({
+  recipe,
+  isRegenerating,
+  regenerateError,
+  canRegenerate,
+  onRegenerate,
+  groceryList,
+}: RecipeRevealProps) {
   const prefersReducedMotion = useReducedMotion();
   const theme = moodThemes[recipe.detectedMood];
+
+  const sourceRecipe = { id: recipe.id, dishName: recipe.dishName };
+  const isIngredientAdded = (ingredient: RecipeIngredient) => groceryList.isIngredientAdded(ingredient, recipe.id);
+  const allIngredientsAdded = recipe.ingredients.every(isIngredientAdded);
 
   const containerVariants: Variants = prefersReducedMotion
     ? { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.15 } } }
@@ -73,13 +86,19 @@ export function RecipeReveal({ recipe, isRegenerating, regenerateError, canRegen
           canRegenerate={canRegenerate}
           regenerateError={regenerateError}
           onRegenerate={onRegenerate}
+          allIngredientsAdded={allIngredientsAdded}
+          onAddAllIngredients={() => groceryList.addIngredients(recipe.ingredients, sourceRecipe)}
         />
       </RevealItem>
       <RevealItem>
         <ReasoningPanel reasoning={recipe.reasoning} theme={theme} />
       </RevealItem>
       <RevealItem>
-        <IngredientsList ingredients={recipe.ingredients} />
+        <IngredientsList
+          ingredients={recipe.ingredients}
+          isAdded={isIngredientAdded}
+          onAdd={(ingredient) => groceryList.addIngredient(ingredient, sourceRecipe)}
+        />
       </RevealItem>
       <RevealItem>
         <InstructionsList instructions={recipe.instructions} />

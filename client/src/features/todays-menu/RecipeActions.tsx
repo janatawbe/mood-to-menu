@@ -10,31 +10,35 @@ interface RecipeActionsProps {
   canRegenerate: boolean;
   regenerateError: VibeCheckError | null;
   onRegenerate: () => void;
+  /** True once every ingredient in the current recipe is already on the Grocery List —
+   * recomputed live from shared grocery state, so removing one on the Grocery List
+   * screen flips this back to false here too (Milestone 6, Step 22). */
+  allIngredientsAdded: boolean;
+  onAddAllIngredients: () => void;
 }
 
 /**
- * Save to Favorites and Add to Grocery List are visible, interactive action surfaces for
- * this milestone only — both are deliberately local component state (reset whenever the
- * recipe itself changes, since RecipeReveal remounts this component via `key={recipe.id}`)
- * rather than a persistence layer, which is Milestone 8 (Favorites) and Milestone 6
- * (Grocery List). Regenerate is the one action that's fully real right now.
+ * Save to Favorites stays a visible, session-local placeholder for Milestone 8. Add to
+ * Grocery List and Regenerate are both fully real: Grocery List is backed by the shared
+ * `useGroceryList` state (Milestone 6), Regenerate by the real Gemini request.
  */
-export function RecipeActions({ isRegenerating, canRegenerate, regenerateError, onRegenerate }: RecipeActionsProps) {
+export function RecipeActions({
+  isRegenerating,
+  canRegenerate,
+  regenerateError,
+  onRegenerate,
+  allIngredientsAdded,
+  onAddAllIngredients,
+}: RecipeActionsProps) {
   const prefersReducedMotion = useReducedMotion();
   const [isFavorited, setIsFavorited] = useState(false);
-  const [addedToGrocery, setAddedToGrocery] = useState(false);
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2">
-        <Button
-          variant="primary"
-          onClick={() => setAddedToGrocery(true)}
-          disabled={addedToGrocery}
-          aria-pressed={addedToGrocery}
-        >
-          {addedToGrocery ? <CheckIcon width={17} height={17} /> : <CartIcon width={17} height={17} />}
-          {addedToGrocery ? "Added to Grocery List" : "Add ingredients to Grocery List"}
+        <Button variant="primary" onClick={onAddAllIngredients} aria-pressed={allIngredientsAdded}>
+          {allIngredientsAdded ? <CheckIcon width={17} height={17} /> : <CartIcon width={17} height={17} />}
+          {allIngredientsAdded ? "Added to Grocery List" : "Add ingredients to Grocery List"}
         </Button>
         <Button
           variant="secondary"
@@ -56,7 +60,7 @@ export function RecipeActions({ isRegenerating, canRegenerate, regenerateError, 
       </div>
 
       <span className="sr-only" aria-live="polite">
-        {addedToGrocery && "Ingredients added to your grocery list."}
+        {allIngredientsAdded && "All ingredients are on your grocery list."}
         {isFavorited && " Recipe saved to favorites."}
       </span>
 

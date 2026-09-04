@@ -35,6 +35,7 @@ async function generateFromVibeCheck() {
 
 beforeEach(() => {
   generateRecipeMock.mockReset();
+  window.localStorage.clear();
 });
 
 describe("AppShell navigation", () => {
@@ -102,5 +103,85 @@ describe("AppShell regenerate", () => {
 
     await waitFor(() => expect(screen.getByText(/lot of orders right now/i)).toBeInTheDocument());
     expect(screen.getByText("Stays Visible")).toBeInTheDocument();
+  });
+});
+
+describe("AppShell grocery list integration", () => {
+  it("Grocery List nav opens the real screen and becomes the active nav item", () => {
+    render(<AppShell chefIntroReady={false} />);
+    fireEvent.click(screen.getByRole("button", { name: /^grocery list$/i }));
+
+    expect(screen.getByRole("heading", { name: "Grocery List" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^grocery list$/i })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("button", { name: /today's menu/i })).not.toHaveAttribute("aria-current");
+  });
+
+  it("Add ingredients to Grocery List from Today's Menu shows up on the Grocery List screen", async () => {
+    generateRecipeMock.mockResolvedValueOnce(
+      makeRecipe({ ingredients: [{ name: "Pasta", amount: "200 g" }, { name: "Garlic", amount: "2 cloves" }] }),
+    );
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /add ingredients to grocery list/i }));
+    // Immediate visual confirmation on Today's Menu itself, without navigating away.
+    expect(screen.getByRole("button", { name: /added to grocery list/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^grocery list$/i }));
+    expect(screen.getByText("Pasta")).toBeInTheDocument();
+    expect(screen.getByText("Garlic")).toBeInTheDocument();
+    expect(screen.getAllByText(/from creamy garlic butter pasta/i)).toHaveLength(2);
+  });
+
+  it("adding one ingredient individually updates the Grocery List without duplicating on a later Add All", async () => {
+    generateRecipeMock.mockResolvedValueOnce(
+      makeRecipe({ ingredients: [{ name: "Pasta", amount: "200 g" }, { name: "Garlic", amount: "2 cloves" }] }),
+    );
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /add garlic to grocery list/i }));
+    // The individual ingredient's own control reflects the added state immediately.
+    expect(screen.getByRole("button", { name: /garlic is on your grocery list/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /add ingredients to grocery list/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /^grocery list$/i }));
+    expect(screen.getAllByText("Garlic")).toHaveLength(1);
+    expect(screen.getByText("Pasta")).toBeInTheDocument();
+  });
+
+  it("removing an item from the Grocery List makes it addable again from Today's Menu", async () => {
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /add pasta to grocery list/i }));
+    expect(screen.getByRole("button", { name: /pasta is on your grocery list/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^grocery list$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /remove pasta/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /^today's menu$/i }));
+    expect(screen.getByRole("button", { name: /add pasta to grocery list/i })).toBeInTheDocument();
+  });
+
+  it("regenerating the recipe does not erase existing Grocery List items", async () => {
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe({ id: "r1", dishName: "First Dish" }));
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("First Dish")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /add ingredients to grocery list/i }));
+
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe({ id: "r2", dishName: "Second Dish" }));
+    fireEvent.click(screen.getByRole("button", { name: /^regenerate$/i }));
+    await waitFor(() => expect(screen.getByText("Second Dish")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /^grocery list$/i }));
+    expect(screen.getByText(/from first dish/i)).toBeInTheDocument();
   });
 });
