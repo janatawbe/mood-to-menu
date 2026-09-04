@@ -1,13 +1,11 @@
 import type { ReactNode } from "react";
 import { SparkleIcon } from "../../components/icons";
-import { hexToRgba, type MoodTheme } from "../../lib/moodTheme";
 import type { Recipe } from "../../types/domain";
 import { moodPreviewEntries } from "../shell/moodPreviewData";
 import { MoodBadge } from "./MoodBadge";
 
 interface RecipeHeroProps {
   recipe: Recipe;
-  theme: MoodTheme;
 }
 
 const effortLabel: Record<Recipe["mealIntent"]["prepEffort"], string> = {
@@ -49,21 +47,17 @@ function pickHighlightTag(recipe: Recipe, moodLabel: string): string {
 /** The recipe hero: dish name is the visual star, everything else (mood/prep/effort/
  * style/tags) supports it. Uses `recipe.detectedMood` (not the Vibe Check's own
  * `selectedMood`, which may be null if the user only typed text) since Gemini always
- * returns one — this screen always has a mood to theme itself around. */
-export function RecipeHero({ recipe, theme }: RecipeHeroProps) {
+ * returns one — this screen always has a mood to theme itself around. Deliberately has
+ * no mood-colored background wash of its own — the card underneath it stays the normal
+ * cream surface; mood identity comes through only via the mood badge below. */
+export function RecipeHero({ recipe }: RecipeHeroProps) {
   const moodLabel = moodPreviewEntries.find((entry) => entry.mood === recipe.detectedMood)?.label ?? recipe.detectedMood;
   const highlightTag = pickHighlightTag(recipe, moodLabel);
 
   return (
     <div className="relative">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-x-6 -top-10 h-56 rounded-full blur-3xl"
-        style={{ backgroundColor: hexToRgba(theme.glow.primary, 0.35) }}
-      />
-
-      <div className="relative flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.2em] text-brand-accent-strong">
-        <SparkleIcon width={14} height={14} />
+      <div className="relative flex items-center gap-2 text-lg font-bold uppercase tracking-[0.2em] text-brand-accent-strong sm:text-xl">
+        <SparkleIcon width={20} height={20} />
         Today&apos;s Menu
       </div>
       <p className="relative mt-1 text-sm text-ink-muted">Made for your mood</p>

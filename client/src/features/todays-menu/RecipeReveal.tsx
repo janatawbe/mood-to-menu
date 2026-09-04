@@ -34,10 +34,11 @@ function RevealItem({ children }: { children: ReactNode }) {
 }
 
 /**
- * The polished Today's Menu reveal: a soft mood-glow bloom + card scale-in, with each
- * section staggering into place a beat after the last (Milestone 5, Step 5). Keyed on
- * `recipe.id` so a Regenerate that swaps in a new recipe replays the same tasteful
- * sequence rather than jump-cutting to new content.
+ * The polished Today's Menu reveal: a card scale-in, with each section staggering into
+ * place a beat after the last (Milestone 5, Step 5). Keyed on `recipe.id` so a
+ * Regenerate that swaps in a new recipe replays the same tasteful sequence rather than
+ * jump-cutting to new content. The card itself stays the normal cream surface regardless
+ * of mood — only bounded sub-sections (e.g. the reasoning panel) carry a mood tint.
  */
 export function RecipeReveal({ recipe, isRegenerating, regenerateError, canRegenerate, onRegenerate }: RecipeRevealProps) {
   const prefersReducedMotion = useReducedMotion();
@@ -64,7 +65,7 @@ export function RecipeReveal({ recipe, isRegenerating, regenerateError, canRegen
       className="flex flex-col gap-5 pb-1"
     >
       <RevealItem>
-        <RecipeHero recipe={recipe} theme={theme} />
+        <RecipeHero recipe={recipe} />
       </RevealItem>
       <RevealItem>
         <RecipeActions
