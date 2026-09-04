@@ -1,4 +1,6 @@
 import { motion, useReducedMotion, type Transition } from "motion/react";
+import { getMoodTheme, hexToRgba } from "../../lib/moodTheme";
+import type { Mood } from "../../types/domain";
 import { ChefCharacter } from "./ChefCharacter";
 
 /** Subtle contextual state for the sidebar chef during a Vibe Check — deliberately
@@ -9,6 +11,9 @@ interface ChefMascotProps {
   /** Whether the chef has finished its intro and settled into the sidebar. */
   arrived: boolean;
   status?: ChefStatus;
+  /** The selected mood, when status is "attentive" — picks the chef's reaction
+   * personality and the tint of the glow behind him. Ignored for other statuses. */
+  mood?: Mood | null;
 }
 
 const CHEF_WIDTH = 225;
@@ -90,9 +95,25 @@ const reactionByStatus: Record<ChefStatus, { animate: Record<string, number[]>; 
   },
 };
 
-export function ChefMascot({ arrived, status = "welcoming" }: ChefMascotProps) {
+/** Once a mood is selected, the chef's "attentive" gesture takes on that mood's own
+ * pace and character instead of the generic wobble — subtle, never distracting, and
+ * layered on top of (not replacing) ChefCharacter's own idle breathing or chef.png. */
+const reactionByMood: Record<Mood, { animate: Record<string, number[]>; transition: Transition }> = {
+  calm: { animate: { y: [0, -3, 0] }, transition: { duration: 3.5, repeat: Infinity, ease: "easeInOut" } },
+  stressed: { animate: { y: [0, -2, 0] }, transition: { duration: 3, repeat: Infinity, ease: "easeInOut" } },
+  tired: { animate: { rotate: [0, -1, 0, 1, 0] }, transition: { duration: 4.5, repeat: Infinity, ease: "easeInOut" } },
+  happy: { animate: { y: [0, -5, 0] }, transition: { duration: 0.9, repeat: Infinity, ease: "easeInOut" } },
+  energetic: { animate: { y: [0, -6, 0] }, transition: { duration: 0.6, repeat: Infinity, ease: "easeInOut" } },
+  cozy: {
+    animate: { y: [0, -2, 0], rotate: [0, -1.2, 0, 1.2, 0] },
+    transition: { duration: 2.6, repeat: Infinity, ease: "easeInOut" },
+  },
+};
+
+export function ChefMascot({ arrived, status = "welcoming", mood = null }: ChefMascotProps) {
   const prefersReducedMotion = useReducedMotion();
-  const reaction = reactionByStatus[status];
+  const theme = status === "attentive" ? getMoodTheme(mood) : null;
+  const reaction = theme ? reactionByMood[theme.mood] : reactionByStatus[status];
 
   return (
     <div className="relative mx-auto" style={{ width: CHEF_WIDTH }}>
@@ -105,6 +126,16 @@ export function ChefMascot({ arrived, status = "welcoming" }: ChefMascotProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: prefersReducedMotion ? 0.5 : [0.3, 0.55, 0.3] }}
               transition={prefersReducedMotion ? { duration: 0.3 } : { duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+            />
+          )}
+          {theme && (
+            <motion.div
+              className="pointer-events-none absolute inset-x-8 inset-y-12 -z-10 rounded-full blur-2xl"
+              aria-hidden
+              style={{ backgroundColor: hexToRgba(theme.glow.primary, 0.3) }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: prefersReducedMotion ? 0.15 : 0.7, ease: "easeInOut" }}
             />
           )}
           <motion.div

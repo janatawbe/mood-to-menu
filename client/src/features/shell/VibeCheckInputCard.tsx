@@ -7,6 +7,7 @@ import { Tag } from "../../components/Tag";
 import { ChefHatIcon, SendIcon, SparkleIcon } from "../../components/icons";
 import type { UseVibeCheckReturn } from "../../hooks/useVibeCheck";
 import { VIBE_CHECK_TEXT_LIMIT } from "../../hooks/useVibeCheck";
+import { getMoodTheme, hexToRgba } from "../../lib/moodTheme";
 import { moodPreviewEntries } from "./moodPreviewData";
 import { quickInputOptions } from "./quickInputData";
 
@@ -35,6 +36,7 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
   const prefersReducedMotion = useReducedMotion();
   const moodLabel = moodPreviewEntries.find((entry) => entry.mood === selectedMood)?.label;
   const fadeTransition = { duration: prefersReducedMotion ? 0.01 : 0.2 };
+  const theme = getMoodTheme(selectedMood);
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
@@ -44,7 +46,20 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
   }
 
   return (
-    <Card tone="cream" className="relative mt-3 flex min-h-[185px] flex-col overflow-hidden">
+    <Card
+      tone="cream"
+      className="relative mt-3 flex min-h-[185px] flex-col overflow-hidden"
+      style={
+        theme
+          ? {
+              borderColor: hexToRgba(theme.accent, 0.35),
+              // Keeps shadow-soft's glossy top inset highlight, just retints the outer
+              // diffuse shadow toward the mood's accent instead of overwriting it.
+              boxShadow: `inset 0 1px 0 0 rgb(255 255 255 / 0.7), 0 10px 30px -14px ${hexToRgba(theme.accent, 0.28)}`,
+            }
+          : undefined
+      }
+    >
       <AnimatePresence mode="wait">
         {phase === "idle" && (
           <motion.div
@@ -84,6 +99,7 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
                   key={chip}
                   label={chip}
                   selected={quickInputs.includes(chip)}
+                  activeColor={theme?.accentStrong}
                   onClick={() => toggleQuickInput(chip)}
                 />
               ))}

@@ -36,7 +36,7 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
-      <AmbientBackground />
+      <AmbientBackground mood={vibeCheck.selectedMood} />
 
       <div
         className="relative z-[1] mx-auto flex min-h-screen w-full max-w-[1440px] flex-col gap-4 p-3 sm:p-4 lg:flex-row lg:gap-4 lg:p-3"
@@ -58,6 +58,7 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
               onSelectSection={handleSelectSection}
               chefArrived={chefIntroDismissed}
               chefStatus={chefStatus}
+              mood={vibeCheck.selectedMood}
             />
           </div>
         </aside>
@@ -77,6 +78,7 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
                 onCloseMobile={() => setMobileNavOpen(false)}
                 chefArrived={chefIntroDismissed}
                 chefStatus={chefStatus}
+                mood={vibeCheck.selectedMood}
               />
             </div>
           </div>
