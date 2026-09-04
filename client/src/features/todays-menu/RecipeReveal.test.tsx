@@ -37,11 +37,42 @@ describe("RecipeReveal", () => {
     expect(screen.getByRole("heading", { name: "Slow-Roasted Root Vegetable Stew" })).toBeInTheDocument();
   });
 
-  it("renders the mood badge, prep time, effort, and style", () => {
+  it("renders exactly one metadata row: mood, prep time, effort, and one non-redundant tag", () => {
     renderRecipe();
     expect(screen.getByText("Cozy")).toBeInTheDocument();
     expect(screen.getByText("50 min")).toBeInTheDocument();
     expect(screen.getByText("Medium effort")).toBeInTheDocument();
+    // "Hearty" duplicates the meal style ("hearty"), so the first non-redundant tag
+    // ("Comforting") is shown instead — and nothing from the raw style/remaining tags
+    // renders as a leftover second row.
+    expect(screen.getByText("Comforting")).toBeInTheDocument();
+    expect(screen.queryByText("hearty")).not.toBeInTheDocument();
+    expect(screen.queryByText("Hearty")).not.toBeInTheDocument();
+    expect(screen.queryByText("Vegetarian")).not.toBeInTheDocument();
+  });
+
+  it("skips a tag that duplicates the effort label (e.g. 'Low Effort') in favor of a genuinely distinct tag", () => {
+    renderRecipe({
+      mealIntent: { prepEffort: "low", style: "comforting" },
+      tags: ["Low Effort", "Quick", "Comforting"],
+    });
+    // "Low effort" (from prepEffort) must appear exactly once — not duplicated by the
+    // "Low Effort" tag — and "Quick" is the distinct tag chosen instead.
+    expect(screen.getAllByText(/^low effort$/i)).toHaveLength(1);
+    expect(screen.getByText("Quick")).toBeInTheDocument();
+  });
+
+  it("falls back to the meal style when every tag duplicates mood/effort/style", () => {
+    renderRecipe({
+      detectedMood: "energetic",
+      mealIntent: { prepEffort: "high", style: "spicy" },
+      tags: ["High Effort", "Spicy", "Energetic"],
+    });
+    expect(screen.getByText("spicy")).toBeInTheDocument();
+  });
+
+  it("falls back to the meal style when there are no tags at all", () => {
+    renderRecipe({ tags: [] });
     expect(screen.getByText("hearty")).toBeInTheDocument();
   });
 
