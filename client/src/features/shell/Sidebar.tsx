@@ -2,7 +2,7 @@ import { AppLogo } from "../../components/AppLogo";
 import { NavigationItem } from "../../components/NavigationItem";
 import { CloseIcon } from "../../components/icons";
 import { IconButton } from "../../components/IconButton";
-import { ChefMascot } from "./ChefMascot";
+import { ChefMascot, type ChefStatus } from "./ChefMascot";
 import { navEntries, type SectionKey } from "./navConfig";
 
 interface SidebarProps {
@@ -11,9 +11,16 @@ interface SidebarProps {
   onCloseMobile?: () => void;
   /** Whether the chef has finished its intro and settled into the sidebar. */
   chefArrived: boolean;
+  chefStatus: ChefStatus;
 }
 
-export function Sidebar({ activeSection, onSelectSection, onCloseMobile, chefArrived }: SidebarProps) {
+export function Sidebar({
+  activeSection,
+  onSelectSection,
+  onCloseMobile,
+  chefArrived,
+  chefStatus,
+}: SidebarProps) {
   return (
     <nav
       aria-label="Primary"
@@ -45,7 +52,7 @@ export function Sidebar({ activeSection, onSelectSection, onCloseMobile, chefArr
       </ul>
 
       <div className="mt-auto">
-        <ChefMascot arrived={chefArrived} />
+        <ChefMascot arrived={chefArrived} status={chefStatus} />
       </div>
     </nav>
   );

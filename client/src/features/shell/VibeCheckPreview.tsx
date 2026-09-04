@@ -1,17 +1,18 @@
-import { Card } from "../../components/Card";
 import { Panel } from "../../components/Panel";
 import { SectionHeader } from "../../components/SectionHeader";
-import { Tag } from "../../components/Tag";
-import { IconButton } from "../../components/IconButton";
-import { SendIcon, SparkleIcon } from "../../components/icons";
+import { SparkleIcon } from "../../components/icons";
+import type { UseVibeCheckReturn } from "../../hooks/useVibeCheck";
 import { HangingPlantAccent } from "./decorative";
 import { FoodLineAccent } from "./FoodLineAccent";
 import { MoodPreviewCard } from "./MoodPreviewCard";
 import { moodPreviewEntries } from "./moodPreviewData";
+import { VibeCheckInputCard } from "./VibeCheckInputCard";
 
-const suggestionChips = ["Long day", "Need comfort", "Too tired to cook", "Healthy please", "Something light"];
+interface VibeCheckPreviewProps {
+  vibeCheck: UseVibeCheckReturn;
+}
 
-export function VibeCheckPreview() {
+export function VibeCheckPreview({ vibeCheck }: VibeCheckPreviewProps) {
   return (
     <Panel className="relative flex flex-col overflow-hidden lg:h-full">
       {/* Anchored to the panel corner independently of the content flow below — sits right
@@ -61,7 +62,12 @@ export function VibeCheckPreview() {
 
       <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
         {moodPreviewEntries.map((entry) => (
-          <MoodPreviewCard key={entry.mood} entry={entry} />
+          <MoodPreviewCard
+            key={entry.mood}
+            entry={entry}
+            selected={vibeCheck.selectedMood === entry.mood}
+            onSelect={() => vibeCheck.toggleMood(entry.mood)}
+          />
         ))}
       </div>
 
@@ -70,30 +76,7 @@ export function VibeCheckPreview() {
         Hover a mood to see the magic
       </p>
 
-      <Card tone="cream" className="mt-3">
-        <h3 className="font-display text-base font-bold text-ink">Or tell me more about your day…</h3>
-        <div className="relative mt-3">
-          <textarea
-            disabled
-            placeholder="Ex: Had a long day at work, feeling exhausted and need something comforting but quick."
-            rows={2}
-            maxLength={200}
-            className="w-full resize-none rounded-2xl border border-tan-200 bg-surface p-4 pb-6 pr-14 text-sm text-ink placeholder:text-ink-muted disabled:cursor-not-allowed"
-          />
-          <span className="absolute bottom-3 right-14 text-xs text-ink-muted">0/200</span>
-          <IconButton
-            icon={<SendIcon width={16} height={16} />}
-            label="Send"
-            disabled
-            className="absolute bottom-3 right-3 bg-brand-accent-strong text-white hover:bg-accent-800 hover:text-white disabled:opacity-60"
-          />
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {suggestionChips.map((chip) => (
-            <Tag key={chip} label={chip} disabled className="cursor-default opacity-80" />
-          ))}
-        </div>
-      </Card>
+      <VibeCheckInputCard vibeCheck={vibeCheck} />
 
       {/* Breathing room before the food line — still the larger of the two spacers
           (grow-[3] vs grow-[2] above) so food stays clearly separated from the input

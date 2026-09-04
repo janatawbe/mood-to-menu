@@ -1,29 +1,56 @@
+import { useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { MoodCharacter } from "./MoodCharacter";
 import type { MoodPreviewEntry } from "./moodPreviewData";
 
 interface MoodPreviewCardProps {
   entry: MoodPreviewEntry;
+  selected: boolean;
+  onSelect: () => void;
 }
 
-export function MoodPreviewCard({ entry }: MoodPreviewCardProps) {
+export function MoodPreviewCard({ entry, selected, onSelect }: MoodPreviewCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const reacting = isHovered || selected;
+
   return (
-    <button
+    <motion.button
       type="button"
-      className="group flex flex-col items-center gap-1 rounded-3xl border border-tan-200/70 bg-surface p-2.5 shadow-soft transition-all duration-200 hover:-translate-y-1.5 hover:border-brand-accent hover:shadow-glow focus-visible:-translate-y-1.5 sm:p-3"
+      onClick={onSelect}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      onFocus={() => setIsHovered(true)}
+      onBlur={() => setIsHovered(false)}
+      aria-pressed={selected}
       aria-label={`${entry.label} mood`}
+      className={`flex flex-col items-center gap-1 rounded-3xl border p-2.5 shadow-soft transition-[background-color,border-color,box-shadow] duration-200 sm:p-3 ${
+        selected
+          ? "border-brand-accent-strong bg-brand-accent-soft/40 shadow-glow"
+          : "border-tan-200/70 bg-surface hover:border-brand-accent hover:shadow-glow"
+      }`}
+      animate={prefersReducedMotion ? undefined : { y: selected ? -4 : 0 }}
+      whileHover={prefersReducedMotion ? undefined : { y: -6, scale: 1.03 }}
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
     >
       <span className="relative flex h-24 w-20 items-center justify-center">
-        <span
-          className="absolute inset-0 rounded-full opacity-60 blur-xl transition-opacity duration-200 group-hover:opacity-90"
+        <motion.span
+          className="absolute inset-0 rounded-full blur-xl"
           style={{ backgroundColor: entry.glow }}
           aria-hidden
+          animate={{ opacity: reacting ? 0.9 : 0.6, scale: reacting ? 1.12 : 1 }}
+          transition={{ duration: 0.3 }}
         />
         <MoodCharacter
           mood={entry.mood}
-          className="relative drop-shadow-[0_6px_10px_rgba(59,42,32,0.16)] transition-transform duration-300 ease-out group-hover:-translate-y-1 group-hover:scale-110"
+          reacting={reacting}
+          className="relative drop-shadow-[0_6px_10px_rgba(59,42,32,0.16)]"
         />
       </span>
-      <span className="font-display text-sm font-bold text-ink">{entry.label}</span>
-    </button>
+      <span className={`font-display text-sm font-bold ${selected ? "text-brand-accent-strong" : "text-ink"}`}>
+        {entry.label}
+      </span>
+    </motion.button>
   );
 }
