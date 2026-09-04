@@ -67,6 +67,18 @@ function translateProviderError(err: unknown): RecipeServiceError {
     if (err.status === 429) {
       return recipeError("RATE_LIMITED", 429, err.message);
     }
+    // 504 (DEADLINE_EXCEEDED) is Gemini itself timing out on the request, not the
+    // provider being down — distinct from 503, and from the client-side AbortError
+    // timeout branch below, but both should read as TIMEOUT to the user.
+    if (err.status === 504) {
+      return recipeError("TIMEOUT", 504, `Gemini deadline exceeded (status 504): ${err.message}`);
+    }
+    // 503 (UNAVAILABLE, e.g. "high demand") is checked explicitly (ahead of the >=500
+    // fallback below) so its classification stays correct even if that fallback's status
+    // code choice ever changes.
+    if (err.status === 503) {
+      return recipeError("PROVIDER_UNAVAILABLE", 503, `Gemini unavailable (status 503): ${err.message}`);
+    }
     if (err.status >= 500) {
       return recipeError("PROVIDER_UNAVAILABLE", 503, `Gemini server error (status ${err.status}): ${err.message}`);
     }

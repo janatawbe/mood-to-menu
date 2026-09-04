@@ -4,8 +4,9 @@ import type { Mood } from "../../types/domain";
 import { ChefCharacter } from "./ChefCharacter";
 
 /** Subtle contextual state for the sidebar chef during a Vibe Check — deliberately
- * light-touch for Milestone 2; the fuller chef personality system is Milestone 9. */
-export type ChefStatus = "welcoming" | "attentive" | "cooking";
+ * light-touch for Milestone 2; the fuller chef personality system is Milestone 9.
+ * "served" (Milestone 5) is the chef's brief reaction once a recipe is on screen. */
+export type ChefStatus = "welcoming" | "attentive" | "cooking" | "served";
 
 interface ChefMascotProps {
   /** Whether the chef has finished its intro and settled into the sidebar. */
@@ -28,7 +29,7 @@ const CHEF_ASPECT = "1102 / 1154";
  */
 function ReadyToHelpCloud({ status }: { status: ChefStatus }) {
   const prefersReducedMotion = useReducedMotion();
-  const message = status === "cooking" ? "Cooking..." : "Ready to help!";
+  const message = status === "cooking" ? "Cooking..." : status === "served" ? "Bon appétit!" : "Ready to help!";
 
   return (
     <motion.div
@@ -93,6 +94,10 @@ const reactionByStatus: Record<ChefStatus, { animate: Record<string, number[]>; 
     animate: { y: [0, -4, 0], rotate: [0, -2, 2, 0] },
     transition: { duration: 1.1, repeat: Infinity, ease: "easeInOut" },
   },
+  served: {
+    animate: { y: [0, -6, 0, -3, 0], rotate: [0, -3, 3, 0] },
+    transition: { duration: 1.7, repeat: Infinity, ease: "easeInOut" },
+  },
 };
 
 /** Once a mood is selected, the chef's "attentive" gesture takes on that mood's own
@@ -112,8 +117,8 @@ const reactionByMood: Record<Mood, { animate: Record<string, number[]>; transiti
 
 export function ChefMascot({ arrived, status = "welcoming", mood = null }: ChefMascotProps) {
   const prefersReducedMotion = useReducedMotion();
-  const theme = status === "attentive" ? getMoodTheme(mood) : null;
-  const reaction = theme ? reactionByMood[theme.mood] : reactionByStatus[status];
+  const theme = status === "attentive" || status === "served" ? getMoodTheme(mood) : null;
+  const reaction = status === "attentive" && theme ? reactionByMood[theme.mood] : reactionByStatus[status];
 
   return (
     <div className="relative mx-auto" style={{ width: CHEF_WIDTH }}>
