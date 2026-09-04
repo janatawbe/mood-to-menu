@@ -1,7 +1,23 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import type { UseGroceryListReturn } from "../../hooks/useGroceryList";
 import type { Recipe } from "../../types/domain";
 import { RecipeReveal } from "./RecipeReveal";
+
+function makeGroceryList(overrides: Partial<UseGroceryListReturn> = {}): UseGroceryListReturn {
+  return {
+    items: [],
+    summary: { total: 0, checked: 0, remaining: 0 },
+    addIngredients: vi.fn().mockReturnValue(0),
+    addIngredient: vi.fn().mockReturnValue(false),
+    isIngredientAdded: vi.fn().mockReturnValue(false),
+    toggleChecked: vi.fn(),
+    removeItem: vi.fn(),
+    clearCompleted: vi.fn(),
+    clearAll: vi.fn(),
+    ...overrides,
+  };
+}
 
 const baseRecipe: Recipe = {
   id: "r1",
@@ -19,7 +35,7 @@ const baseRecipe: Recipe = {
   chefTip: "Add a splash of vinegar right before serving to brighten the flavors.",
 };
 
-function renderRecipe(overrides: Partial<Recipe> = {}) {
+function renderRecipe(overrides: Partial<Recipe> = {}, groceryList: UseGroceryListReturn = makeGroceryList()) {
   return render(
     <RecipeReveal
       recipe={{ ...baseRecipe, ...overrides }}
@@ -27,6 +43,7 @@ function renderRecipe(overrides: Partial<Recipe> = {}) {
       regenerateError={null}
       canRegenerate
       onRegenerate={vi.fn()}
+      groceryList={groceryList}
     />,
   );
 }
@@ -108,6 +125,38 @@ describe("RecipeReveal", () => {
     renderRecipe();
     expect(screen.queryByText(/\[DEV\]/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/recipe received from/i)).not.toBeInTheDocument();
+  });
+
+  it("Add ingredients to Grocery List calls addIngredients with every ingredient and the source recipe", () => {
+    const groceryList = makeGroceryList();
+    renderRecipe({}, groceryList);
+
+    fireEvent.click(screen.getByRole("button", { name: /add ingredients to grocery list/i }));
+
+    expect(groceryList.addIngredients).toHaveBeenCalledWith(baseRecipe.ingredients, {
+      id: baseRecipe.id,
+      dishName: baseRecipe.dishName,
+    });
+  });
+
+  it("shows 'Added to Grocery List' once every ingredient is already present", () => {
+    const groceryList = makeGroceryList({ isIngredientAdded: vi.fn().mockReturnValue(true) });
+    renderRecipe({}, groceryList);
+
+    expect(screen.getByRole("button", { name: /added to grocery list/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^add ingredients to grocery list$/i })).not.toBeInTheDocument();
+  });
+
+  it("adding one ingredient individually calls addIngredient with that ingredient and the source recipe", () => {
+    const groceryList = makeGroceryList();
+    renderRecipe({}, groceryList);
+
+    fireEvent.click(screen.getByRole("button", { name: /add carrots to grocery list/i }));
+
+    expect(groceryList.addIngredient).toHaveBeenCalledWith(
+      { name: "Carrots", amount: "3 large" },
+      { id: baseRecipe.id, dishName: baseRecipe.dishName },
+    );
   });
 
   it("remains stable with a long dish name, many ingredients, and many steps", () => {

@@ -3,7 +3,9 @@ import { AnimatePresence } from "motion/react";
 import { AppLogo } from "../../components/AppLogo";
 import { IconButton } from "../../components/IconButton";
 import { MenuIcon } from "../../components/icons";
+import { useGroceryList } from "../../hooks/useGroceryList";
 import { useVibeCheck } from "../../hooks/useVibeCheck";
+import { GroceryListScreen } from "../grocery-list/GroceryListScreen";
 import { TodaysMenuScreen } from "../todays-menu/TodaysMenuScreen";
 import { ChefIntroOverlay } from "../chef-intro/ChefIntroOverlay";
 import type { ChefStatus } from "./ChefMascot";
@@ -35,6 +37,10 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
   // Menu, so a successful generation should take the user straight there.
   const handleGenerated = useCallback(() => handleSelectSection("todays-menu"), []);
   const vibeCheck = useVibeCheck(handleGenerated);
+  // One shared instance (Step 23) — Today's Menu and the Grocery List screen both read
+  // and write this same state, so an add/remove/check on one is reflected on the other
+  // immediately, and it's never cleared by regenerating or navigating away.
+  const groceryList = useGroceryList();
 
   const showChefIntro = chefIntroReady && !chefIntroDismissed;
   const chefStatus: ChefStatus =
@@ -105,7 +111,18 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
           {activeSection === "vibe-check" ? (
             <VibeCheckPreview vibeCheck={vibeCheck} />
           ) : activeSection === "todays-menu" ? (
-            <TodaysMenuScreen vibeCheck={vibeCheck} onGoToVibeCheck={() => handleSelectSection("vibe-check")} />
+            <TodaysMenuScreen
+              vibeCheck={vibeCheck}
+              groceryList={groceryList}
+              onGoToVibeCheck={() => handleSelectSection("vibe-check")}
+            />
+          ) : activeSection === "grocery-list" ? (
+            <GroceryListScreen
+              groceryList={groceryList}
+              hasRecipe={vibeCheck.recipe !== null}
+              onGoToTodaysMenu={() => handleSelectSection("todays-menu")}
+              onGoToVibeCheck={() => handleSelectSection("vibe-check")}
+            />
           ) : (
             <SectionPlaceholder section={activeSection} />
           )}

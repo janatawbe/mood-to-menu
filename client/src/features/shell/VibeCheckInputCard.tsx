@@ -7,7 +7,7 @@ import { Tag } from "../../components/Tag";
 import { ChefHatIcon, SendIcon } from "../../components/icons";
 import type { UseVibeCheckReturn } from "../../hooks/useVibeCheck";
 import { VIBE_CHECK_TEXT_LIMIT } from "../../hooks/useVibeCheck";
-import { getFriendlyErrorMessage } from "../../lib/errorMessages";
+import { getRecipeErrorCopy } from "../../lib/errorMessages";
 import { darken, getMoodTheme, hexToRgba } from "../../lib/moodTheme";
 import { quickInputOptions } from "./quickInputData";
 
@@ -45,6 +45,7 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
   const fadeTransition = { duration: prefersReducedMotion ? 0.01 : 0.2 };
   const theme = getMoodTheme(selectedMood);
   const showForm = phase === "idle" || phase === "captured";
+  const errorCopy = error ? getRecipeErrorCopy(error.code) : null;
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
@@ -171,7 +172,7 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
           </motion.div>
         )}
 
-        {phase === "error" && error && (
+        {phase === "error" && error && errorCopy && (
           <motion.div
             key="error"
             initial={{ opacity: 0 }}
@@ -182,8 +183,8 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
             className="flex flex-1 flex-col items-center justify-center gap-2 text-center"
           >
             <ChefHatIcon width={30} height={30} className="text-ink-muted" />
-            <p className="font-display text-base font-bold text-ink">Hmm, that didn't work.</p>
-            <p className="max-w-xs text-sm text-ink-muted">{getFriendlyErrorMessage(error.code)}</p>
+            <p className="font-display text-base font-bold text-ink">{errorCopy.title}</p>
+            <p className="max-w-xs text-sm text-ink-muted">{errorCopy.message}</p>
             <div className="mt-1 flex gap-2">
               <Button variant="primary" size="sm" onClick={retry} disabled={!canRetry}>
                 Try again
