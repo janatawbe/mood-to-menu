@@ -78,4 +78,25 @@
     outline-offset: 2px;
     border-radius: 0.5rem;
   }
+
+  /*
+   * Milestone 3: mood-aware hover states for elements whose hover color must follow
+   * a runtime-computed mood accent (Tailwind's `hover:` utilities only work with colors
+   * known at build time, not a color coming from a React prop). Each element sets the
+   * relevant `--mood-*` custom property inline only when a mood is active; the `var(...,
+   * fallback)` second argument keeps the exact original brand-orange hover behavior when
+   * no mood is selected (the property is simply unset), so this never changes the default.
+   */
+  .mood-hover-border:hover,
+  .mood-hover-border:focus-visible {
+    border-color: var(--mood-hover-accent, var(--color-brand-accent));
+  }
+  .mood-hover-text:hover,
+  .mood-hover-text:focus-visible {
+    color: var(--mood-hover-accent-strong, var(--color-brand-accent-strong));
+  }
+  .mood-hover-bg:hover,
+  .mood-hover-bg:focus-visible {
+    background-color: var(--mood-hover-bg, var(--color-accent-800));
+  }
 }

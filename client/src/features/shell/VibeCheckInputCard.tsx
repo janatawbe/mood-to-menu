@@ -1,4 +1,4 @@
-import type { KeyboardEvent } from "react";
+import type { CSSProperties, KeyboardEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
@@ -7,7 +7,7 @@ import { Tag } from "../../components/Tag";
 import { ChefHatIcon, SendIcon, SparkleIcon } from "../../components/icons";
 import type { UseVibeCheckReturn } from "../../hooks/useVibeCheck";
 import { VIBE_CHECK_TEXT_LIMIT } from "../../hooks/useVibeCheck";
-import { getMoodTheme, hexToRgba } from "../../lib/moodTheme";
+import { darken, getMoodTheme, hexToRgba } from "../../lib/moodTheme";
 import { moodPreviewEntries } from "./moodPreviewData";
 import { quickInputOptions } from "./quickInputData";
 
@@ -81,6 +81,7 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
                 maxLength={VIBE_CHECK_TEXT_LIMIT}
                 aria-label="Tell me more about your day"
                 className="w-full resize-none rounded-2xl border border-tan-200 bg-surface p-4 pb-6 pr-14 text-sm text-ink placeholder:text-ink-muted"
+                style={theme ? { borderColor: hexToRgba(theme.accent, 0.45) } : undefined}
               />
               <span className="absolute bottom-3 right-14 text-xs text-ink-muted">
                 {userText.length}/{VIBE_CHECK_TEXT_LIMIT}
@@ -90,7 +91,17 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
                 label="Send Vibe Check"
                 disabled={!canSubmit}
                 onClick={submit}
-                className="absolute bottom-3 right-3 bg-brand-accent-strong text-white hover:bg-accent-800 hover:text-white disabled:cursor-not-allowed disabled:bg-tan-200 disabled:text-ink-muted"
+                className={`absolute bottom-3 right-3 text-white hover:text-white disabled:cursor-not-allowed disabled:bg-tan-200 disabled:text-ink-muted ${
+                  theme && canSubmit ? "mood-hover-bg" : "bg-brand-accent-strong hover:bg-accent-800"
+                }`}
+                style={
+                  theme && canSubmit
+                    ? ({
+                        backgroundColor: theme.accentStrong,
+                        "--mood-hover-bg": darken(theme.accentStrong, 0.15),
+                      } as CSSProperties)
+                    : undefined
+                }
               />
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -99,7 +110,7 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
                   key={chip}
                   label={chip}
                   selected={quickInputs.includes(chip)}
-                  activeColor={theme?.accentStrong}
+                  mood={selectedMood}
                   onClick={() => toggleQuickInput(chip)}
                 />
               ))}

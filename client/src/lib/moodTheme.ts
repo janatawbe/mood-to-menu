@@ -38,12 +38,16 @@ export const defaultTheme = {
 } as const;
 
 export const moodThemes: Record<Mood, MoodTheme> = {
+  // Bright, airy, cool blue-violet — kept clearly higher-saturation and lighter than
+  // Tired so the two never read as "the same purple."
   calm: {
     mood: "calm",
-    accent: "#9678D1",
-    accentStrong: "#8066B2",
-    accentSoft: "#C9B8ED",
-    glow: { primary: "#C9B8ED", secondary: "#AEDFF7" },
+    accent: "#8E7CD9",
+    accentStrong: "#7969B8",
+    accentSoft: "#D6C6F5",
+    // Both stops stay in the lavender/violet family — no more purple-on-the-left,
+    // blue-on-the-right split.
+    glow: { primary: "#C9B8ED", secondary: "#DED0F7" },
     cardBackground: "#F1ECFB",
     driftSeconds: 16,
   },
@@ -56,12 +60,14 @@ export const moodThemes: Record<Mood, MoodTheme> = {
     cardBackground: "#EAF3FA",
     driftSeconds: 13,
   },
+  // Deeper, dustier, warmer (mauve/plum-leaning) and noticeably less saturated than
+  // Calm — a different hue family, not just a dimmer version of the same purple.
   tired: {
     mood: "tired",
-    accent: "#8B7699",
-    accentStrong: "#7D6A8A",
-    accentSoft: "#B3A4C4",
-    glow: { primary: "#B3A4C4", secondary: "#DDC9D3" },
+    accent: "#8F7288",
+    accentStrong: "#886C81",
+    accentSoft: "#C2A8B8",
+    glow: { primary: "#B89AAE", secondary: "#DCC9CE" },
     cardBackground: "#F0E6E6",
     driftSeconds: 18,
   },
@@ -74,20 +80,23 @@ export const moodThemes: Record<Mood, MoodTheme> = {
     cardBackground: "#FFF8E1",
     driftSeconds: 8,
   },
+  // Punchier, more saturated, golden-tangerine — pushed clearly away from Cozy's
+  // softer coral-peach on the hue wheel, not just brighter.
   energetic: {
     mood: "energetic",
-    accent: "#F5813A",
-    accentStrong: "#AC5A29",
-    accentSoft: "#FFB347",
-    glow: { primary: "#F4863A", secondary: "#FFD9A6" },
+    accent: "#F5760A",
+    accentStrong: "#B85908",
+    accentSoft: "#FFAD5C",
+    glow: { primary: "#F5813A", secondary: "#FFCB80" },
     cardBackground: "#FFF0E1",
     driftSeconds: 6,
   },
+  // Softer, creamier, coral/peach-leaning and less saturated than Energetic.
   cozy: {
     mood: "cozy",
-    accent: "#DD7C3E",
-    accentStrong: "#A65D2F",
-    accentSoft: "#F3A96F",
+    accent: "#E0806F",
+    accentStrong: "#A86053",
+    accentSoft: "#F0A98A",
     glow: { primary: "#F3A96F", secondary: "#F0846B" },
     cardBackground: "#FDEEE0",
     driftSeconds: 11,
@@ -128,4 +137,17 @@ export function ambientWash(primary: string, secondary: string, primaryAlpha = 0
  * selected mood card and other elements that should "glow" in the active mood's color. */
 export function moodGlowShadow(accent: string, ringAlpha = 0.22, blurAlpha = 0.4) {
   return `0 0 0 4px ${hexToRgba(accent, ringAlpha)}, 0 12px 30px -12px ${hexToRgba(accent, blurAlpha)}`;
+}
+
+/** `#RRGGBB` darkened by `amount` (0-1) — e.g. for a button's hover/press state, so
+ * every mood gets a consistent "one shade deeper" interaction color without hand-picking
+ * a third hex per mood. */
+export function darken(hex: string, amount: number): string {
+  const match = /^#?([a-f\d]{6})$/i.exec(hex);
+  const captured = match?.[1];
+  if (!captured) return hex;
+  const r = Math.round(parseInt(captured.slice(0, 2), 16) * (1 - amount));
+  const g = Math.round(parseInt(captured.slice(2, 4), 16) * (1 - amount));
+  const b = Math.round(parseInt(captured.slice(4, 6), 16) * (1 - amount));
+  return `#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
 }
