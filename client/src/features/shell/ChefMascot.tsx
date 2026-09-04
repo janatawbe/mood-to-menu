@@ -1,9 +1,14 @@
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion, type Transition } from "motion/react";
 import { ChefCharacter } from "./ChefCharacter";
+
+/** Subtle contextual state for the sidebar chef during a Vibe Check — deliberately
+ * light-touch for Milestone 2; the fuller chef personality system is Milestone 9. */
+export type ChefStatus = "welcoming" | "attentive" | "cooking";
 
 interface ChefMascotProps {
   /** Whether the chef has finished its intro and settled into the sidebar. */
   arrived: boolean;
+  status?: ChefStatus;
 }
 
 const CHEF_WIDTH = 225;
@@ -16,8 +21,9 @@ const CHEF_ASPECT = "1102 / 1154";
  * down-left toward the chef — sitting beside his head rather than a separate status
  * badge above him.
  */
-function ReadyToHelpCloud() {
+function ReadyToHelpCloud({ status }: { status: ChefStatus }) {
   const prefersReducedMotion = useReducedMotion();
+  const message = status === "cooking" ? "Cooking..." : "Ready to help!";
 
   return (
     <motion.div
@@ -63,24 +69,55 @@ function ReadyToHelpCloud() {
 
       <div className="absolute left-[3px] top-[2px] flex h-10 w-[102px] items-center justify-center px-2.5">
         <span className="text-center text-[10.5px] font-extrabold leading-tight tracking-tight text-ink">
-          Ready to help!
+          {message}
         </span>
       </div>
     </motion.div>
   );
 }
 
-export function ChefMascot({ arrived }: ChefMascotProps) {
+/** A tiny extra gesture layered on top of ChefCharacter's own idle breathing — never
+ * replaces it, just adds a little more life once the user is actively interacting. */
+const reactionByStatus: Record<ChefStatus, { animate: Record<string, number[]>; transition: Transition }> = {
+  welcoming: { animate: { rotate: [0], y: [0] }, transition: { duration: 0.3 } },
+  attentive: {
+    animate: { rotate: [0, -1.5, 0, 1.5, 0] },
+    transition: { duration: 2.6, repeat: Infinity, ease: "easeInOut" },
+  },
+  cooking: {
+    animate: { y: [0, -4, 0], rotate: [0, -2, 2, 0] },
+    transition: { duration: 1.1, repeat: Infinity, ease: "easeInOut" },
+  },
+};
+
+export function ChefMascot({ arrived, status = "welcoming" }: ChefMascotProps) {
+  const prefersReducedMotion = useReducedMotion();
+  const reaction = reactionByStatus[status];
+
   return (
     <div className="relative mx-auto" style={{ width: CHEF_WIDTH }}>
       {arrived ? (
         <motion.div layoutId="chef-mascot" className="relative">
-          <ChefCharacter className="w-full" />
+          {status === "cooking" && (
+            <motion.div
+              className="pointer-events-none absolute inset-x-8 inset-y-12 -z-10 rounded-full bg-accent-300/35 blur-2xl"
+              aria-hidden
+              initial={{ opacity: 0 }}
+              animate={{ opacity: prefersReducedMotion ? 0.5 : [0.3, 0.55, 0.3] }}
+              transition={prefersReducedMotion ? { duration: 0.3 } : { duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+            />
+          )}
+          <motion.div
+            animate={prefersReducedMotion ? undefined : reaction.animate}
+            transition={prefersReducedMotion ? undefined : reaction.transition}
+          >
+            <ChefCharacter className="w-full" />
+          </motion.div>
           {/* Kept within the chef's own bounding box (flush toward its right edge) so it
               can never clip the sidebar, regardless of how much side margin centering
               leaves at different sidebar widths. */}
           <div className="absolute left-[110px] top-[-14px]">
-            <ReadyToHelpCloud />
+            <ReadyToHelpCloud status={status} />
           </div>
         </motion.div>
       ) : (

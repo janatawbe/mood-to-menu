@@ -1,8 +1,16 @@
+import { motion, useReducedMotion, type Transition } from "motion/react";
 import type { Mood } from "../../types/domain";
 
 interface MoodCharacterProps {
   mood: Mood;
   className?: string;
+  /** True while hovered, focused, or selected — drives this mood's micro-reaction.
+   * Always treated as false when the user prefers reduced motion. */
+  reacting?: boolean;
+}
+
+interface MoodMarkupProps {
+  active: boolean;
 }
 
 function GroundShadow() {
@@ -14,16 +22,29 @@ function Sparkle({
   y,
   size = 6,
   color,
+  active,
+  delay = 0,
+  duration = 1.1,
 }: {
   x: number;
   y: number;
   size?: number;
   color: string;
+  active: boolean;
+  delay?: number;
+  duration?: number;
 }) {
   return (
-    <path
+    <motion.path
       d={`M${x} ${y - size} Q${x + size * 0.25} ${y - size * 0.25} ${x + size} ${y} Q${x + size * 0.25} ${y + size * 0.25} ${x} ${y + size} Q${x - size * 0.25} ${y + size * 0.25} ${x - size} ${y} Q${x - size * 0.25} ${y - size * 0.25} ${x} ${y - size} Z`}
       fill={color}
+      style={{ transformOrigin: `${x}px ${y}px` }}
+      animate={
+        active
+          ? { scale: [1, 1.3, 1], opacity: [0.85, 1, 0.85] }
+          : { scale: 1, opacity: 1 }
+      }
+      transition={active ? { duration, repeat: Infinity, ease: "easeInOut", delay } : { duration: 0.2 }}
     />
   );
 }
@@ -33,23 +54,30 @@ function HeartMark({
   y,
   size = 7,
   color,
+  active,
+  delay = 0,
 }: {
   x: number;
   y: number;
   size?: number;
   color: string;
+  active: boolean;
+  delay?: number;
 }) {
   const s = size / 10;
   return (
-    <path
+    <motion.path
       transform={`translate(${x - 5 * s} ${y - 4.5 * s}) scale(${s})`}
       d="M5 8.5C2 6.3 0 4.6 0 2.6 0 1 1.2 0 2.6 0c.9 0 1.8.5 2.4 1.3C5.6.5 6.5 0 7.4 0 8.8 0 10 1 10 2.6c0 2-2 3.7-5 5.9Z"
       fill={color}
+      style={{ transformOrigin: `${x}px ${y}px` }}
+      animate={active ? { scale: [1, 1.22, 1] } : { scale: 1 }}
+      transition={active ? { duration: 0.9, repeat: Infinity, ease: "easeInOut", delay } : { duration: 0.2 }}
     />
   );
 }
 
-function CalmMarkup() {
+function CalmMarkup({ active }: MoodMarkupProps) {
   return (
     <>
       <defs>
@@ -60,9 +88,9 @@ function CalmMarkup() {
         </radialGradient>
       </defs>
       <GroundShadow />
-      <Sparkle x={13} y={22} size={7} color="#C9B8ED" />
-      <Sparkle x={87} y={30} size={5.6} color="#CDB6F0" />
-      <Sparkle x={78} y={12} size={4.3} color="#C9B8ED" />
+      <Sparkle x={13} y={22} size={7} color="#C9B8ED" active={active} delay={0} />
+      <Sparkle x={87} y={30} size={5.6} color="#CDB6F0" active={active} delay={0.25} />
+      <Sparkle x={78} y={12} size={4.3} color="#C9B8ED" active={active} delay={0.5} />
       <circle cx="50" cy="60" r="26" fill="url(#calmBody)" />
       <ellipse cx="40" cy="48" rx="9" ry="6" fill="#FFFFFF" opacity="0.35" />
       <ellipse cx="38" cy="68" rx="6" ry="4" fill="#E7B8D6" opacity="0.5" />
@@ -74,7 +102,7 @@ function CalmMarkup() {
   );
 }
 
-function StressedMarkup() {
+function StressedMarkup({ active }: MoodMarkupProps) {
   return (
     <>
       <defs>
@@ -85,17 +113,22 @@ function StressedMarkup() {
         </radialGradient>
       </defs>
       <GroundShadow />
-      <g>
+      <motion.g
+        animate={active ? { y: [0, -1.5, 0] } : { y: 0 }}
+        transition={active ? { duration: 1.4, repeat: Infinity, ease: "easeInOut" } : { duration: 0.2 }}
+      >
         <ellipse cx="42" cy="13" rx="10.8" ry="8.1" fill="#8FA3B5" />
         <ellipse cx="54" cy="9.5" rx="13.4" ry="9.4" fill="#9DB0C2" />
         <ellipse cx="64" cy="14" rx="9.4" ry="7.4" fill="#8FA3B5" />
-        <path
-          d="M40 23 L35.9 31.7M50 24 L45.9 34.1M60 23 L55.9 31.7"
-          stroke="#5D9BD0"
-          strokeWidth="2.9"
-          strokeLinecap="round"
-        />
-      </g>
+      </motion.g>
+      <motion.path
+        d="M40 23 L35.9 31.7M50 24 L45.9 34.1M60 23 L55.9 31.7"
+        stroke="#5D9BD0"
+        strokeWidth="2.9"
+        strokeLinecap="round"
+        animate={active ? { y: [0, 5, 0], opacity: [1, 0.35, 1] } : { y: 0, opacity: 1 }}
+        transition={active ? { duration: 0.8, repeat: Infinity, ease: "easeIn" } : { duration: 0.2 }}
+      />
       <circle cx="50" cy="62" r="26" fill="url(#stressedBody)" />
       <ellipse cx="40" cy="50" rx="9" ry="6" fill="#FFFFFF" opacity="0.3" />
       <ellipse cx="39" cy="70" rx="5.5" ry="3.5" fill="#F0B9CE" opacity="0.5" />
@@ -110,7 +143,7 @@ function StressedMarkup() {
   );
 }
 
-function TiredMarkup() {
+function TiredMarkup({ active }: MoodMarkupProps) {
   return (
     <>
       <defs>
@@ -121,16 +154,47 @@ function TiredMarkup() {
         </radialGradient>
       </defs>
       <GroundShadow />
-      <text x="64" y="25" fontFamily="'Baloo 2', sans-serif" fontWeight="700" fontSize="18" fill="#8B7699">
+      <motion.text
+        x="64"
+        y="25"
+        fontFamily="'Baloo 2', sans-serif"
+        fontWeight="700"
+        fontSize="18"
+        fill="#8B7699"
+        animate={active ? { y: [25, 17, 25], opacity: [1, 0.3, 1] } : { y: 25, opacity: 1 }}
+        transition={active ? { duration: 2.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.2 }}
+      >
         Z
-      </text>
-      <text x="79" y="14" fontFamily="'Baloo 2', sans-serif" fontWeight="700" fontSize="13.5" fill="#A793BB">
+      </motion.text>
+      <motion.text
+        x="79"
+        y="14"
+        fontFamily="'Baloo 2', sans-serif"
+        fontWeight="700"
+        fontSize="13.5"
+        fill="#A793BB"
+        animate={active ? { y: [14, 7, 14], opacity: [1, 0.3, 1] } : { y: 14, opacity: 1 }}
+        transition={active ? { duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: 0.4 } : { duration: 0.2 }}
+      >
         z
-      </text>
-      <text x="56" y="8" fontFamily="'Baloo 2', sans-serif" fontWeight="700" fontSize="9.5" fill="#B9A8C9">
+      </motion.text>
+      <motion.text
+        x="56"
+        y="8"
+        fontFamily="'Baloo 2', sans-serif"
+        fontWeight="700"
+        fontSize="9.5"
+        fill="#B9A8C9"
+        animate={active ? { y: [8, 2, 8], opacity: [1, 0.3, 1] } : { y: 8, opacity: 1 }}
+        transition={active ? { duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 } : { duration: 0.2 }}
+      >
         z
-      </text>
-      <g transform="rotate(-4 50 62)">
+      </motion.text>
+      <motion.g
+        animate={active ? { rotate: [-4, -1, -4] } : { rotate: -4 }}
+        style={{ transformOrigin: "50px 62px" }}
+        transition={active ? { duration: 3.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
+      >
         <circle cx="50" cy="62" r="26" fill="url(#tiredBody)" />
         <ellipse cx="40" cy="50" rx="9" ry="6" fill="#FFFFFF" opacity="0.26" />
         <ellipse cx="36" cy="72" rx="5" ry="3.2" fill="#C9A9C7" opacity="0.4" />
@@ -140,12 +204,12 @@ function TiredMarkup() {
         <path d="M36 62 Q41 66 46 62" stroke="#3E3350" strokeWidth="2.6" fill="none" strokeLinecap="round" />
         <path d="M54 62 Q59 66 64 62" stroke="#3E3350" strokeWidth="2.6" fill="none" strokeLinecap="round" />
         <path d="M44 78 Q50 76 56 78" stroke="#3E3350" strokeWidth="2.2" fill="none" strokeLinecap="round" />
-      </g>
+      </motion.g>
     </>
   );
 }
 
-function HappyMarkup() {
+function HappyMarkup({ active }: MoodMarkupProps) {
   const rays = Array.from({ length: 8 }, (_, i) => i);
   return (
     <>
@@ -157,7 +221,14 @@ function HappyMarkup() {
         </radialGradient>
       </defs>
       <GroundShadow />
-      <g stroke="#FFC12A" strokeWidth="3.5" strokeLinecap="round">
+      <motion.g
+        stroke="#FFC12A"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+        style={{ transformOrigin: "50px 60px" }}
+        animate={active ? { rotate: [0, 12, 0], scale: [1, 1.06, 1] } : { rotate: 0, scale: 1 }}
+        transition={active ? { duration: 1.6, repeat: Infinity, ease: "easeInOut" } : { duration: 0.2 }}
+      >
         {rays.map((i) => {
           const angle = (i / rays.length) * Math.PI * 2;
           const x1 = 50 + Math.cos(angle) * 29;
@@ -166,7 +237,7 @@ function HappyMarkup() {
           const y2 = 60 + Math.sin(angle) * 43;
           return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} />;
         })}
-      </g>
+      </motion.g>
       <circle cx="50" cy="60" r="26" fill="url(#happyBody)" />
       <ellipse cx="40" cy="48" rx="9" ry="6" fill="#FFFFFF" opacity="0.4" />
       <ellipse cx="38" cy="66" rx="6" ry="4" fill="#F58B6B" opacity="0.55" />
@@ -179,7 +250,7 @@ function HappyMarkup() {
   );
 }
 
-function EnergeticMarkup() {
+function EnergeticMarkup({ active }: MoodMarkupProps) {
   const sparks = [
     { x: 12, y: 18, size: 7 },
     { x: 89, y: 22, size: 5.6 },
@@ -207,17 +278,32 @@ function EnergeticMarkup() {
       <circle cx="50" cy="58" r="42" fill="url(#energeticGlow)" />
       <GroundShadow />
       {sparks.map((s, i) => (
-        <Sparkle key={i} x={s.x} y={s.y} size={s.size} color={i % 2 ? "#FFC93C" : "#F5813A"} />
+        <Sparkle
+          key={i}
+          x={s.x}
+          y={s.y}
+          size={s.size}
+          color={i % 2 ? "#FFC93C" : "#F5813A"}
+          active={active}
+          delay={i * 0.12}
+          duration={0.55}
+        />
       ))}
-      <path
-        d="M50 6 C56 16 68 20 66 34 C74 28 80 38 76 48 C86 44 88 58 78 64 C82 74 74 84 62 82 C64 92 50 98 50 98 C50 98 36 92 38 82 C26 84 18 74 22 64 C12 58 14 44 24 48 C20 38 26 28 34 34 C32 20 44 16 50 6 Z"
-        fill="url(#energeticOuterFlame)"
-      />
-      <path
-        d="M50 20 C54 30 62 32 60 42 C66 40 68 50 62 54 C68 58 64 68 56 66 C58 74 50 78 50 78 C50 78 42 74 44 66 C36 68 32 58 38 54 C32 50 34 40 40 42 C38 32 46 30 50 20 Z"
-        fill="url(#energeticInnerFlame)"
-        opacity="0.9"
-      />
+      <motion.g
+        style={{ transformOrigin: "50px 58px" }}
+        animate={active ? { scale: [1, 1.07, 1] } : { scale: 1 }}
+        transition={active ? { duration: 0.45, repeat: Infinity, ease: "easeInOut" } : { duration: 0.2 }}
+      >
+        <path
+          d="M50 6 C56 16 68 20 66 34 C74 28 80 38 76 48 C86 44 88 58 78 64 C82 74 74 84 62 82 C64 92 50 98 50 98 C50 98 36 92 38 82 C26 84 18 74 22 64 C12 58 14 44 24 48 C20 38 26 28 34 34 C32 20 44 16 50 6 Z"
+          fill="url(#energeticOuterFlame)"
+        />
+        <path
+          d="M50 20 C54 30 62 32 60 42 C66 40 68 50 62 54 C68 58 64 68 56 66 C58 74 50 78 50 78 C50 78 42 74 44 66 C36 68 32 58 38 54 C32 50 34 40 40 42 C38 32 46 30 50 20 Z"
+          fill="url(#energeticInnerFlame)"
+          opacity="0.9"
+        />
+      </motion.g>
       <ellipse cx="41" cy="56" rx="5" ry="6" fill="#FFFFFF" />
       <ellipse cx="59" cy="56" rx="5" ry="6" fill="#FFFFFF" />
       <circle cx="42" cy="58" r="2.6" fill="#3B1204" />
@@ -233,7 +319,7 @@ function EnergeticMarkup() {
   );
 }
 
-function CozyMarkup() {
+function CozyMarkup({ active }: MoodMarkupProps) {
   return (
     <>
       <defs>
@@ -248,8 +334,8 @@ function CozyMarkup() {
         </linearGradient>
       </defs>
       <GroundShadow />
-      <HeartMark x={14} y={19} size={8.1} color="#F0846B" />
-      <HeartMark x={85} y={25} size={6.3} color="#F09777" />
+      <HeartMark x={14} y={19} size={8.1} color="#F0846B" active={active} delay={0} />
+      <HeartMark x={85} y={25} size={6.3} color="#F09777" active={active} delay={0.2} />
 
       {/* body */}
       <circle cx="50" cy="62" r="26" fill="url(#cozyBody)" />
@@ -264,7 +350,7 @@ function CozyMarkup() {
         strokeWidth="1.1"
         opacity="0.55"
       />
-      <HeartMark x={50} y={17} size={10.1} color="#EC7357" />
+      <HeartMark x={50} y={17} size={10.1} color="#EC7357" active={active} delay={0.1} />
 
       {/* wrapped blanket across the shoulders, with a ribbed knit texture */}
       <path
@@ -299,20 +385,47 @@ function CozyMarkup() {
   );
 }
 
+/** Each mood's own subtle root-level reaction — a small, distinct gesture (not just a
+ * generic lift) so the six keep their separate personalities even while animating. */
+const rootReactions: Record<Mood, { animate: Record<string, number[]>; transition: Transition }> = {
+  calm: { animate: { y: [0, -5, 0] }, transition: { duration: 2.4, repeat: Infinity, ease: "easeInOut" } },
+  stressed: {
+    animate: { x: [0, -2, 2, -2, 0], y: [0, -2, -2, -2, 0] },
+    transition: { duration: 0.5, repeat: Infinity, ease: "easeInOut" },
+  },
+  tired: { animate: { rotate: [-1.5, 1.5, -1.5], y: [0, -2, 0] }, transition: { duration: 3.4, repeat: Infinity, ease: "easeInOut" } },
+  happy: { animate: { y: [0, -7, 0] }, transition: { duration: 0.6, repeat: Infinity, ease: "easeOut" } },
+  energetic: { animate: { y: [0, -8, 0] }, transition: { duration: 0.4, repeat: Infinity, ease: "easeOut" } },
+  cozy: { animate: { y: [0, -3, 0], rotate: [-1, 1, -1] }, transition: { duration: 1.5, repeat: Infinity, ease: "easeInOut" } },
+};
+
+const restTransition: Transition = { duration: 0.25, ease: "easeOut" };
+
 /**
  * Illustrated per-mood characters. Each mood gets its own layered SVG (gradient body,
  * expression, and supporting motifs) rather than a shared face formula, so the six read
- * as distinct personalities even without their labels.
+ * as distinct personalities even without their labels. `reacting` drives a small,
+ * mood-specific micro-interaction (root gesture + accent motifs) on hover/focus/select.
  */
-export function MoodCharacter({ mood, className = "" }: MoodCharacterProps) {
+export function MoodCharacter({ mood, className = "", reacting = false }: MoodCharacterProps) {
+  const prefersReducedMotion = useReducedMotion();
+  const active = reacting && !prefersReducedMotion;
+  const rootReaction = rootReactions[mood];
+
   return (
-    <svg viewBox="0 0 100 116" className={`h-full w-full ${className}`} aria-hidden>
-      {mood === "calm" && <CalmMarkup />}
-      {mood === "stressed" && <StressedMarkup />}
-      {mood === "tired" && <TiredMarkup />}
-      {mood === "happy" && <HappyMarkup />}
-      {mood === "energetic" && <EnergeticMarkup />}
-      {mood === "cozy" && <CozyMarkup />}
-    </svg>
+    <motion.svg
+      viewBox="0 0 100 116"
+      className={`h-full w-full ${className}`}
+      aria-hidden
+      animate={active ? rootReaction.animate : { x: 0, y: 0, rotate: 0 }}
+      transition={active ? rootReaction.transition : restTransition}
+    >
+      {mood === "calm" && <CalmMarkup active={active} />}
+      {mood === "stressed" && <StressedMarkup active={active} />}
+      {mood === "tired" && <TiredMarkup active={active} />}
+      {mood === "happy" && <HappyMarkup active={active} />}
+      {mood === "energetic" && <EnergeticMarkup active={active} />}
+      {mood === "cozy" && <CozyMarkup active={active} />}
+    </motion.svg>
   );
 }

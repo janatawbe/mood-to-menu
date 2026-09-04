@@ -3,7 +3,9 @@ import { AnimatePresence } from "motion/react";
 import { AppLogo } from "../../components/AppLogo";
 import { IconButton } from "../../components/IconButton";
 import { MenuIcon } from "../../components/icons";
+import { useVibeCheck } from "../../hooks/useVibeCheck";
 import { ChefIntroOverlay } from "../chef-intro/ChefIntroOverlay";
+import type { ChefStatus } from "./ChefMascot";
 import { AmbientBackground } from "./decorative";
 import { Sidebar } from "./Sidebar";
 import { SectionPlaceholder } from "./SectionPlaceholder";
@@ -21,8 +23,11 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
   // Not persisted (by design, for now — see ChefIntroOverlay) so the intro replays on
   // every open/refresh. Swap in a sessionStorage-backed flag here if that should change.
   const [chefIntroDismissed, setChefIntroDismissed] = useState(false);
+  const vibeCheck = useVibeCheck();
 
   const showChefIntro = chefIntroReady && !chefIntroDismissed;
+  const chefStatus: ChefStatus =
+    vibeCheck.phase === "loading" ? "cooking" : vibeCheck.selectedMood ? "attentive" : "welcoming";
 
   function handleSelectSection(section: SectionKey) {
     setActiveSection(section);
@@ -52,6 +57,7 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
               activeSection={activeSection}
               onSelectSection={handleSelectSection}
               chefArrived={chefIntroDismissed}
+              chefStatus={chefStatus}
             />
           </div>
         </aside>
@@ -70,6 +76,7 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
                 onSelectSection={handleSelectSection}
                 onCloseMobile={() => setMobileNavOpen(false)}
                 chefArrived={chefIntroDismissed}
+                chefStatus={chefStatus}
               />
             </div>
           </div>
@@ -77,7 +84,7 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
 
         <main id="main-content" className="min-w-0 flex-1">
           {activeSection === "vibe-check" ? (
-            <VibeCheckPreview />
+            <VibeCheckPreview vibeCheck={vibeCheck} />
           ) : (
             <SectionPlaceholder section={activeSection} />
           )}
