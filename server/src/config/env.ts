@@ -14,10 +14,19 @@ function getPort(): number {
  * was confirmed via a live request during Milestone 4 to be retired for new API
  * keys/projects — Gemini's own error response named gemini-3.6-flash as the direct
  * replacement. gemini-3.6-flash was then swapped for gemini-3.7-flash (the current
- * stable Flash release) during Milestone 5 after repeated live 504 DEADLINE_EXCEEDED /
- * 503 UNAVAILABLE ("high demand") failures — a specific stable id on purpose, not
- * gemini-flash-latest, so behavior never changes silently underneath this app. */
-const DEFAULT_GEMINI_MODEL = "gemini-3.7-flash";
+ * stable Flash release) during Milestone 5, then several other Flash variants were
+ * probed after repeated live 503 UNAVAILABLE ("high demand") responses. The actual root
+ * cause turned out to be visible in Google AI Studio's free-tier rate limits, not the
+ * model itself: this project's gemini-3.7-flash quota is 20 requests/day, and usage was
+ * already over that (23/20 RPD) — every other Flash tier tried shares a similarly small
+ * daily allowance. gemini-3.5-flash-lite (500 requests/day vs. gemini-3.7-flash's 20)
+ * was tried next and fit Mood-to-Menu's short, single-turn structured-JSON generations
+ * well, but gemini-3.1-flash-lite was confirmed via a live browser test to have better
+ * availability on this specific free-tier project, so that's the current default
+ * (exactly gemini-3.1-flash-lite, not gemini-3.1-flash-lite-preview, which has been shut
+ * down). A specific stable id on purpose, never gemini-flash-latest, so behavior never
+ * changes silently underneath this app. */
+const DEFAULT_GEMINI_MODEL = "gemini-3.1-flash-lite";
 
 export const env = {
   port: getPort(),
