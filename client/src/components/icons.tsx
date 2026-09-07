@@ -113,12 +113,18 @@ export function SparkleIcon(props: IconProps) {
   );
 }
 
-/** Used for the Taste Memory nav entry — a star reads as "marked/remembered
- * preference," distinct from Favorites' heart (saved recipes). */
-export function StarIcon(props: IconProps) {
+/** Used for the Taste Memory nav entry — a small preferences/tuning glyph (three rows,
+ * each with its own adjusted handle) reads as "personalized/remembered settings" rather
+ * than food, favorites, or rating. */
+export function SlidersIcon(props: IconProps) {
   return (
     <svg {...base(props)}>
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z" />
+      <path d="M4 7h7M15 7h5" />
+      <circle cx="11" cy="7" r="2" />
+      <path d="M4 12h3M11 12h9" />
+      <circle cx="7" cy="12" r="2" />
+      <path d="M4 17h11M19 17h1" />
+      <circle cx="15" cy="17" r="2" />
     </svg>
   );
 }
