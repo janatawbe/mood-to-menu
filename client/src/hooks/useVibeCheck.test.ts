@@ -206,4 +206,98 @@ describe("useVibeCheck", () => {
       expect(generateRecipeMock.mock.calls[1]?.[0]).toMatchObject({ tastePreferences: updatedPrefs });
     });
   });
+
+  describe("openRecipe (Milestone 8)", () => {
+    it("displays the given recipe with no API call and marks it as reopened", () => {
+      const { result } = renderHook(() => useVibeCheck());
+      const saved = makeRecipe({ dishName: "Saved From Favorites" });
+
+      act(() => result.current.openRecipe(saved));
+
+      expect(result.current.recipe?.dishName).toBe("Saved From Favorites");
+      expect(result.current.phase).toBe("captured");
+      expect(result.current.isReopenedRecipe).toBe(true);
+      expect(generateRecipeMock).not.toHaveBeenCalled();
+    });
+
+    it("disables canRegenerate while viewing a reopened recipe, even with a selected mood", () => {
+      const { result } = renderHook(() => useVibeCheck());
+      act(() => result.current.toggleMood("happy"));
+      act(() => result.current.openRecipe(makeRecipe()));
+
+      expect(result.current.canRegenerate).toBe(false);
+    });
+
+    it("a real submit after openRecipe clears isReopenedRecipe again", async () => {
+      const { result } = renderHook(() => useVibeCheck());
+      act(() => result.current.openRecipe(makeRecipe()));
+      expect(result.current.isReopenedRecipe).toBe(true);
+
+      generateRecipeMock.mockResolvedValueOnce(makeRecipe({ dishName: "Freshly Generated" }));
+      act(() => result.current.toggleMood("happy"));
+      act(() => result.current.submit());
+      await waitFor(() => expect(result.current.recipe?.dishName).toBe("Freshly Generated"));
+
+      expect(result.current.isReopenedRecipe).toBe(false);
+    });
+  });
+
+  describe("onRecipeGenerated (Milestone 8, Recipe History recording)", () => {
+    it("fires exactly once with the recipe after a successful initial submit", async () => {
+      generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+      const onRecipeGenerated = vi.fn();
+      const { result } = renderHook(() => useVibeCheck(undefined, undefined, onRecipeGenerated));
+
+      act(() => result.current.toggleMood("happy"));
+      act(() => result.current.submit());
+      await waitFor(() => expect(result.current.phase).toBe("captured"));
+
+      expect(onRecipeGenerated).toHaveBeenCalledTimes(1);
+      expect(onRecipeGenerated).toHaveBeenCalledWith(expect.objectContaining({ dishName: "Lemon Herb Chicken Salad" }));
+    });
+
+    it("does not fire on a failed submit", async () => {
+      generateRecipeMock.mockRejectedValueOnce(new RecipeApiError("TIMEOUT", "raw"));
+      const onRecipeGenerated = vi.fn();
+      const { result } = renderHook(() => useVibeCheck(undefined, undefined, onRecipeGenerated));
+
+      act(() => result.current.toggleMood("happy"));
+      act(() => result.current.submit());
+      await waitFor(() => expect(result.current.phase).toBe("error"));
+
+      expect(onRecipeGenerated).not.toHaveBeenCalled();
+    });
+
+    it("fires again on a successful regenerate, but not on a failed one", async () => {
+      generateRecipeMock.mockResolvedValueOnce(makeRecipe({ dishName: "First" }));
+      const onRecipeGenerated = vi.fn();
+      const { result } = renderHook(() => useVibeCheck(undefined, undefined, onRecipeGenerated));
+      act(() => result.current.toggleMood("happy"));
+      act(() => result.current.submit());
+      await waitFor(() => expect(result.current.recipe?.dishName).toBe("First"));
+      expect(onRecipeGenerated).toHaveBeenCalledTimes(1);
+
+      generateRecipeMock.mockRejectedValueOnce(new RecipeApiError("PROVIDER_UNAVAILABLE", "raw"));
+      await act(async () => {
+        await result.current.regenerate();
+      });
+      expect(onRecipeGenerated).toHaveBeenCalledTimes(1);
+
+      generateRecipeMock.mockResolvedValueOnce(makeRecipe({ dishName: "Second" }));
+      await act(async () => {
+        await result.current.regenerate();
+      });
+      expect(onRecipeGenerated).toHaveBeenCalledTimes(2);
+      expect(onRecipeGenerated).toHaveBeenLastCalledWith(expect.objectContaining({ dishName: "Second" }));
+    });
+
+    it("does not fire when a recipe is merely reopened via openRecipe", () => {
+      const onRecipeGenerated = vi.fn();
+      const { result } = renderHook(() => useVibeCheck(undefined, undefined, onRecipeGenerated));
+
+      act(() => result.current.openRecipe(makeRecipe()));
+
+      expect(onRecipeGenerated).not.toHaveBeenCalled();
+    });
+  });
 });

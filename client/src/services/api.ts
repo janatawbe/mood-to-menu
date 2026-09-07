@@ -1,5 +1,6 @@
 import { z } from "zod";
-import type { Mood, Recipe, VibeCheck } from "../types/domain";
+import { recipeSchema } from "../schemas/recipe";
+import type { Recipe, VibeCheck } from "../types/domain";
 
 const healthResponseSchema = z.object({
   status: z.literal("ok"),
@@ -15,28 +16,9 @@ export async function fetchHealth(): Promise<HealthResponse> {
   return healthResponseSchema.parse(await response.json());
 }
 
-const MOODS = ["calm", "stressed", "tired", "happy", "energetic", "cozy"] as const satisfies readonly Mood[];
-
-/** Mirrors the server's recipeContentSchema (server/src/schemas/recipe.ts) — the
- * frontend never trusts a 200 response's shape just because the backend already
+/** The frontend never trusts a 200 response's shape just because the backend already
  * validated it; this is cheap insurance against a future backend/frontend drift. */
-const recipeResponseSchema = z.object({
-  recipe: z.object({
-    id: z.string().min(1),
-    detectedMood: z.enum(MOODS),
-    mealIntent: z.object({
-      prepEffort: z.enum(["low", "medium", "high"]),
-      style: z.string().min(1),
-    }),
-    dishName: z.string().min(1),
-    reasoning: z.string().min(1),
-    ingredients: z.array(z.object({ name: z.string().min(1), amount: z.string().min(1) })).min(1),
-    instructions: z.array(z.string().min(1)).min(1),
-    prepTime: z.string().min(1),
-    tags: z.array(z.string().min(1)),
-    chefTip: z.string().min(1),
-  }),
-});
+const recipeResponseSchema = z.object({ recipe: recipeSchema });
 
 const errorResponseSchema = z.object({
   error: z.object({

@@ -3,10 +3,15 @@ import { AnimatePresence } from "motion/react";
 import { AppLogo } from "../../components/AppLogo";
 import { IconButton } from "../../components/IconButton";
 import { MenuIcon } from "../../components/icons";
+import { useFavorites } from "../../hooks/useFavorites";
 import { useGroceryList } from "../../hooks/useGroceryList";
+import { useRecipeHistory } from "../../hooks/useRecipeHistory";
 import { useTasteMemory } from "../../hooks/useTasteMemory";
 import { useVibeCheck } from "../../hooks/useVibeCheck";
+import type { Recipe } from "../../types/domain";
+import { FavoritesScreen } from "../favorites/FavoritesScreen";
 import { GroceryListScreen } from "../grocery-list/GroceryListScreen";
+import { RecipeHistoryScreen } from "../recipe-history/RecipeHistoryScreen";
 import { TasteMemoryScreen } from "../taste-memory/TasteMemoryScreen";
 import { TodaysMenuScreen } from "../todays-menu/TodaysMenuScreen";
 import { ChefIntroOverlay } from "../chef-intro/ChefIntroOverlay";
@@ -41,11 +46,28 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
   // One shared instance (Milestone 7) — read by every generation/regeneration request
   // below, and edited on its own screen; nothing else holds a separate copy.
   const tasteMemory = useTasteMemory();
-  const vibeCheck = useVibeCheck(handleGenerated, tasteMemory.preferences);
+  // One shared instance (Milestone 8) — Recipe History records itself imperatively via
+  // `recordGeneration`, fired once per successful response inside useVibeCheck (never
+  // from an effect watching `recipe`, which would risk a StrictMode double-record).
+  const recipeHistory = useRecipeHistory();
+  const vibeCheck = useVibeCheck(handleGenerated, tasteMemory.preferences, recipeHistory.recordGeneration);
   // One shared instance (Step 23) — Today's Menu and the Grocery List screen both read
   // and write this same state, so an add/remove/check on one is reflected on the other
   // immediately, and it's never cleared by regenerating or navigating away.
   const groceryList = useGroceryList();
+  // One shared instance (Milestone 8) — Today's Menu, Favorites, and Recipe History all
+  // read/write the same favorited state via recipe id, so it's consistent everywhere.
+  const favorites = useFavorites();
+
+  // Opening a saved Favorite/History recipe reuses the existing Today's Menu rendering
+  // entirely (Step 20) — no separate recipe-detail screen, and no Gemini call.
+  const handleOpenRecipe = useCallback(
+    (recipe: Recipe) => {
+      vibeCheck.openRecipe(recipe);
+      handleSelectSection("todays-menu");
+    },
+    [vibeCheck],
+  );
 
   const showChefIntro = chefIntroReady && !chefIntroDismissed;
   const chefStatus: ChefStatus =
@@ -119,6 +141,7 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
             <TodaysMenuScreen
               vibeCheck={vibeCheck}
               groceryList={groceryList}
+              favorites={favorites}
               onGoToVibeCheck={() => handleSelectSection("vibe-check")}
             />
           ) : activeSection === "grocery-list" ? (
@@ -130,6 +153,20 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
             />
           ) : activeSection === "taste-memory" ? (
             <TasteMemoryScreen tasteMemory={tasteMemory} />
+          ) : activeSection === "favorites" ? (
+            <FavoritesScreen
+              favorites={favorites}
+              hasRecipe={vibeCheck.recipe !== null}
+              onOpenRecipe={handleOpenRecipe}
+              onGoToTodaysMenu={() => handleSelectSection("todays-menu")}
+              onGoToVibeCheck={() => handleSelectSection("vibe-check")}
+            />
+          ) : activeSection === "recipe-history" ? (
+            <RecipeHistoryScreen
+              history={recipeHistory}
+              onOpenRecipe={handleOpenRecipe}
+              onGoToVibeCheck={() => handleSelectSection("vibe-check")}
+            />
           ) : (
             <SectionPlaceholder section={activeSection} />
           )}

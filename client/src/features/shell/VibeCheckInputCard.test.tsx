@@ -15,6 +15,7 @@ function makeVibeCheck(overrides: Partial<UseVibeCheckReturn> = {}): UseVibeChec
     error: null,
     isRegenerating: false,
     regenerateError: null,
+    isReopenedRecipe: false,
     hasMeaningfulText: false,
     canSubmit: false,
     canRetry: false,
@@ -26,6 +27,7 @@ function makeVibeCheck(overrides: Partial<UseVibeCheckReturn> = {}): UseVibeChec
     retry: vi.fn(),
     regenerate: vi.fn(),
     editVibeCheck: vi.fn(),
+    openRecipe: vi.fn(),
     ...overrides,
   };
 }
