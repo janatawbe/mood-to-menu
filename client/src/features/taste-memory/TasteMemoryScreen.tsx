@@ -25,9 +25,16 @@ export function TasteMemoryScreen({ tasteMemory }: TasteMemoryScreenProps) {
   return (
     <Panel className="relative flex flex-col overflow-hidden lg:h-full">
       <SectionHeader title="Taste Memory" subtitle="Teach your chef what you love." />
-      <p className="mt-1 text-xs text-ink-muted">Changes save automatically on this device.</p>
 
-      <div className="mt-3 min-h-0 flex-1 overflow-y-auto pr-1">
+      {/* Horizontal padding + matching negative margin: this div's overflow-y-auto
+          forces its overflow-x to an effective auto/clipped value too (per the CSS
+          overflow spec, a non-visible Y axis forces the X axis out of "visible"), which
+          was clipping the LEFT edge of the focus outline on the inputs below (they sit
+          flush against this box's own left edge, with no padding to absorb the ~4px the
+          outline+outline-offset extends past the input's border). The padding gives the
+          outline room before the actual clip boundary; the negative margin cancels the
+          padding's own inward shift so the content still lines up with the heading above. */}
+      <div className="mt-3 min-h-0 flex-1 overflow-y-auto px-1.5 -mx-1.5">
         <div className="flex flex-col gap-5 pb-2">
           {isEmpty && (
             <div className="rounded-3xl border border-dashed border-tan-200 bg-cream-soft px-4 py-4 text-center">

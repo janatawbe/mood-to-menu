@@ -72,8 +72,8 @@ export function TastePreferenceSection({
 
   return (
     <section>
-      <h3 className="font-display text-sm font-bold text-ink">{title}</h3>
-      {helper && <p className="mt-0.5 text-xs text-ink-muted">{helper}</p>}
+      <h3 className="font-display text-base font-bold text-ink">{title}</h3>
+      {helper && <p className="mt-0.5 text-sm text-ink-muted">{helper}</p>}
 
       {suggestions.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
