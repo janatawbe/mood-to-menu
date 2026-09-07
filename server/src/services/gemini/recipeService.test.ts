@@ -18,7 +18,19 @@ vi.mock("./client.js", () => ({
 const { generateRecipe } = await import("./recipeService.js");
 const { RecipeServiceError } = await import("./errors.js");
 
-const INPUT: VibeCheckRequest = { selectedMood: "tired", userText: "Long day.", quickInputs: [] };
+const EMPTY_TASTE_PREFERENCES = {
+  favoriteComfortFoods: [],
+  likedIngredients: [],
+  dislikedIngredients: [],
+  dietaryPreferences: [],
+};
+
+const INPUT: VibeCheckRequest = {
+  selectedMood: "tired",
+  userText: "Long day.",
+  quickInputs: [],
+  tastePreferences: EMPTY_TASTE_PREFERENCES,
+};
 
 function validRecipeJson(): string {
   return JSON.stringify({

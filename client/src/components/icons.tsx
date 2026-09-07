@@ -113,6 +113,24 @@ export function SparkleIcon(props: IconProps) {
   );
 }
 
+/** Used for the Taste Memory nav entry — a simple warm bowl with three rising steam
+ * wisps, reading as "the chef remembers what kind of food you like" rather than a
+ * specific meal (CalendarIcon), a shopping trip (CartIcon), a saved item (HeartIcon), or
+ * the chef himself (ChefHatIcon). An open oval rim (so it reads as "looking into" the
+ * bowl, rather than a plain smile-shaped arc) plus a rounded body — no interior detail —
+ * so it stays legible at sidebar size instead of turning muddy. */
+export function FoodBowlIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M8 5c-.9.9-.9 1.8 0 2.7s-.9 1.8 0 2.7" />
+      <path d="M12 3c-1 1-1 2 0 3s-1 2 0 3" />
+      <path d="M16 5c-.9.9-.9 1.8 0 2.7s-.9 1.8 0 2.7" />
+      <ellipse cx="12" cy="12.5" rx="7" ry="2" />
+      <path d="M5 12.5c0 4.5 3.5 7.5 7 7.5s7-3 7-7.5" />
+    </svg>
+  );
+}
+
 export function LeafIcon(props: IconProps) {
   return (
     <svg {...base(props)}>

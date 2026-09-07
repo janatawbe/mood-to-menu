@@ -4,11 +4,16 @@ export type Mood = "calm" | "stressed" | "tired" | "happy" | "energetic" | "cozy
  * The shape of a single Vibe Check submission — everything the mood-input screen
  * collects, sent as the request body to POST /api/recipes/generate (see
  * ../services/api.ts). Deliberately just data: no UI/phase state lives here.
+ *
+ * `tastePreferences` (Milestone 7) is optional so the request stays valid for a user
+ * with no saved Taste Memory — see ../hooks/useVibeCheck.ts, which always fills it in
+ * from the current live `useTasteMemory()` state when present.
  */
 export interface VibeCheck {
   selectedMood: Mood | null;
   userText: string;
   quickInputs: string[];
+  tastePreferences?: TastePreferences;
 }
 
 export type PrepEffort = "low" | "medium" | "high";

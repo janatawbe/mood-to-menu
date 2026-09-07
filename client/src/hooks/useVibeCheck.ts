@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { generateRecipe, RecipeApiError } from "../services/api";
-import type { Mood, Recipe, VibeCheck } from "../types/domain";
+import type { Mood, Recipe, TastePreferences, VibeCheck } from "../types/domain";
 
 export type VibeCheckPhase = "idle" | "loading" | "captured" | "error";
 
@@ -33,8 +33,14 @@ function toVibeCheckError(err: unknown): VibeCheckError {
  * `regenerate` is a separate action (Milestone 5, driven from Today's Menu) with its own
  * `isRegenerating`/`regenerateError` state, deliberately kept apart from `phase`/`error`
  * so a failed regeneration never destroys or hides the recipe currently on screen.
+ *
+ * `tastePreferences` (Milestone 7) is the *current* live Taste Memory from
+ * `useTasteMemory()`, passed in fresh on every render — both `submit`/`retry` and
+ * `regenerate` read it via their `useCallback` dependency array, so an edit made on the
+ * Taste Memory screen during the session is picked up by the very next generation (initial
+ * or regenerate) with no refresh required, and never rewrites a recipe already on screen.
  */
-export function useVibeCheck(onGenerated?: () => void) {
+export function useVibeCheck(onGenerated?: () => void, tastePreferences?: TastePreferences) {
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [userText, setUserTextRaw] = useState("");
   const [quickInputs, setQuickInputs] = useState<string[]>([]);
@@ -71,7 +77,7 @@ export function useVibeCheck(onGenerated?: () => void) {
     setError(null);
     setPhase("loading");
     try {
-      const result = await generateRecipe({ selectedMood, userText, quickInputs });
+      const result = await generateRecipe({ selectedMood, userText, quickInputs, tastePreferences });
       setRecipe(result);
       setPhase("captured");
       onGenerated?.();
@@ -79,7 +85,7 @@ export function useVibeCheck(onGenerated?: () => void) {
       setError(toVibeCheckError(err));
       setPhase("error");
     }
-  }, [selectedMood, userText, quickInputs, onGenerated]);
+  }, [selectedMood, userText, quickInputs, tastePreferences, onGenerated]);
 
   const submit = useCallback(() => {
     if (!canSubmit) return;
@@ -102,14 +108,14 @@ export function useVibeCheck(onGenerated?: () => void) {
     setRegenerateError(null);
     setIsRegenerating(true);
     try {
-      const result = await generateRecipe({ selectedMood, userText, quickInputs });
+      const result = await generateRecipe({ selectedMood, userText, quickInputs, tastePreferences });
       setRecipe(result);
     } catch (err) {
       setRegenerateError(toVibeCheckError(err));
     } finally {
       setIsRegenerating(false);
     }
-  }, [canRegenerate, selectedMood, userText, quickInputs]);
+  }, [canRegenerate, selectedMood, userText, quickInputs, tastePreferences]);
 
   /** Returns to the editable form after a failed *initial* generation — mood/text/chips
    * and any previously generated recipe are left untouched, this only clears the error

@@ -4,8 +4,10 @@ import { AppLogo } from "../../components/AppLogo";
 import { IconButton } from "../../components/IconButton";
 import { MenuIcon } from "../../components/icons";
 import { useGroceryList } from "../../hooks/useGroceryList";
+import { useTasteMemory } from "../../hooks/useTasteMemory";
 import { useVibeCheck } from "../../hooks/useVibeCheck";
 import { GroceryListScreen } from "../grocery-list/GroceryListScreen";
+import { TasteMemoryScreen } from "../taste-memory/TasteMemoryScreen";
 import { TodaysMenuScreen } from "../todays-menu/TodaysMenuScreen";
 import { ChefIntroOverlay } from "../chef-intro/ChefIntroOverlay";
 import type { ChefStatus } from "./ChefMascot";
@@ -36,7 +38,10 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
   // not a Today's Menu regeneration) — the recipe reveal's real destination is Today's
   // Menu, so a successful generation should take the user straight there.
   const handleGenerated = useCallback(() => handleSelectSection("todays-menu"), []);
-  const vibeCheck = useVibeCheck(handleGenerated);
+  // One shared instance (Milestone 7) — read by every generation/regeneration request
+  // below, and edited on its own screen; nothing else holds a separate copy.
+  const tasteMemory = useTasteMemory();
+  const vibeCheck = useVibeCheck(handleGenerated, tasteMemory.preferences);
   // One shared instance (Step 23) — Today's Menu and the Grocery List screen both read
   // and write this same state, so an add/remove/check on one is reflected on the other
   // immediately, and it's never cleared by regenerating or navigating away.
@@ -123,6 +128,8 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
               onGoToTodaysMenu={() => handleSelectSection("todays-menu")}
               onGoToVibeCheck={() => handleSelectSection("vibe-check")}
             />
+          ) : activeSection === "taste-memory" ? (
+            <TasteMemoryScreen tasteMemory={tasteMemory} />
           ) : (
             <SectionPlaceholder section={activeSection} />
           )}

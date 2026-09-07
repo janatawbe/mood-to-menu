@@ -16,11 +16,15 @@ export const QUICK_INPUTS = [
 
 export type QuickInput = (typeof QUICK_INPUTS)[number];
 
-/** The Vibe Check payload the frontend sends to POST /api/recipes/generate. */
+/** The Vibe Check payload the frontend sends to POST /api/recipes/generate. Note: the
+ * actual runtime-validated request type used throughout the server is
+ * `VibeCheckRequest` (schemas/vibeCheck.ts's zod inference), not this interface — this
+ * one exists purely to mirror the client's own domain.ts documentation. */
 export interface VibeCheck {
   selectedMood: Mood | null;
   userText: string;
   quickInputs: string[];
+  tastePreferences?: TastePreferences;
 }
 
 export type PrepEffort = "low" | "medium" | "high";
