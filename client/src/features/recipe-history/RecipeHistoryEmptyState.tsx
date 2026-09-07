@@ -14,8 +14,8 @@ export function RecipeHistoryEmptyState({ onGoToVibeCheck }: RecipeHistoryEmptyS
     <div className="flex h-full flex-col items-center justify-center py-8">
       <EmptyState
         icon={<HistoryIcon width={26} height={26} />}
-        title="Nothing cooked yet"
-        description="Every recipe you generate will show up here, newest first."
+        title="No recipe history yet."
+        description="Recipes you generate will appear here so you can revisit them later."
       />
       <Button variant="primary" onClick={onGoToVibeCheck} className="mt-5">
         Start a Vibe Check

@@ -42,7 +42,7 @@ describe("FavoritesScreen", () => {
         onGoToVibeCheck={vi.fn()}
       />,
     );
-    expect(screen.getByText(/no favorites yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/favorites are waiting to happen/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /go to today's menu/i })).toBeInTheDocument();
   });
 
@@ -144,6 +144,6 @@ describe("FavoritesScreen", () => {
     fireEvent.change(screen.getByLabelText(/search favorites/i), { target: { value: "pizza" } });
 
     expect(screen.getByText(/no recipes match your search/i)).toBeInTheDocument();
-    expect(screen.queryByText(/no favorites yet/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/favorites are waiting to happen/i)).not.toBeInTheDocument();
   });
 });

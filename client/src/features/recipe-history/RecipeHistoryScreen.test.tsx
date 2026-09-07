@@ -33,7 +33,7 @@ function makeHistoryState(history: RecipeHistoryEntry[] = [], overrides: Partial
 describe("RecipeHistoryScreen", () => {
   it("shows the empty state with a 'Start a Vibe Check' CTA when history is empty", () => {
     render(<RecipeHistoryScreen history={makeHistoryState()} onOpenRecipe={vi.fn()} onGoToVibeCheck={vi.fn()} />);
-    expect(screen.getByText(/nothing cooked yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/no recipe history yet/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /start a vibe check/i })).toBeInTheDocument();
   });
 
@@ -128,6 +128,6 @@ describe("RecipeHistoryScreen", () => {
     fireEvent.change(screen.getByLabelText(/search history/i), { target: { value: "pizza" } });
 
     expect(screen.getByText(/no recipes match your search/i)).toBeInTheDocument();
-    expect(screen.queryByText(/nothing cooked yet/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/no recipe history yet/i)).not.toBeInTheDocument();
   });
 });

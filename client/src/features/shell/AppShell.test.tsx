@@ -275,7 +275,7 @@ describe("AppShell favorites & recipe history integration", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /^recipe history$/i }));
     expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument();
-    expect(screen.queryByText(/nothing cooked yet/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/no recipe history yet/i)).not.toBeInTheDocument();
   });
 
   it("a failed generation is never recorded in Recipe History", async () => {
@@ -285,7 +285,7 @@ describe("AppShell favorites & recipe history integration", () => {
     await waitFor(() => expect(screen.getByText(/took too long/i)).toBeInTheDocument());
 
     fireEvent.click(screen.getByRole("button", { name: /^recipe history$/i }));
-    expect(screen.getByText(/nothing cooked yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/no recipe history yet/i)).toBeInTheDocument();
   });
 
   it("regenerating adds a second, separate History entry and keeps the first", async () => {
@@ -354,7 +354,7 @@ describe("AppShell favorites & recipe history integration", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /^favorites$/i }));
     fireEvent.click(screen.getByRole("button", { name: /remove creamy garlic butter pasta from favorites/i }));
-    expect(screen.getByText(/no favorites yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/favorites are waiting to happen/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /^recipe history$/i }));
     expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument();
@@ -369,7 +369,7 @@ describe("AppShell favorites & recipe history integration", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /^recipe history$/i }));
     fireEvent.click(screen.getByRole("button", { name: /remove creamy garlic butter pasta from history/i }));
-    expect(screen.getByText(/nothing cooked yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/no recipe history yet/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /^favorites$/i }));
     expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument();
@@ -389,7 +389,7 @@ describe("AppShell favorites & recipe history integration", () => {
     fireEvent.click(screen.getByRole("button", { name: /^recipe history$/i }));
     fireEvent.click(screen.getByRole("button", { name: /^clear history$/i }));
     fireEvent.click(screen.getByRole("button", { name: /yes, clear history/i }));
-    expect(screen.getByText(/nothing cooked yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/no recipe history yet/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /^favorites$/i }));
     expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument();

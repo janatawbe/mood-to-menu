@@ -7,8 +7,8 @@ import { filterSavedRecipes, type MoodFilter } from "../../lib/savedRecipeSearch
 import type { UseRecipeHistoryReturn } from "../../hooks/useRecipeHistory";
 import type { Recipe } from "../../types/domain";
 import { NoSearchResults } from "../saved-recipes/NoSearchResults";
-import { SavedRecipeCard } from "../saved-recipes/SavedRecipeCard";
 import { SavedRecipeFilters } from "../saved-recipes/SavedRecipeFilters";
+import { HistoryRow } from "./HistoryRow";
 import { RecipeHistoryEmptyState } from "./RecipeHistoryEmptyState";
 
 interface RecipeHistoryScreenProps {
@@ -33,7 +33,7 @@ export function RecipeHistoryScreen({ history, onOpenRecipe, onGoToVibeCheck }: 
   return (
     <Panel className="relative flex flex-col overflow-hidden lg:h-full">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <SectionHeader title="Recipe History" subtitle="Every recipe you've generated, newest first." />
+        <SectionHeader title="Recipe History" subtitle="Your recent cooking journey, newest first." />
         {history.history.length > 0 &&
           (confirmingClear ? (
             <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -63,7 +63,10 @@ export function RecipeHistoryScreen({ history, onOpenRecipe, onGoToVibeCheck }: 
         <RecipeHistoryEmptyState onGoToVibeCheck={onGoToVibeCheck} />
       ) : (
         <>
-          <div className="mt-3">
+          {/* A plain utility row (vs. Favorites' rounded toolbar) — a thin border-bottom
+              rather than a soft enclosing card, to keep this screen reading as compact
+              controls above a list, not a decorated collection header. */}
+          <div className="mt-3 border-b border-tan-200/60 pb-3">
             <SavedRecipeFilters query={query} onQueryChange={setQuery} mood={mood} onMoodChange={setMood} searchLabel="Search history" />
           </div>
 
@@ -76,16 +79,20 @@ export function RecipeHistoryScreen({ history, onOpenRecipe, onGoToVibeCheck }: 
                 }}
               />
             ) : (
-              <div className="flex flex-col gap-5 pb-2">
+              <div className="flex flex-col gap-4 pb-2">
                 {groups.map((group) => (
                   <section key={group.label}>
-                    <h3 className="mb-2 font-display text-sm font-bold text-ink-soft">{group.label}</h3>
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="mb-1.5 flex items-center gap-2">
+                      <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-accent-strong" />
+                      <h3 className="text-xs font-bold tracking-wide text-ink-soft uppercase">{group.label}</h3>
+                      <span aria-hidden className="h-px flex-1 bg-tan-200" />
+                    </div>
+                    <div className="flex flex-col divide-y divide-tan-200/60 overflow-hidden rounded-3xl border border-tan-200/60 bg-surface/70">
                       {group.entries.map(({ recipe, generatedAt }) => (
-                        <SavedRecipeCard
+                        <HistoryRow
                           key={`${recipe.id}-${generatedAt}`}
                           recipe={recipe}
-                          timestampLabel={formatSavedTimestamp(generatedAt)}
+                          timeLabel={formatSavedTimestamp(generatedAt)}
                           onOpen={() => onOpenRecipe(recipe)}
                           onRemove={() => history.removeEntry(recipe.id)}
                           removeLabel={`Remove ${recipe.dishName} from History`}
