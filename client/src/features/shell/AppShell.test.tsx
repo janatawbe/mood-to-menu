@@ -265,3 +265,168 @@ describe("AppShell taste memory integration", () => {
     expect(screen.getByText(/1 item · 0 checked · 1 left/i)).toBeInTheDocument();
   });
 });
+
+describe("AppShell favorites & recipe history integration", () => {
+  it("a successful generation is recorded in Recipe History", async () => {
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /^recipe history$/i }));
+    expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument();
+    expect(screen.queryByText(/nothing cooked yet/i)).not.toBeInTheDocument();
+  });
+
+  it("a failed generation is never recorded in Recipe History", async () => {
+    generateRecipeMock.mockRejectedValueOnce(new RecipeApiError("TIMEOUT", "raw"));
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText(/took too long/i)).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /^recipe history$/i }));
+    expect(screen.getByText(/nothing cooked yet/i)).toBeInTheDocument();
+  });
+
+  it("regenerating adds a second, separate History entry and keeps the first", async () => {
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe({ id: "r1", dishName: "First Dish" }));
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("First Dish")).toBeInTheDocument());
+
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe({ id: "r2", dishName: "Second Dish" }));
+    fireEvent.click(screen.getByRole("button", { name: /^regenerate$/i }));
+    await waitFor(() => expect(screen.getByText("Second Dish")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /^recipe history$/i }));
+    expect(screen.getByText("First Dish")).toBeInTheDocument();
+    expect(screen.getByText("Second Dish")).toBeInTheDocument();
+  });
+
+  it("favoriting a recipe from Today's Menu makes it appear on the Favorites screen and persists across a fresh mount", async () => {
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+    const first = render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+    expect(screen.getByRole("button", { name: /saved to favorites/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^favorites$/i }));
+    expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument();
+    first.unmount();
+
+    render(<AppShell chefIntroReady={false} />);
+    fireEvent.click(screen.getByRole("button", { name: /^favorites$/i }));
+    expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument();
+  });
+
+  it("opening a Favorite renders the complete recipe with no additional Gemini request, and Regenerate is disabled", async () => {
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /^vibe check$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^favorites$/i }));
+
+    expect(generateRecipeMock).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: /open recipe/i }));
+
+    // Reopening reuses the existing Today's Menu rendering — same ingredients/steps/chef
+    // tip visible — and must not have made a second API call.
+    expect(screen.getByRole("button", { name: /today's menu/i })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument();
+    expect(screen.getByText("Boil pasta.")).toBeInTheDocument();
+    expect(generateRecipeMock).toHaveBeenCalledTimes(1);
+
+    const regenerateButton = screen.getByRole("button", { name: /^regenerate$/i });
+    expect(regenerateButton).toBeDisabled();
+  });
+
+  it("unfavoriting removes it from Favorites but leaves Recipe History untouched", async () => {
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /^favorites$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /remove creamy garlic butter pasta from favorites/i }));
+    expect(screen.getByText(/no favorites yet/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^recipe history$/i }));
+    expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument();
+  });
+
+  it("removing a Recipe History entry leaves Favorites untouched", async () => {
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /^recipe history$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /remove creamy garlic butter pasta from history/i }));
+    expect(screen.getByText(/nothing cooked yet/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^favorites$/i }));
+    expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument();
+  });
+
+  it("Clear History empties History but leaves Favorites, Grocery List, and Taste Memory untouched", async () => {
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+    fireEvent.click(screen.getByRole("button", { name: /add ingredients to grocery list/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /^taste memory$/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Pasta" }));
+
+    fireEvent.click(screen.getByRole("button", { name: /^recipe history$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^clear history$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /yes, clear history/i }));
+    expect(screen.getByText(/nothing cooked yet/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^favorites$/i }));
+    expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^grocery list$/i }));
+    expect(screen.getByText("Pasta")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^taste memory$/i }));
+    expect(screen.getByRole("button", { name: "Pasta" })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("opening a reopened recipe and adding a grocery ingredient attributes it to the reopened recipe's id", async () => {
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe({ id: "r1" }));
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /^vibe check$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^favorites$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /open recipe/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /add pasta to grocery list/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /^grocery list$/i }));
+    expect(screen.getByText(/from creamy garlic butter pasta/i)).toBeInTheDocument();
+  });
+
+  it("Favorites and Recipe History nav entries become the active nav item when opened", () => {
+    render(<AppShell chefIntroReady={false} />);
+    fireEvent.click(screen.getByRole("button", { name: /^favorites$/i }));
+    expect(screen.getByRole("heading", { name: "Favorites" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^favorites$/i })).toHaveAttribute("aria-current", "page");
+
+    fireEvent.click(screen.getByRole("button", { name: /^recipe history$/i }));
+    expect(screen.getByRole("heading", { name: "Recipe History" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^recipe history$/i })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("button", { name: /^favorites$/i })).not.toHaveAttribute("aria-current");
+  });
+});

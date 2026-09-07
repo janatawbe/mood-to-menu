@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import type { UseFavoritesReturn } from "../../hooks/useFavorites";
 import type { UseGroceryListReturn } from "../../hooks/useGroceryList";
 import type { Recipe } from "../../types/domain";
 import { RecipeReveal } from "./RecipeReveal";
@@ -15,6 +16,17 @@ function makeGroceryList(overrides: Partial<UseGroceryListReturn> = {}): UseGroc
     removeItem: vi.fn(),
     clearCompleted: vi.fn(),
     clearAll: vi.fn(),
+    ...overrides,
+  };
+}
+
+function makeFavorites(overrides: Partial<UseFavoritesReturn> = {}): UseFavoritesReturn {
+  return {
+    favorites: [],
+    isFavorited: vi.fn().mockReturnValue(false),
+    addFavorite: vi.fn(),
+    removeFavorite: vi.fn(),
+    toggleFavorite: vi.fn(),
     ...overrides,
   };
 }
@@ -35,15 +47,23 @@ const baseRecipe: Recipe = {
   chefTip: "Add a splash of vinegar right before serving to brighten the flavors.",
 };
 
-function renderRecipe(overrides: Partial<Recipe> = {}, groceryList: UseGroceryListReturn = makeGroceryList()) {
+function renderRecipe(
+  overrides: Partial<Recipe> = {},
+  groceryList: UseGroceryListReturn = makeGroceryList(),
+  favorites: UseFavoritesReturn = makeFavorites(),
+  isReopenedRecipe = false,
+  canRegenerate = true,
+) {
   return render(
     <RecipeReveal
       recipe={{ ...baseRecipe, ...overrides }}
       isRegenerating={false}
       regenerateError={null}
-      canRegenerate
+      canRegenerate={canRegenerate}
+      isReopenedRecipe={isReopenedRecipe}
       onRegenerate={vi.fn()}
       groceryList={groceryList}
+      favorites={favorites}
     />,
   );
 }
@@ -157,6 +177,29 @@ describe("RecipeReveal", () => {
       { name: "Carrots", amount: "3 large" },
       { id: baseRecipe.id, dishName: baseRecipe.dishName },
     );
+  });
+
+  it("Save to Favorites calls toggleFavorite with the current recipe", () => {
+    const favorites = makeFavorites();
+    renderRecipe({}, makeGroceryList(), favorites);
+
+    fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+
+    expect(favorites.toggleFavorite).toHaveBeenCalledWith(baseRecipe);
+  });
+
+  it("shows 'Saved to Favorites' when the current recipe is already favorited", () => {
+    renderRecipe({}, makeGroceryList(), makeFavorites({ isFavorited: vi.fn().mockReturnValue(true) }));
+
+    expect(screen.getByRole("button", { name: /saved to favorites/i })).toBeInTheDocument();
+  });
+
+  it("disables Regenerate and explains why when viewing a reopened recipe", () => {
+    renderRecipe({}, makeGroceryList(), makeFavorites(), true, false);
+
+    const regenerateButton = screen.getByRole("button", { name: /regenerate/i });
+    expect(regenerateButton).toBeDisabled();
+    expect(regenerateButton.getAttribute("title")).toMatch(/saved recipe/i);
   });
 
   it("remains stable with a long dish name, many ingredients, and many steps", () => {

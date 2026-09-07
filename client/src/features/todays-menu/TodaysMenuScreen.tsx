@@ -1,4 +1,5 @@
 import { Panel } from "../../components/Panel";
+import type { UseFavoritesReturn } from "../../hooks/useFavorites";
 import type { UseGroceryListReturn } from "../../hooks/useGroceryList";
 import type { UseVibeCheckReturn } from "../../hooks/useVibeCheck";
 import { CookingState } from "./CookingState";
@@ -8,6 +9,7 @@ import { TodaysMenuEmptyState } from "./TodaysMenuEmptyState";
 interface TodaysMenuScreenProps {
   vibeCheck: UseVibeCheckReturn;
   groceryList: UseGroceryListReturn;
+  favorites: UseFavoritesReturn;
   onGoToVibeCheck: () => void;
 }
 
@@ -18,9 +20,13 @@ interface TodaysMenuScreenProps {
  * `overflow-y-auto` wrapper below, and `lg:h-screen` on the app shell in AppShell.tsx
  * that gives this panel a definite height to scroll within without ever stretching or
  * distorting the sidebar).
+ *
+ * Milestone 8: this is also where a Favorite/History recipe gets rendered once reopened
+ * (see useVibeCheck's `openRecipe`) — `vibeCheck.recipe` is the same single source of
+ * truth either way, so no separate recipe-detail UI is needed.
  */
-export function TodaysMenuScreen({ vibeCheck, groceryList, onGoToVibeCheck }: TodaysMenuScreenProps) {
-  const { recipe, phase, isRegenerating, regenerateError, canRegenerate, regenerate } = vibeCheck;
+export function TodaysMenuScreen({ vibeCheck, groceryList, favorites, onGoToVibeCheck }: TodaysMenuScreenProps) {
+  const { recipe, phase, isRegenerating, regenerateError, canRegenerate, isReopenedRecipe, regenerate } = vibeCheck;
 
   return (
     <Panel className="relative flex flex-col overflow-hidden lg:h-full">
@@ -31,8 +37,10 @@ export function TodaysMenuScreen({ vibeCheck, groceryList, onGoToVibeCheck }: To
             isRegenerating={isRegenerating}
             regenerateError={regenerateError}
             canRegenerate={canRegenerate}
+            isReopenedRecipe={isReopenedRecipe}
             onRegenerate={() => void regenerate()}
             groceryList={groceryList}
+            favorites={favorites}
           />
         ) : phase === "loading" ? (
           <CookingState />

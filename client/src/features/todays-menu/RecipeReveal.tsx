@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
+import type { UseFavoritesReturn } from "../../hooks/useFavorites";
 import type { UseGroceryListReturn } from "../../hooks/useGroceryList";
 import type { VibeCheckError } from "../../hooks/useVibeCheck";
 import { moodThemes } from "../../lib/moodTheme";
@@ -16,8 +17,10 @@ interface RecipeRevealProps {
   isRegenerating: boolean;
   regenerateError: VibeCheckError | null;
   canRegenerate: boolean;
+  isReopenedRecipe: boolean;
   onRegenerate: () => void;
   groceryList: UseGroceryListReturn;
+  favorites: UseFavoritesReturn;
 }
 
 const itemVariants: Variants = {
@@ -47,8 +50,10 @@ export function RecipeReveal({
   isRegenerating,
   regenerateError,
   canRegenerate,
+  isReopenedRecipe,
   onRegenerate,
   groceryList,
+  favorites,
 }: RecipeRevealProps) {
   const prefersReducedMotion = useReducedMotion();
   const theme = moodThemes[recipe.detectedMood];
@@ -84,10 +89,13 @@ export function RecipeReveal({
         <RecipeActions
           isRegenerating={isRegenerating}
           canRegenerate={canRegenerate}
+          isReopenedRecipe={isReopenedRecipe}
           regenerateError={regenerateError}
           onRegenerate={onRegenerate}
           allIngredientsAdded={allIngredientsAdded}
           onAddAllIngredients={() => groceryList.addIngredients(recipe.ingredients, sourceRecipe)}
+          isFavorited={favorites.isFavorited(recipe.id)}
+          onToggleFavorite={() => favorites.toggleFavorite(recipe)}
         />
       </RevealItem>
       <RevealItem>

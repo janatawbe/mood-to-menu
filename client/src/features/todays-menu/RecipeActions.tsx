@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { Button } from "../../components/Button";
 import { CartIcon, CheckIcon, HeartIcon, RefreshIcon } from "../../components/icons";
@@ -8,6 +7,10 @@ import { getFriendlyErrorMessage } from "../../lib/errorMessages";
 interface RecipeActionsProps {
   isRegenerating: boolean;
   canRegenerate: boolean;
+  /** True while viewing a reopened Favorite/History recipe — Regenerate is disabled and
+   * explains why via its title, rather than silently regenerating against unrelated
+   * current Vibe Check state (Milestone 8, Step 19). */
+  isReopenedRecipe: boolean;
   regenerateError: VibeCheckError | null;
   onRegenerate: () => void;
   /** True once every ingredient in the current recipe is already on the Grocery List —
@@ -15,23 +18,30 @@ interface RecipeActionsProps {
    * screen flips this back to false here too (Milestone 6, Step 22). */
   allIngredientsAdded: boolean;
   onAddAllIngredients: () => void;
+  /** Real, persistent Favorites state (Milestone 8) — recomputed live from shared
+   * favorites state by recipe id, so unfavoriting from the Favorites screen flips this
+   * back to false here too, the same way Grocery List's `allIngredientsAdded` does. */
+  isFavorited: boolean;
+  onToggleFavorite: () => void;
 }
 
 /**
- * Save to Favorites stays a visible, session-local placeholder for Milestone 8. Add to
- * Grocery List and Regenerate are both fully real: Grocery List is backed by the shared
- * `useGroceryList` state (Milestone 6), Regenerate by the real Gemini request.
+ * Add to Grocery List, Save to Favorites, and Regenerate are all fully real: Grocery
+ * List is backed by the shared `useGroceryList` state (Milestone 6), Favorites by the
+ * shared `useFavorites` state (Milestone 8), Regenerate by the real Gemini request.
  */
 export function RecipeActions({
   isRegenerating,
   canRegenerate,
+  isReopenedRecipe,
   regenerateError,
   onRegenerate,
   allIngredientsAdded,
   onAddAllIngredients,
+  isFavorited,
+  onToggleFavorite,
 }: RecipeActionsProps) {
   const prefersReducedMotion = useReducedMotion();
-  const [isFavorited, setIsFavorited] = useState(false);
 
   return (
     <div className="flex flex-col gap-2">
@@ -40,11 +50,7 @@ export function RecipeActions({
           {allIngredientsAdded ? <CheckIcon width={17} height={17} /> : <CartIcon width={17} height={17} />}
           {allIngredientsAdded ? "Added to Grocery List" : "Add ingredients to Grocery List"}
         </Button>
-        <Button
-          variant="secondary"
-          onClick={() => setIsFavorited((current) => !current)}
-          aria-pressed={isFavorited}
-        >
+        <Button variant="secondary" onClick={onToggleFavorite} aria-pressed={isFavorited}>
           <HeartIcon
             width={17}
             height={17}
@@ -53,7 +59,12 @@ export function RecipeActions({
           />
           {isFavorited ? "Saved to Favorites" : "Save to Favorites"}
         </Button>
-        <Button variant="secondary" onClick={onRegenerate} disabled={!canRegenerate || isRegenerating}>
+        <Button
+          variant="secondary"
+          onClick={onRegenerate}
+          disabled={!canRegenerate || isRegenerating}
+          title={isReopenedRecipe ? "Regenerate isn't available for a saved recipe you're viewing." : undefined}
+        >
           <RefreshIcon width={16} height={16} className={isRegenerating && !prefersReducedMotion ? "animate-spin" : ""} />
           {isRegenerating ? "Regenerating…" : "Regenerate"}
         </Button>

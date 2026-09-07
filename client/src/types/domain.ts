@@ -70,3 +70,25 @@ export interface TastePreferences {
   dislikedIngredients: string[];
   dietaryPreferences: string[];
 }
+
+/**
+ * A saved Favorite (Milestone 8) — wraps the *complete* Recipe so it can be reopened
+ * later with no Gemini call, keyed by the recipe's own stable `id` (never a duplicate
+ * per id). Deliberately separate from TastePreferences — favoriting a recipe never
+ * writes into Taste Memory, and vice versa.
+ */
+export interface FavoriteRecipe {
+  recipe: Recipe;
+  /** ISO timestamp, set once when first saved. */
+  savedAt: string;
+}
+
+/**
+ * One successful recipe generation (initial or regenerate), recorded for Recipe History.
+ * Independent of Favorites — removing/clearing one store never touches the other.
+ */
+export interface RecipeHistoryEntry {
+  recipe: Recipe;
+  /** ISO timestamp, set once when the generation succeeded. */
+  generatedAt: string;
+}
