@@ -38,6 +38,18 @@ RECIPE QUALITY
   - "Long day" leans toward something easy and satisfying.
 - If mood and text/chips seem to pull in different directions, use your judgment to find one recipe that reasonably honors all of them.
 
+TASTE MEMORY (only present for returning users — the request may include none of this)
+Some requests include a "USER TASTE MEMORY" section: saved favorite comfort foods, liked ingredients, disliked ingredients, and dietary preferences from this user's past sessions. When present, use it as background signal, in this priority order:
+1. The user's current explicit request in THIS Vibe Check (mood/text/quick picks) always comes first.
+2. Dietary preferences and disliked ingredients are strong avoid/respect instructions — not just soft hints.
+3. Liked ingredients and favorite comfort foods are soft inspiration only.
+Specific rules:
+- Treat liked ingredients as soft preferences: use one when it fits naturally, never force every liked ingredient into every recipe.
+- Treat favorite comfort foods as inspiration, especially when the current mood/request already leans toward comfort — do not force a comfort food into a recipe the current mood/request clearly points away from (e.g. "energetic" + "something light").
+- Avoid disliked ingredients, unless the user's current explicit request specifically asks for that exact ingredient — that current request wins.
+- Respect dietary preferences when generating the meal. A dietary preference outranks a liked ingredient that conflicts with it (e.g. a vegan user who likes cheese should not get ordinary dairy cheese).
+- These are taste preferences, not medical or allergy information — never treat them as a diagnosis or a guarantee of allergen safety.
+
 OUTPUT
 Respond with ONLY the structured JSON described by the response schema — no extra commentary, no markdown fences, no text outside the JSON object.
 - "reasoning" should be 1-3 short sentences connecting the dish to their mood/request, in the food-only voice above.
@@ -46,13 +58,43 @@ Respond with ONLY the structured JSON described by the response schema — no ex
 
 /** Builds the per-request user content from the validated Vibe Check. `correctionNote`
  * is only set on the bounded one-time retry (see recipeService.ts) to steer Gemini away
- * from whatever made the previous attempt fail validation. */
+ * from whatever made the previous attempt fail validation.
+ *
+ * The "USER TASTE MEMORY" block is only appended when at least one saved preference
+ * list is non-empty — a brand-new user with no Taste Memory yet gets no extra section
+ * at all, not an empty/noisy one (Milestone 7, Step 39). Wording deliberately echoes the
+ * system prompt's own precedence framing (soft preference vs. avoid/respect) so the
+ * intent is unambiguous right next to the actual saved values. */
 export function buildUserContent(input: VibeCheckRequest, correctionNote?: string): string {
   const lines: string[] = [];
   if (input.selectedMood) lines.push(`Selected mood: ${input.selectedMood}`);
   if (input.userText) lines.push(`User's own words: "${input.userText}"`);
   if (input.quickInputs.length > 0) lines.push(`Quick picks: ${input.quickInputs.join(", ")}`);
   lines.push("Generate one recipe recommendation that fits this Vibe Check.");
+
+  const { favoriteComfortFoods, likedIngredients, dislikedIngredients, dietaryPreferences } = input.tastePreferences;
+  const hasTasteMemory =
+    favoriteComfortFoods.length > 0 ||
+    likedIngredients.length > 0 ||
+    dislikedIngredients.length > 0 ||
+    dietaryPreferences.length > 0;
+
+  if (hasTasteMemory) {
+    lines.push("", "USER TASTE MEMORY:");
+    if (favoriteComfortFoods.length > 0) {
+      lines.push(`Favorite comfort foods (soft inspiration only): ${favoriteComfortFoods.join(", ")}`);
+    }
+    if (likedIngredients.length > 0) {
+      lines.push(`Liked ingredients (soft preference, use only where it fits naturally): ${likedIngredients.join(", ")}`);
+    }
+    if (dislikedIngredients.length > 0) {
+      lines.push(`Disliked ingredients (avoid unless explicitly requested above): ${dislikedIngredients.join(", ")}`);
+    }
+    if (dietaryPreferences.length > 0) {
+      lines.push(`Dietary preferences (must respect, outranks liked ingredients): ${dietaryPreferences.join(", ")}`);
+    }
+  }
+
   if (correctionNote) {
     lines.push(
       `Your previous response was invalid (${correctionNote}). Return a corrected response that strictly matches the required JSON schema.`,

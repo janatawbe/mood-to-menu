@@ -185,3 +185,83 @@ describe("AppShell grocery list integration", () => {
     expect(screen.getByText(/from first dish/i)).toBeInTheDocument();
   });
 });
+
+describe("AppShell taste memory integration", () => {
+  it("Taste Memory nav opens the real screen and becomes the active nav item", () => {
+    render(<AppShell chefIntroReady={false} />);
+    fireEvent.click(screen.getByRole("button", { name: /^taste memory$/i }));
+
+    expect(screen.getByRole("heading", { name: "Taste Memory" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^taste memory$/i })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("button", { name: /^grocery list$/i })).not.toHaveAttribute("aria-current");
+  });
+
+  it("preferences saved in Taste Memory are sent with the next Vibe Check generation", async () => {
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+    render(<AppShell chefIntroReady={false} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /^taste memory$/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Avocado" })); // liked ingredient suggestion
+    fireEvent.click(screen.getByRole("button", { name: "Mushrooms" })); // disliked ingredient suggestion
+    fireEvent.click(screen.getByRole("button", { name: "Vegetarian" })); // dietary suggestion
+
+    fireEvent.click(screen.getByRole("button", { name: /^vibe check$/i }));
+    await generateFromVibeCheck();
+
+    await waitFor(() => expect(generateRecipeMock).toHaveBeenCalled());
+    expect(generateRecipeMock.mock.calls[0]?.[0]).toMatchObject({
+      tastePreferences: {
+        favoriteComfortFoods: [],
+        likedIngredients: ["Avocado"],
+        dislikedIngredients: ["Mushrooms"],
+        dietaryPreferences: ["Vegetarian"],
+      },
+    });
+  });
+
+  it("preferences persist across a fresh AppShell mount (simulating a refresh)", () => {
+    const first = render(<AppShell chefIntroReady={false} />);
+    fireEvent.click(screen.getByRole("button", { name: /^taste memory$/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Pasta" }));
+    first.unmount();
+
+    render(<AppShell chefIntroReady={false} />);
+    fireEvent.click(screen.getByRole("button", { name: /^taste memory$/i }));
+    expect(screen.getByRole("button", { name: "Pasta" })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("regenerating after editing Taste Memory uses the newest preferences", async () => {
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe({ dishName: "First Dish" }));
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("First Dish")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /^taste memory$/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Cilantro" }));
+
+    fireEvent.click(screen.getByRole("button", { name: /^today's menu$/i }));
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe({ dishName: "Second Dish" }));
+    fireEvent.click(screen.getByRole("button", { name: /^regenerate$/i }));
+    await waitFor(() => expect(screen.getByText("Second Dish")).toBeInTheDocument());
+
+    expect(generateRecipeMock.mock.calls[1]?.[0]).toMatchObject({
+      tastePreferences: { dislikedIngredients: ["Cilantro"] },
+    });
+  });
+
+  it("changing Taste Memory does not affect the Grocery List", async () => {
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /add ingredients to grocery list/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /^taste memory$/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Soup" }));
+
+    fireEvent.click(screen.getByRole("button", { name: /^grocery list$/i }));
+    expect(screen.getByText("Pasta")).toBeInTheDocument();
+    expect(screen.getByText(/1 item · 0 checked · 1 left/i)).toBeInTheDocument();
+  });
+});

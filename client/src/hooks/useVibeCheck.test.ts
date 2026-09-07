@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Recipe } from "../types/domain";
+import type { Recipe, TastePreferences } from "../types/domain";
 
 const generateRecipeMock = vi.fn();
 
@@ -27,6 +27,16 @@ function makeRecipe(overrides: Partial<Recipe> = {}): Recipe {
     prepTime: "15 min",
     tags: ["Light"],
     chefTip: "Let the chicken rest before slicing.",
+    ...overrides,
+  };
+}
+
+function makeTastePreferences(overrides: Partial<TastePreferences> = {}): TastePreferences {
+  return {
+    favoriteComfortFoods: [],
+    likedIngredients: [],
+    dislikedIngredients: [],
+    dietaryPreferences: [],
     ...overrides,
   };
 }
@@ -129,5 +139,71 @@ describe("useVibeCheck", () => {
     // A failed regeneration must never resurrect the initial-generation error UI.
     expect(result.current.phase).toBe("captured");
     expect(result.current.error).toBeNull();
+  });
+
+  describe("Taste Memory in the generation request", () => {
+    it("submit includes the current Taste Memory in the request", async () => {
+      const prefs = makeTastePreferences({ likedIngredients: ["avocado"], dislikedIngredients: ["mushrooms"], dietaryPreferences: ["vegetarian"] });
+      generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+      const { result } = renderHook(() => useVibeCheck(undefined, prefs));
+
+      act(() => result.current.toggleMood("happy"));
+      act(() => result.current.submit());
+      await waitFor(() => expect(result.current.phase).toBe("captured"));
+
+      expect(generateRecipeMock.mock.calls[0]?.[0]).toMatchObject({ tastePreferences: prefs });
+    });
+
+    it("submit still works with no Taste Memory (undefined)", async () => {
+      generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+      const { result } = renderHook(() => useVibeCheck(undefined, undefined));
+
+      act(() => result.current.toggleMood("happy"));
+      act(() => result.current.submit());
+
+      await waitFor(() => expect(result.current.phase).toBe("captured"));
+      expect(generateRecipeMock.mock.calls[0]?.[0]).toMatchObject({ tastePreferences: undefined });
+    });
+
+    it("regenerate includes the current Taste Memory", async () => {
+      const prefs = makeTastePreferences({ favoriteComfortFoods: ["Pasta"] });
+      generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+      const { result } = renderHook(() => useVibeCheck(undefined, prefs));
+      act(() => result.current.toggleMood("happy"));
+      act(() => result.current.submit());
+      await waitFor(() => expect(result.current.phase).toBe("captured"));
+
+      generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+      await act(async () => {
+        await result.current.regenerate();
+      });
+
+      expect(generateRecipeMock.mock.calls[1]?.[0]).toMatchObject({ tastePreferences: prefs });
+    });
+
+    it("changing Taste Memory before regenerating uses the newest preferences, not a stale copy", async () => {
+      const initialPrefs = makeTastePreferences({ likedIngredients: ["chicken"] });
+      generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+      const { result, rerender } = renderHook(
+        ({ tastePreferences }: { tastePreferences: TastePreferences }) => useVibeCheck(undefined, tastePreferences),
+        { initialProps: { tastePreferences: initialPrefs } },
+      );
+      act(() => result.current.toggleMood("happy"));
+      act(() => result.current.submit());
+      await waitFor(() => expect(result.current.phase).toBe("captured"));
+      expect(generateRecipeMock.mock.calls[0]?.[0]).toMatchObject({ tastePreferences: initialPrefs });
+
+      // User edits Taste Memory on its own screen — AppShell re-renders useVibeCheck
+      // with the new live value, exactly like this rerender.
+      const updatedPrefs = makeTastePreferences({ likedIngredients: ["chicken"], dislikedIngredients: ["olives"] });
+      rerender({ tastePreferences: updatedPrefs });
+
+      generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+      await act(async () => {
+        await result.current.regenerate();
+      });
+
+      expect(generateRecipeMock.mock.calls[1]?.[0]).toMatchObject({ tastePreferences: updatedPrefs });
+    });
   });
 });
