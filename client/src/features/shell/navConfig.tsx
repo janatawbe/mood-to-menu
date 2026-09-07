@@ -3,10 +3,10 @@ import {
   CalendarIcon,
   CartIcon,
   ChefHatIcon,
+  FoodBowlIcon,
   HeartIcon,
   HistoryIcon,
   HomeIcon,
-  SlidersIcon,
 } from "../../components/icons";
 
 export type SectionKey =
@@ -34,7 +34,7 @@ export const navEntries: NavEntry[] = [
   { key: "vibe-check", label: "Vibe Check", icon: <HomeIcon {...iconSize} /> },
   { key: "todays-menu", label: "Today's Menu", icon: <CalendarIcon {...iconSize} /> },
   { key: "grocery-list", label: "Grocery List", icon: <CartIcon {...iconSize} /> },
-  { key: "taste-memory", label: "Taste Memory", icon: <SlidersIcon {...iconSize} /> },
+  { key: "taste-memory", label: "Taste Memory", icon: <FoodBowlIcon {...iconSize} /> },
   { key: "favorites", label: "Favorites", icon: <HeartIcon {...iconSize} /> },
   { key: "recipe-history", label: "Recipe History", icon: <HistoryIcon {...iconSize} /> },
   { key: "chefs-tips", label: "Chef's Tips", icon: <ChefHatIcon {...iconSize} /> },
