@@ -8,6 +8,7 @@ import type { Recipe, RecipeIngredient } from "../../types/domain";
 import { ChefTipCard } from "./ChefTipCard";
 import { IngredientsList } from "./IngredientsList";
 import { InstructionsList } from "./InstructionsList";
+import { NutritionCard } from "./NutritionCard";
 import { ReasoningPanel } from "./ReasoningPanel";
 import { RecipeActions } from "./RecipeActions";
 import { RecipeHero } from "./RecipeHero";
@@ -110,6 +111,9 @@ export function RecipeReveal({
       </RevealItem>
       <RevealItem>
         <InstructionsList instructions={recipe.instructions} />
+      </RevealItem>
+      <RevealItem>
+        <NutritionCard recipe={recipe} />
       </RevealItem>
       <RevealItem>
         <ChefTipCard chefTip={recipe.chefTip} />

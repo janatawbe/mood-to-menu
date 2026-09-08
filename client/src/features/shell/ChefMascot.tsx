@@ -33,7 +33,6 @@ const sectionMessages: Partial<Record<SectionKey, string>> = {
   "taste-memory": "I'll remember!",
   favorites: "Best picks here!",
   "recipe-history": "A tasty trail.",
-  "chefs-tips": "More soon!",
 };
 
 const CHEF_WIDTH = 225;

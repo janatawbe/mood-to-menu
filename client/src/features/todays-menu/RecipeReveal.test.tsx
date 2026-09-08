@@ -224,4 +224,33 @@ describe("RecipeReveal", () => {
     expect(screen.getByText("Step number 9 of the cooking process.")).toBeInTheDocument();
     expect(screen.getByText("09")).toBeInTheDocument();
   });
+
+  describe("Nutritional Facts (Milestone 9)", () => {
+    it("shows the Nutritional Facts section for a recipe that has nutrition", () => {
+      renderRecipe({
+        servings: 4,
+        nutrition: { calories: 520, proteinG: 21, carbohydratesG: 62, fatG: 20, fiberG: 8 },
+      });
+      expect(screen.getByRole("heading", { name: "Nutritional Facts" })).toBeInTheDocument();
+    });
+
+    it("omits the Nutritional Facts section for an old recipe with no nutrition, without breaking anything else", () => {
+      renderRecipe();
+      expect(screen.queryByRole("heading", { name: "Nutritional Facts" })).not.toBeInTheDocument();
+      // The rest of the reveal still renders normally for a nutrition-less recipe.
+      expect(screen.getByText("Carrots")).toBeInTheDocument();
+      expect(screen.getByText("Chop the vegetables.")).toBeInTheDocument();
+      expect(screen.getByText(baseRecipe.chefTip)).toBeInTheDocument();
+    });
+
+    it("keeps the recipe-level Chef's Tip separate from Nutritional Facts", () => {
+      renderRecipe({
+        servings: 2,
+        nutrition: { calories: 400, proteinG: 18, carbohydratesG: 40, fatG: 12, fiberG: 5 },
+      });
+      expect(screen.getByRole("heading", { name: "Nutritional Facts" })).toBeInTheDocument();
+      expect(screen.getByText(/chef's tip/i)).toBeInTheDocument();
+      expect(screen.getByText(baseRecipe.chefTip)).toBeInTheDocument();
+    });
+  });
 });

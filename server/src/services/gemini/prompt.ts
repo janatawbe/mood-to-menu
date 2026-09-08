@@ -54,7 +54,9 @@ OUTPUT
 Respond with ONLY the structured JSON described by the response schema — no extra commentary, no markdown fences, no text outside the JSON object.
 - "reasoning" should be 1-3 short sentences connecting the dish to their mood/request, in the food-only voice above.
 - "chefTip" should be one concise, genuinely useful cooking tip related to this specific recipe.
-- "tags" should be a small number of short, relevant descriptors (e.g. "Comforting", "Quick", "Vegetarian").`;
+- "tags" should be a small number of short, relevant descriptors (e.g. "Comforting", "Quick", "Vegetarian").
+- "servings" is how many servings the recipe as written makes.
+- "nutrition" is your best reasonable ESTIMATE of calories/protein/carbohydrates/fat/fiber for ONE serving (not the whole recipe) — never claim lab-level precision, never invent implausibly exact numbers, and never use these values to make a good/bad or health judgment about the meal. This is informational only, not dieting or medical guidance.`;
 
 /** Builds the per-request user content from the validated Vibe Check. `correctionNote`
  * is only set on the bounded one-time retry (see recipeService.ts) to steer Gemini away

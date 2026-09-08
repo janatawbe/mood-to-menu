@@ -18,7 +18,6 @@ import { ChefIntroOverlay } from "../chef-intro/ChefIntroOverlay";
 import type { ChefStatus } from "./ChefMascot";
 import { AmbientBackground } from "./decorative";
 import { Sidebar } from "./Sidebar";
-import { SectionPlaceholder } from "./SectionPlaceholder";
 import { VibeCheckPreview } from "./VibeCheckPreview";
 import type { SectionKey } from "./navConfig";
 
@@ -180,14 +179,12 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
                 onGoToTodaysMenu={() => handleSelectSection("todays-menu")}
                 onGoToVibeCheck={() => handleSelectSection("vibe-check")}
               />
-            ) : activeSection === "recipe-history" ? (
+            ) : (
               <RecipeHistoryScreen
                 history={recipeHistory}
                 onOpenRecipe={handleOpenRecipe}
                 onGoToVibeCheck={() => handleSelectSection("vibe-check")}
               />
-            ) : (
-              <SectionPlaceholder section={activeSection} />
             )}
           </motion.div>
         </main>

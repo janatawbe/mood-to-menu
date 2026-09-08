@@ -43,6 +43,8 @@ function validRecipeJson(): string {
     prepTime: "20 min",
     tags: ["Comforting", "Quick"],
     chefTip: "Use pre-cooked rice to save time.",
+    servings: 2,
+    nutrition: { calories: 520, proteinG: 32, carbohydratesG: 55, fatG: 16, fiberG: 4 },
   });
 }
 
@@ -58,6 +60,8 @@ describe("generateRecipe", () => {
 
     expect(recipe.dishName).toBe("Creamy Chicken Rice Bowl");
     expect(recipe.id).toBeTruthy();
+    expect(recipe.servings).toBe(2);
+    expect(recipe.nutrition).toEqual({ calories: 520, proteinG: 32, carbohydratesG: 55, fatG: 16, fiberG: 4 });
     expect(generateContentMock).toHaveBeenCalledTimes(1);
   });
 

@@ -25,13 +25,22 @@ describe("ChefMascot", () => {
       ["taste-memory", "I'll remember!"],
       ["favorites", "Best picks here!"],
       ["recipe-history", "A tasty trail."],
-      ["chefs-tips", "More soon!"],
     ];
     for (const [section, expected] of cases) {
       const { unmount } = render(<ChefMascot arrived status="welcoming" section={section as never} />);
       expect(screen.getByText(expected)).toBeInTheDocument();
       unmount();
     }
+  });
+
+  it("no longer has a Chef's Tips section-message entry (the sidebar section was removed)", () => {
+    // Regression guard distinguishing the two different "chef tip" concepts: the
+    // sidebar's "Chef's Tips" nav section is gone, but this test only concerns the
+    // idle sidebar bubble — the per-recipe `chefTip` field/ChefTipCard is unrelated
+    // and unaffected (see RecipeReveal.test.tsx for that).
+    render(<ChefMascot arrived status="welcoming" section={"chefs-tips" as never} />);
+    expect(screen.queryByText("More soon!")).not.toBeInTheDocument();
+    expect(screen.getByText("Ready to help!")).toBeInTheDocument();
   });
 
   it("shows 'Cooking...' while cooking, regardless of section", () => {

@@ -30,9 +30,16 @@ export function NavigationItem({ icon, label, active = false, onClick, layoutGro
       }`}
     >
       {active && (
+        // No z-index here (in particular, NOT a negative one) — the icon/label spans
+        // below already paint on top of this thanks to plain DOM order (they come
+        // after it in the JSX), so this just needs to be a normal stacking-context
+        // layer. A negative z-index previously sent it stacking behind the sidebar
+        // <nav>'s own translucent bg-surface/95 background instead, which washed the
+        // solid brand-accent-strong orange down to a much fainter tint — restoring
+        // the original active-state color meant fixing this, not the color itself.
         <motion.span
           layoutId={prefersReducedMotion ? undefined : `active-nav-pill-${layoutGroup}`}
-          className="absolute inset-0 -z-10 rounded-2xl bg-brand-accent-strong shadow-lift"
+          className="absolute inset-0 rounded-2xl bg-brand-accent-strong shadow-lift"
           transition={{ type: "spring", stiffness: 420, damping: 34 }}
         />
       )}

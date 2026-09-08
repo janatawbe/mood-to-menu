@@ -41,6 +41,25 @@ describe("loadFavorites", () => {
     expect(loadFavorites()).toEqual(favorites);
   });
 
+  it("round-trips nutrition/servings for a favorite that has them (Milestone 9)", () => {
+    const favorite = makeFavorite({
+      recipe: makeRecipe({ servings: 4, nutrition: { calories: 520, proteinG: 21, carbohydratesG: 62, fatG: 20, fiberG: 8 } }),
+    });
+    saveFavorites([favorite]);
+    expect(loadFavorites()).toEqual([favorite]);
+  });
+
+  it("still loads an old favorite with no nutrition/servings at all (backward compatibility)", () => {
+    // No `nutrition`/`servings` keys present at all — simulates a favorite persisted
+    // before Milestone 9 introduced those fields.
+    const oldFavorite = { recipe: makeRecipe(), savedAt: "2025-06-01T00:00:00.000Z" };
+    window.localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify([oldFavorite]));
+
+    const loaded = loadFavorites();
+    expect(loaded).toEqual([oldFavorite]);
+    expect(loaded[0]?.recipe.nutrition).toBeUndefined();
+  });
+
   it("does not crash and returns an empty list for invalid JSON", () => {
     window.localStorage.setItem(FAVORITES_STORAGE_KEY, "{not valid json");
     expect(loadFavorites()).toEqual([]);

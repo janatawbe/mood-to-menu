@@ -1,13 +1,5 @@
 import type { ReactNode } from "react";
-import {
-  CalendarIcon,
-  CartIcon,
-  ChefHatIcon,
-  FoodBowlIcon,
-  HeartIcon,
-  HistoryIcon,
-  HomeIcon,
-} from "../../components/icons";
+import { CalendarIcon, CartIcon, FoodBowlIcon, HeartIcon, HistoryIcon, HomeIcon } from "../../components/icons";
 
 export type SectionKey =
   | "vibe-check"
@@ -15,8 +7,7 @@ export type SectionKey =
   | "grocery-list"
   | "taste-memory"
   | "favorites"
-  | "recipe-history"
-  | "chefs-tips";
+  | "recipe-history";
 
 export interface NavEntry {
   key: SectionKey;
@@ -26,10 +17,10 @@ export interface NavEntry {
 
 const iconSize = { width: 23, height: 23 };
 
-// "Taste Memory" is a new nav entry (Milestone 7) rather than repurposing "Chef's Tips"
-// — nothing in the roadmap concretely claims Chef's Tips for a specific later milestone,
-// but repurposing it would still gamble on that, whereas adding one more entry using the
-// exact same NavigationItem pattern is a small, safe, fully reversible addition.
+// Chef's Tips (a standalone sidebar placeholder section) was removed rather than kept
+// as an unused stub — it never grew real functionality, and the app's actual chef
+// personality/tips already live inline per-recipe (see ChefTipCard.tsx), not as a
+// separate nav destination.
 export const navEntries: NavEntry[] = [
   { key: "vibe-check", label: "Vibe Check", icon: <HomeIcon {...iconSize} /> },
   { key: "todays-menu", label: "Today's Menu", icon: <CalendarIcon {...iconSize} /> },
@@ -37,5 +28,4 @@ export const navEntries: NavEntry[] = [
   { key: "taste-memory", label: "Taste Memory", icon: <FoodBowlIcon {...iconSize} /> },
   { key: "favorites", label: "Favorites", icon: <HeartIcon {...iconSize} /> },
   { key: "recipe-history", label: "Recipe History", icon: <HistoryIcon {...iconSize} /> },
-  { key: "chefs-tips", label: "Chef's Tips", icon: <ChefHatIcon {...iconSize} /> },
 ];

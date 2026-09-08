@@ -345,6 +345,59 @@ describe("AppShell favorites & recipe history integration", () => {
     expect(regenerateButton).toBeDisabled();
   });
 
+  it("nutrition survives Favorites persistence and reopening, with no extra Gemini call (Milestone 9)", async () => {
+    generateRecipeMock.mockResolvedValueOnce(
+      makeRecipe({ servings: 4, nutrition: { calories: 520, proteinG: 21, carbohydratesG: 62, fatG: 20, fiberG: 8 } }),
+    );
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument());
+    expect(screen.getByRole("heading", { name: "Nutritional Facts" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /^vibe check$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^favorites$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /open recipe/i }));
+
+    expect(screen.getByRole("heading", { name: "Nutritional Facts" })).toBeInTheDocument();
+    expect(screen.getByText("520")).toBeInTheDocument();
+    expect(generateRecipeMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("nutrition survives Recipe History persistence and reopening (Milestone 9)", async () => {
+    generateRecipeMock.mockResolvedValueOnce(
+      makeRecipe({ servings: 4, nutrition: { calories: 520, proteinG: 21, carbohydratesG: 62, fatG: 20, fiberG: 8 } }),
+    );
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /^recipe history$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /open recipe/i }));
+
+    expect(screen.getByRole("heading", { name: "Nutritional Facts" })).toBeInTheDocument();
+    expect(screen.getByText("520")).toBeInTheDocument();
+    expect(generateRecipeMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("an old reopened recipe without nutrition still opens normally, with the section simply omitted", async () => {
+    generateRecipeMock.mockResolvedValueOnce(makeRecipe());
+    render(<AppShell chefIntroReady={false} />);
+    await generateFromVibeCheck();
+    await waitFor(() => expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument());
+    expect(screen.queryByRole("heading", { name: "Nutritional Facts" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /save to favorites/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /^vibe check$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^favorites$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /open recipe/i }));
+
+    expect(screen.getByText("Creamy Garlic Butter Pasta")).toBeInTheDocument();
+    expect(screen.getByText("Boil pasta.")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Nutritional Facts" })).not.toBeInTheDocument();
+    expect(generateRecipeMock).toHaveBeenCalledTimes(1);
+  });
+
   it("unfavoriting removes it from Favorites but leaves Recipe History untouched", async () => {
     generateRecipeMock.mockResolvedValueOnce(makeRecipe());
     render(<AppShell chefIntroReady={false} />);
