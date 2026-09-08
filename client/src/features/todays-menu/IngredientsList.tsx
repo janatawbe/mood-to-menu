@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from "motion/react";
 import { CheckIcon, PlusIcon } from "../../components/icons";
 import type { RecipeIngredient } from "../../types/domain";
 
@@ -12,6 +13,7 @@ interface IngredientsListProps {
  * compact, keyboard-accessible add-to-grocery-list affordance (Milestone 6, Step 7) —
  * a single small button, not a cluttered row of controls. */
 export function IngredientsList({ ingredients, isAdded, onAdd }: IngredientsListProps) {
+  const prefersReducedMotion = useReducedMotion();
   return (
     <section aria-labelledby="ingredients-heading">
       <h2 id="ingredients-heading" className="font-display text-base font-bold text-ink">
@@ -28,13 +30,16 @@ export function IngredientsList({ ingredients, isAdded, onAdd }: IngredientsList
               <span aria-hidden className="mb-0.5 h-1.5 w-1.5 shrink-0 self-center rounded-full bg-brand-accent" />
               <span className="font-semibold text-ink">{ingredient.amount}</span>
               <span className="flex-1 text-ink-soft">{ingredient.name}</span>
-              <button
+              <motion.button
                 type="button"
                 onClick={() => onAdd(ingredient)}
                 disabled={added}
                 aria-label={added ? `${ingredient.name} is on your grocery list` : `Add ${ingredient.name} to grocery list`}
                 aria-pressed={added}
                 title={added ? "On your grocery list" : "Add to grocery list"}
+                whileTap={prefersReducedMotion || added ? undefined : { scale: 0.85 }}
+                animate={{ scale: added ? 1.15 : 1 }}
+                transition={prefersReducedMotion ? { duration: 0.01 } : { type: "spring", stiffness: 500, damping: 15 }}
                 className={`inline-flex h-6 w-6 shrink-0 items-center justify-center self-center rounded-full transition-colors duration-150 ${
                   added
                     ? "bg-brand-accent-soft text-brand-accent-strong"
@@ -42,7 +47,7 @@ export function IngredientsList({ ingredients, isAdded, onAdd }: IngredientsList
                 }`}
               >
                 {added ? <CheckIcon width={12} height={12} /> : <PlusIcon width={12} height={12} />}
-              </button>
+              </motion.button>
             </li>
           );
         })}

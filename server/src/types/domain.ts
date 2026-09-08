@@ -40,6 +40,16 @@ export interface RecipeIngredient {
   amount: string;
 }
 
+/** AI-estimated, per single serving — never lab-measured, never used for calorie
+ * targeting or good/bad food judgments (see the system prompt). */
+export interface RecipeNutrition {
+  calories: number;
+  proteinG: number;
+  carbohydratesG: number;
+  fatG: number;
+  fiberG: number;
+}
+
 export interface Recipe {
   /** Generated server-side (crypto.randomUUID()) — never produced by Gemini. */
   id: string;
@@ -52,6 +62,10 @@ export interface Recipe {
   prepTime: string;
   tags: string[];
   chefTip: string;
+  /** How many servings the recipe as written makes — `nutrition` below is per one of
+   * these servings, not the whole recipe. */
+  servings: number;
+  nutrition: RecipeNutrition;
 }
 
 export interface TastePreferences {

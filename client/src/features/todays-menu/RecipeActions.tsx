@@ -1,4 +1,4 @@
-import { useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { Button } from "../../components/Button";
 import { CartIcon, CheckIcon, HeartIcon, RefreshIcon } from "../../components/icons";
 import type { VibeCheckError } from "../../hooks/useVibeCheck";
@@ -51,12 +51,18 @@ export function RecipeActions({
           {allIngredientsAdded ? "Added to Grocery List" : "Add ingredients to Grocery List"}
         </Button>
         <Button variant="secondary" onClick={onToggleFavorite} aria-pressed={isFavorited}>
-          <HeartIcon
-            width={17}
-            height={17}
-            fill={isFavorited ? "currentColor" : "none"}
-            className={isFavorited ? "text-brand-accent-strong" : ""}
-          />
+          <motion.span
+            className="inline-flex"
+            animate={{ scale: isFavorited ? 1.15 : 1 }}
+            transition={prefersReducedMotion ? { duration: 0.15 } : { type: "spring", stiffness: 500, damping: 15 }}
+          >
+            <HeartIcon
+              width={17}
+              height={17}
+              fill={isFavorited ? "currentColor" : "none"}
+              className={isFavorited ? "text-brand-accent-strong" : ""}
+            />
+          </motion.span>
           {isFavorited ? "Saved to Favorites" : "Save to Favorites"}
         </Button>
         <Button

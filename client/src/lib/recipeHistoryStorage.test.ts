@@ -41,6 +41,23 @@ describe("loadRecipeHistory", () => {
     expect(loadRecipeHistory()).toEqual(entries);
   });
 
+  it("round-trips nutrition/servings for a history entry that has them (Milestone 9)", () => {
+    const entry = makeEntry({
+      recipe: makeRecipe({ servings: 4, nutrition: { calories: 520, proteinG: 21, carbohydratesG: 62, fatG: 20, fiberG: 8 } }),
+    });
+    saveRecipeHistory([entry]);
+    expect(loadRecipeHistory()).toEqual([entry]);
+  });
+
+  it("still loads an old history entry with no nutrition/servings at all (backward compatibility)", () => {
+    const oldEntry = { recipe: makeRecipe(), generatedAt: "2025-06-01T00:00:00.000Z" };
+    window.localStorage.setItem(RECIPE_HISTORY_STORAGE_KEY, JSON.stringify([oldEntry]));
+
+    const loaded = loadRecipeHistory();
+    expect(loaded).toEqual([oldEntry]);
+    expect(loaded[0]?.recipe.nutrition).toBeUndefined();
+  });
+
   it("does not crash and returns an empty list for invalid JSON", () => {
     window.localStorage.setItem(RECIPE_HISTORY_STORAGE_KEY, "{not valid json");
     expect(loadRecipeHistory()).toEqual([]);

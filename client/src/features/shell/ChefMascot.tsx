@@ -2,6 +2,7 @@ import { motion, useReducedMotion, type Transition } from "motion/react";
 import { getMoodTheme, hexToRgba } from "../../lib/moodTheme";
 import type { Mood } from "../../types/domain";
 import { ChefCharacter } from "./ChefCharacter";
+import type { SectionKey } from "./navConfig";
 
 /** Subtle contextual state for the sidebar chef during a Vibe Check — deliberately
  * light-touch for Milestone 2; the fuller chef personality system is Milestone 9.
@@ -15,7 +16,24 @@ interface ChefMascotProps {
   /** The selected mood, when status is "attentive" — picks the chef's reaction
    * personality and the tint of the glow behind him. Ignored for other statuses. */
   mood?: Mood | null;
+  /** The sidebar's active section (Milestone 9) — only consulted while `status` is
+   * "welcoming" (nothing more specific — cooking/served/a chosen mood — is going on),
+   * so the idle chef's speech bubble says something small and relevant to whatever the
+   * user is actually looking at instead of always "Ready to help!". */
+  section?: SectionKey;
 }
+
+/** Kept short on purpose — the speech bubble is a fixed ~102px-wide, single-line area
+ * (see ReadyToHelpCloud below), matched to the length of the existing status messages
+ * ("Ready to help!", "Bon appétit!"). Vibe Check has no entry here — it keeps the
+ * original default "Ready to help!" message, unchanged. */
+const sectionMessages: Partial<Record<SectionKey, string>> = {
+  "todays-menu": "Let's cook!",
+  "grocery-list": "Need anything?",
+  "taste-memory": "I'll remember!",
+  favorites: "Best picks here!",
+  "recipe-history": "A tasty trail.",
+};
 
 const CHEF_WIDTH = 225;
 /** Matches the cropped chef.webp's own aspect ratio, so the placeholder below reserves
@@ -27,9 +45,16 @@ const CHEF_ASPECT = "1102 / 1154";
  * down-left toward the chef — sitting beside his head rather than a separate status
  * badge above him.
  */
-function ReadyToHelpCloud({ status }: { status: ChefStatus }) {
+function ReadyToHelpCloud({ status, section }: { status: ChefStatus; section?: SectionKey }) {
   const prefersReducedMotion = useReducedMotion();
-  const message = status === "cooking" ? "Cooking..." : status === "served" ? "Bon appétit!" : "Ready to help!";
+  const message =
+    status === "cooking"
+      ? "Cooking..."
+      : status === "served"
+        ? "Bon appétit!"
+        : status === "welcoming" && section && sectionMessages[section]
+          ? sectionMessages[section]
+          : "Ready to help!";
 
   return (
     <motion.div
@@ -115,7 +140,7 @@ const reactionByMood: Record<Mood, { animate: Record<string, number[]>; transiti
   },
 };
 
-export function ChefMascot({ arrived, status = "welcoming", mood = null }: ChefMascotProps) {
+export function ChefMascot({ arrived, status = "welcoming", mood = null, section }: ChefMascotProps) {
   const prefersReducedMotion = useReducedMotion();
   const theme = status === "attentive" || status === "served" ? getMoodTheme(mood) : null;
   const reaction = status === "attentive" && theme ? reactionByMood[theme.mood] : reactionByStatus[status];
@@ -153,7 +178,7 @@ export function ChefMascot({ arrived, status = "welcoming", mood = null }: ChefM
               can never clip the sidebar, regardless of how much side margin centering
               leaves at different sidebar widths. */}
           <div className="absolute left-[110px] top-[-14px]">
-            <ReadyToHelpCloud status={status} />
+            <ReadyToHelpCloud status={status} section={section} />
           </div>
         </motion.div>
       ) : (

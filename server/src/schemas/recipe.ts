@@ -11,6 +11,17 @@ const PREP_EFFORTS = ["low", "medium", "high"] as const;
  * allowed to leave the server. Field limits are generous but bounded, so a single
  * pathological response can't balloon the payload.
  */
+/** AI-estimated, per serving — never lab-measured. Bounded to plausible per-serving
+ * ranges for a home-cooked meal, the same "generous but bounded" philosophy as every
+ * other field here, so one pathological Gemini response can't slip through. */
+const nutritionSchema = z.object({
+  calories: z.number().int().min(0).max(3000),
+  proteinG: z.number().min(0).max(300),
+  carbohydratesG: z.number().min(0).max(500),
+  fatG: z.number().min(0).max(300),
+  fiberG: z.number().min(0).max(100),
+});
+
 export const recipeContentSchema = z.object({
   detectedMood: z.enum(MOODS as [Mood, ...Mood[]]),
   mealIntent: z.object({
@@ -32,6 +43,14 @@ export const recipeContentSchema = z.object({
   prepTime: z.string().trim().min(1).max(30),
   tags: z.array(z.string().trim().min(1).max(24)).max(8),
   chefTip: z.string().trim().min(1).max(300),
+  /** How many servings the recipe as written makes — required alongside `nutrition`
+   * (below) for every NEW generation, since "nutrition per serving" is only meaningful
+   * with a serving count attached. Older, already-persisted recipes predate both fields
+   * entirely; see client/src/schemas/recipe.ts, where they're optional instead, for that
+   * backward-compatibility boundary — this server-side schema only ever validates a
+   * *fresh* Gemini response, never a previously-saved one. */
+  servings: z.number().int().min(1).max(12),
+  nutrition: nutritionSchema,
 });
 
 export type RecipeContent = z.infer<typeof recipeContentSchema>;
@@ -97,6 +116,23 @@ export const GEMINI_RECIPE_SCHEMA: Schema = {
       maxItems: "6",
     },
     chefTip: { type: Type.STRING, description: "One concise, genuinely useful tip for this specific recipe." },
+    servings: {
+      type: Type.INTEGER,
+      description: "How many servings this recipe as written makes, e.g. 2, 4.",
+    },
+    nutrition: {
+      type: Type.OBJECT,
+      description:
+        "Your best reasonable ESTIMATE of nutrition per single serving (not the whole recipe) — never claim lab-level precision.",
+      properties: {
+        calories: { type: Type.INTEGER, description: "Estimated kcal per serving." },
+        proteinG: { type: Type.NUMBER, description: "Estimated grams of protein per serving." },
+        carbohydratesG: { type: Type.NUMBER, description: "Estimated grams of carbohydrates per serving." },
+        fatG: { type: Type.NUMBER, description: "Estimated grams of fat per serving." },
+        fiberG: { type: Type.NUMBER, description: "Estimated grams of fiber per serving." },
+      },
+      required: ["calories", "proteinG", "carbohydratesG", "fatG", "fiberG"],
+    },
   },
   required: [
     "detectedMood",
@@ -108,5 +144,7 @@ export const GEMINI_RECIPE_SCHEMA: Schema = {
     "prepTime",
     "tags",
     "chefTip",
+    "servings",
+    "nutrition",
   ],
 };

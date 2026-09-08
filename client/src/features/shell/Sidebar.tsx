@@ -49,13 +49,18 @@ export function Sidebar({
               label={entry.label}
               active={activeSection === entry.key}
               onClick={() => onSelectSection(entry.key)}
+              // The desktop <aside> Sidebar stays mounted at all times, and the mobile
+              // overlay Sidebar mounts alongside it while open — two simultaneously-
+              // mounted instances would otherwise fight over the same shared
+              // layoutId-animated active pill (Milestone 9), so each gets its own.
+              layoutGroup={onCloseMobile ? "mobile" : "desktop"}
             />
           </li>
         ))}
       </ul>
 
       <div className="mt-auto">
-        <ChefMascot arrived={chefArrived} status={chefStatus} mood={mood} />
+        <ChefMascot arrived={chefArrived} status={chefStatus} mood={mood} section={activeSection} />
       </div>
     </nav>
   );

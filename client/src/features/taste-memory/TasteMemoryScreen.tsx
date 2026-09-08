@@ -55,6 +55,12 @@ export function TasteMemoryScreen({ tasteMemory }: TasteMemoryScreenProps) {
             onRemove={(value) => removePreference("favoriteComfortFoods", value)}
           />
 
+          {/* A plain inserted hairline, not a divide-y border — since it's a real sibling
+              in this flex-col gap-5 stack, the existing 20px gap already lands evenly on
+              both sides of it for free, rather than needing extra padding math to
+              balance a border-based divider (Milestone 9 polish). */}
+          <div aria-hidden className="h-px w-full shrink-0 bg-tan-200/80" />
+
           <TastePreferenceSection
             title="Liked ingredients"
             helper="Soft favorites — your chef will use these when they fit, not force them into everything."
@@ -66,6 +72,8 @@ export function TasteMemoryScreen({ tasteMemory }: TasteMemoryScreenProps) {
             onRemove={(value) => removePreference("likedIngredients", value)}
           />
 
+          <div aria-hidden className="h-px w-full shrink-0 bg-tan-200/80" />
+
           <TastePreferenceSection
             title="Disliked ingredients"
             helper="Your chef will steer away from these."
@@ -76,6 +84,8 @@ export function TasteMemoryScreen({ tasteMemory }: TasteMemoryScreenProps) {
             onAdd={(value) => addPreference("dislikedIngredients", value)}
             onRemove={(value) => removePreference("dislikedIngredients", value)}
           />
+
+          <div aria-hidden className="h-px w-full shrink-0 bg-tan-200/80" />
 
           <TastePreferenceSection
             title="Dietary preferences"

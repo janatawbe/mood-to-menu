@@ -192,7 +192,11 @@ export function MoodFilterPicker({ mood, onMoodChange }: MoodFilterPickerProps) 
             variants={panelVariants}
             transition={{ duration: prefersReducedMotion ? 0.1 : 0.15, ease: "easeOut" }}
             style={{ top: position.top, right: position.right }}
-            className="fixed z-50 w-48 rounded-3xl border border-tan-200 bg-surface p-1.5 shadow-lift focus:outline-none"
+            // `space-y-1` gives adjacent options a small gap — without it, a selected
+            // option's filled background and the option hovered right next to it sit
+            // edge-to-edge with no breathing room, so their rounded corners visually
+            // collide instead of reading as two distinct rows.
+            className="fixed z-50 w-48 space-y-1 rounded-3xl border border-tan-200 bg-surface p-1.5 shadow-lift focus:outline-none"
           >
             {options.map((option, index) => {
               const isSelected = option.value === mood;

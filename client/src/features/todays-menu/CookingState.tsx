@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from "motion/react";
 import { ChefHatIcon } from "../../components/icons";
+import { LoadingChefLine } from "../shell/LoadingChefLine";
 
 /** Shown if the user navigates to Today's Menu while the *initial* generation (from the
  * Vibe Check form) is still in flight and no recipe exists yet — distinct from the empty
@@ -17,6 +18,7 @@ export function CookingState() {
         <ChefHatIcon width={44} height={44} />
       </motion.div>
       <p className="font-display text-lg font-bold text-ink">Cooking up something that matches your vibe…</p>
+      <LoadingChefLine />
       <p className="max-w-xs text-sm text-ink-muted">Your Today&apos;s Menu will appear here in just a moment.</p>
     </div>
   );

@@ -29,8 +29,26 @@ export interface RecipeIngredient {
   amount: string;
 }
 
+/** AI-estimated, per single serving — never lab-measured, never used for calorie
+ * targeting or a good/bad judgment about the meal (see RecipeReveal's Nutritional Facts
+ * section, and the server system prompt). */
+export interface RecipeNutrition {
+  calories: number;
+  proteinG: number;
+  carbohydratesG: number;
+  fatG: number;
+  fiberG: number;
+}
+
 /** Mirrors server/src/types/domain.ts's `Recipe` — there is no shared package in this
- * workspace, so this shape is kept in sync by hand, the same way `Mood` already is. */
+ * workspace, so this shape is kept in sync by hand, the same way `Mood` already is.
+ *
+ * `servings`/`nutrition` (Milestone 9) are optional here — unlike the server's own
+ * `Recipe`, where they're required — specifically for backward compatibility: this type
+ * also describes Favorites/Recipe History entries already persisted in localStorage
+ * from before this milestone, which predate both fields entirely and must keep loading,
+ * opening, and working normally without them (see ../lib/favoritesStorage.ts and
+ * ../lib/recipeHistoryStorage.ts). Every newly generated recipe always has both. */
 export interface Recipe {
   id: string;
   detectedMood: Mood;
@@ -42,6 +60,8 @@ export interface Recipe {
   prepTime: string;
   tags: string[];
   chefTip: string;
+  servings?: number;
+  nutrition?: RecipeNutrition;
 }
 
 export interface GroceryItemSourceRecipe {

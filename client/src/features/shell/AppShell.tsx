@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { AppLogo } from "../../components/AppLogo";
 import { IconButton } from "../../components/IconButton";
 import { MenuIcon } from "../../components/icons";
@@ -18,7 +18,6 @@ import { ChefIntroOverlay } from "../chef-intro/ChefIntroOverlay";
 import type { ChefStatus } from "./ChefMascot";
 import { AmbientBackground } from "./decorative";
 import { Sidebar } from "./Sidebar";
-import { SectionPlaceholder } from "./SectionPlaceholder";
 import { VibeCheckPreview } from "./VibeCheckPreview";
 import type { SectionKey } from "./navConfig";
 
@@ -28,6 +27,7 @@ interface AppShellProps {
 }
 
 export function AppShell({ chefIntroReady }: AppShellProps) {
+  const prefersReducedMotion = useReducedMotion();
   const [activeSection, setActiveSection] = useState<SectionKey>("vibe-check");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   // Not persisted (by design, for now — see ChefIntroOverlay) so the intro replays on
@@ -50,7 +50,11 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
   // `recordGeneration`, fired once per successful response inside useVibeCheck (never
   // from an effect watching `recipe`, which would risk a StrictMode double-record).
   const recipeHistory = useRecipeHistory();
-  const vibeCheck = useVibeCheck(handleGenerated, tasteMemory.preferences, recipeHistory.recordGeneration);
+  const vibeCheck = useVibeCheck(
+    handleGenerated,
+    tasteMemory.preferences,
+    recipeHistory.recordGeneration,
+  );
   // One shared instance (Step 23) — Today's Menu and the Grocery List screen both read
   // and write this same state, so an add/remove/check on one is reflected on the other
   // immediately, and it's never cleared by regenerating or navigating away.
@@ -82,7 +86,9 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
   // actually made (always a real mood), not the Vibe Check picker's own selection,
   // which may since be null or changed.
   const chefMood =
-    activeSection === "todays-menu" && vibeCheck.recipe ? vibeCheck.recipe.detectedMood : vibeCheck.selectedMood;
+    activeSection === "todays-menu" && vibeCheck.recipe
+      ? vibeCheck.recipe.detectedMood
+      : vibeCheck.selectedMood;
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -135,41 +141,52 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
         )}
 
         <main id="main-content" className="min-w-0 flex-1">
-          {activeSection === "vibe-check" ? (
-            <VibeCheckPreview vibeCheck={vibeCheck} />
-          ) : activeSection === "todays-menu" ? (
-            <TodaysMenuScreen
-              vibeCheck={vibeCheck}
-              groceryList={groceryList}
-              favorites={favorites}
-              onGoToVibeCheck={() => handleSelectSection("vibe-check")}
-            />
-          ) : activeSection === "grocery-list" ? (
-            <GroceryListScreen
-              groceryList={groceryList}
-              hasRecipe={vibeCheck.recipe !== null}
-              onGoToTodaysMenu={() => handleSelectSection("todays-menu")}
-              onGoToVibeCheck={() => handleSelectSection("vibe-check")}
-            />
-          ) : activeSection === "taste-memory" ? (
-            <TasteMemoryScreen tasteMemory={tasteMemory} />
-          ) : activeSection === "favorites" ? (
-            <FavoritesScreen
-              favorites={favorites}
-              hasRecipe={vibeCheck.recipe !== null}
-              onOpenRecipe={handleOpenRecipe}
-              onGoToTodaysMenu={() => handleSelectSection("todays-menu")}
-              onGoToVibeCheck={() => handleSelectSection("vibe-check")}
-            />
-          ) : activeSection === "recipe-history" ? (
-            <RecipeHistoryScreen
-              history={recipeHistory}
-              onOpenRecipe={handleOpenRecipe}
-              onGoToVibeCheck={() => handleSelectSection("vibe-check")}
-            />
-          ) : (
-            <SectionPlaceholder section={activeSection} />
-          )}
+          {/* Milestone 9: a quick, restrained fade+shift when switching sections. This is
+              a fade-IN only (no `exit`, no AnimatePresence) — the incoming screen mounts
+              immediately/synchronously on click, same as before this milestone, and just
+              animates its own opacity/position in; nothing ever delays becoming visible
+              or interactive while the animation plays. Skipped under reduced motion. */}
+          <motion.div
+            key={activeSection}
+            className="h-full"
+            initial={prefersReducedMotion ? undefined : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0.01 : 0.18, ease: "easeOut" }}
+          >
+            {activeSection === "vibe-check" ? (
+              <VibeCheckPreview vibeCheck={vibeCheck} />
+            ) : activeSection === "todays-menu" ? (
+              <TodaysMenuScreen
+                vibeCheck={vibeCheck}
+                groceryList={groceryList}
+                favorites={favorites}
+                onGoToVibeCheck={() => handleSelectSection("vibe-check")}
+              />
+            ) : activeSection === "grocery-list" ? (
+              <GroceryListScreen
+                groceryList={groceryList}
+                hasRecipe={vibeCheck.recipe !== null}
+                onGoToTodaysMenu={() => handleSelectSection("todays-menu")}
+                onGoToVibeCheck={() => handleSelectSection("vibe-check")}
+              />
+            ) : activeSection === "taste-memory" ? (
+              <TasteMemoryScreen tasteMemory={tasteMemory} />
+            ) : activeSection === "favorites" ? (
+              <FavoritesScreen
+                favorites={favorites}
+                hasRecipe={vibeCheck.recipe !== null}
+                onOpenRecipe={handleOpenRecipe}
+                onGoToTodaysMenu={() => handleSelectSection("todays-menu")}
+                onGoToVibeCheck={() => handleSelectSection("vibe-check")}
+              />
+            ) : (
+              <RecipeHistoryScreen
+                history={recipeHistory}
+                onOpenRecipe={handleOpenRecipe}
+                onGoToVibeCheck={() => handleSelectSection("vibe-check")}
+              />
+            )}
+          </motion.div>
         </main>
       </div>
 

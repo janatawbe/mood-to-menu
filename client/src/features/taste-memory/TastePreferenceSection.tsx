@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { IconButton } from "../../components/IconButton";
 import { Tag } from "../../components/Tag";
 import { CloseIcon, PlusIcon } from "../../components/icons";
@@ -16,8 +17,16 @@ interface RemovableChipProps {
 /** A saved, freely-typed preference — filled brand-colored pill with its own small
  * remove control, distinct from the outlined `Tag` suggestion chips below. */
 function RemovableChip({ label, onRemove }: RemovableChipProps) {
+  const prefersReducedMotion = useReducedMotion();
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-accent-strong bg-brand-accent-strong px-3.5 py-1.5 text-sm font-medium text-white">
+    <motion.span
+      layout={!prefersReducedMotion}
+      initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8, y: 4 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
+      transition={{ duration: prefersReducedMotion ? 0.15 : 0.2, ease: "easeOut" }}
+      className="inline-flex items-center gap-1.5 rounded-full border border-brand-accent-strong bg-brand-accent-strong px-3.5 py-1.5 text-sm font-medium text-white"
+    >
       {label}
       <button
         type="button"
@@ -27,7 +36,7 @@ function RemovableChip({ label, onRemove }: RemovableChipProps) {
       >
         <CloseIcon width={10} height={10} />
       </button>
-    </span>
+    </motion.span>
   );
 }
 
@@ -110,13 +119,13 @@ export function TastePreferenceSection({
         />
       </form>
 
-      {customValues.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-2">
+      <div className="mt-2 flex flex-wrap gap-2 empty:mt-0">
+        <AnimatePresence initial={false}>
           {customValues.map((value) => (
             <RemovableChip key={value} label={value} onRemove={() => onRemove(value)} />
           ))}
-        </div>
-      )}
+        </AnimatePresence>
+      </div>
     </section>
   );
 }
