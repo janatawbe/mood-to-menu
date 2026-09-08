@@ -1,0 +1,38 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    # GEMINI_API_KEY (and optional GEMINI_MODEL override) come from server/.env at
+    # container start — never baked into the image, never hardcoded here.
+    env_file:
+      - ./server/.env
+    environment:
+      - PORT=3001
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    # No `ports:` mapping on purpose — Nginx is the only thing that needs to reach this
+    # service, over the Compose-internal network (DNS name `server`, port 3001). It is
+    # not published to the host.
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      server:
+        condition: service_healthy
+    restart: unless-stopped

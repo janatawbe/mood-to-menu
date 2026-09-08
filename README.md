@@ -142,6 +142,80 @@ npm run format       # formats the repo with Prettier
 npm run format:check # checks formatting without writing changes
 ```
 
+## Docker
+
+The app can also be run as two containers — an Nginx-served frontend and an Express
+backend — via Docker Compose. This is purely a deployment/setup convenience; it does not
+replace normal local development (`npm run dev` above still works exactly as before).
+
+```
+Browser → http://localhost:8080 → Nginx (client container) → /api/* → server:3001 (backend container) → Gemini API
+```
+
+Nginx serves the built React app and proxies any `/api/*` request to the backend
+container over Docker's internal network — the browser only ever talks to one origin
+(`localhost:8080`), the same relative-`/api`-path pattern the app already uses in dev.
+
+**Prerequisites**
+
+- Docker Desktop (Docker Engine + Compose v2 — the `docker compose` subcommand, not the
+  legacy standalone `docker-compose`)
+
+**Environment**
+
+Docker reads the same `server/.env` file normal local development uses — create it if you
+haven't already:
+
+```bash
+cp server/.env.example server/.env
+```
+
+Fill in `GEMINI_API_KEY` (and `GEMINI_MODEL` if you want to override the default model).
+This file is never copied into an image — Compose loads it into the `server` container's
+environment at startup only, so the key never gets baked into a build.
+
+**Run**
+
+```bash
+docker compose up --build
+```
+
+Then open:
+
+```
+http://localhost:8080
+```
+
+**Stop**
+
+```bash
+docker compose down
+```
+
+**Rebuild** (after dependency or code changes)
+
+```bash
+docker compose up --build
+```
+
+**Logs**
+
+```bash
+docker compose logs -f
+```
+
+**Notes**
+
+- The frontend is served entirely by Nginx (static files) — the Vite dev server never
+  runs in the Docker image.
+- `/api/*` is proxied by Nginx to the Express container; the backend container does not
+  publish a port to the host, since nothing outside the Nginx container needs to reach it
+  directly.
+- The Gemini API key is supplied at container runtime only, via `server/.env` — it is
+  never present in a Dockerfile, `docker-compose.yml`, or a built image layer.
+- `GET /api/health` (already used by the app) doubles as the backend's Docker
+  healthcheck; the client container waits for it to report healthy before starting.
+
 ## Milestone 0 Status
 
 Implemented:
