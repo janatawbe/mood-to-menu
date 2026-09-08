@@ -9,6 +9,7 @@ import type { UseVibeCheckReturn } from "../../hooks/useVibeCheck";
 import { VIBE_CHECK_TEXT_LIMIT } from "../../hooks/useVibeCheck";
 import { getRecipeErrorCopy } from "../../lib/errorMessages";
 import { darken, getMoodTheme, hexToRgba } from "../../lib/moodTheme";
+import { LoadingChefLine } from "./LoadingChefLine";
 import { quickInputOptions } from "./quickInputData";
 
 interface VibeCheckInputCardProps {
@@ -155,6 +156,7 @@ export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
             <p className="font-display text-base font-bold text-ink">
               Cooking up something that matches your vibe…
             </p>
+            <LoadingChefLine />
             <div className="flex gap-1.5" aria-hidden>
               {[0, 1, 2].map((i) => (
                 <motion.span

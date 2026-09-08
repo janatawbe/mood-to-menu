@@ -1,9 +1,11 @@
 import type { ButtonHTMLAttributes } from "react";
+import { motion, useReducedMotion } from "motion/react";
 
 type ButtonVariant = "primary" | "secondary" | "ghost";
 type ButtonSize = "md" | "sm";
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps
+  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onDrag" | "onDragStart" | "onDragEnd" | "onAnimationStart"> {
   variant?: ButtonVariant;
   size?: ButtonSize;
 }
@@ -20,14 +22,19 @@ const sizeClasses: Record<ButtonSize, string> = {
   sm: "px-3.5 py-1.5 text-xs",
 };
 
+/** Milestone 9: a small tactile press state (skipped under reduced motion) on every
+ * button in the app, since they all funnel through this one component. */
 export function Button({
   variant = "primary",
   size = "md",
   className = "",
   ...props
 }: ButtonProps) {
+  const prefersReducedMotion = useReducedMotion();
   return (
-    <button
+    <motion.button
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
+      transition={{ duration: 0.12 }}
       className={`inline-flex items-center justify-center gap-2 rounded-2xl font-display font-semibold tracking-wide transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}
     />

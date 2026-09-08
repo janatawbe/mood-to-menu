@@ -3,9 +3,14 @@ import { SparkleIcon } from "../../components/icons";
 import type { Recipe } from "../../types/domain";
 import { moodPreviewEntries } from "../shell/moodPreviewData";
 import { MoodBadge } from "./MoodBadge";
+import { SuccessSparkle } from "./SuccessSparkle";
 
 interface RecipeHeroProps {
   recipe: Recipe;
+  /** True for a genuinely fresh generation — plays a brief one-time celebratory accent
+   * next to the eyebrow label (Milestone 9, Step 13). False for a reopened Favorite/
+   * History recipe, which never celebrates a generation that didn't just happen. */
+  celebrate?: boolean;
 }
 
 const effortLabel: Record<Recipe["mealIntent"]["prepEffort"], string> = {
@@ -50,7 +55,7 @@ function pickHighlightTag(recipe: Recipe, moodLabel: string): string {
  * returns one — this screen always has a mood to theme itself around. Deliberately has
  * no mood-colored background wash of its own — the card underneath it stays the normal
  * cream surface; mood identity comes through only via the mood badge below. */
-export function RecipeHero({ recipe }: RecipeHeroProps) {
+export function RecipeHero({ recipe, celebrate = false }: RecipeHeroProps) {
   const moodLabel = moodPreviewEntries.find((entry) => entry.mood === recipe.detectedMood)?.label ?? recipe.detectedMood;
   const highlightTag = pickHighlightTag(recipe, moodLabel);
 
@@ -59,6 +64,7 @@ export function RecipeHero({ recipe }: RecipeHeroProps) {
       <div className="relative flex items-center gap-2 text-lg font-bold uppercase tracking-[0.2em] text-brand-accent-strong sm:text-xl">
         <SparkleIcon width={20} height={20} />
         Today&apos;s Menu
+        <SuccessSparkle active={celebrate} />
       </div>
       <p className="relative mt-1 text-sm text-ink-muted">Made for your mood</p>
       <h1 className="relative mt-2 break-words font-display text-3xl font-bold leading-tight text-ink sm:text-4xl">

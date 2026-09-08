@@ -83,7 +83,7 @@ export function RecipeReveal({
       className="flex flex-col gap-5 pb-1"
     >
       <RevealItem>
-        <RecipeHero recipe={recipe} />
+        <RecipeHero recipe={recipe} celebrate={!isReopenedRecipe} />
       </RevealItem>
       <RevealItem>
         <RecipeActions

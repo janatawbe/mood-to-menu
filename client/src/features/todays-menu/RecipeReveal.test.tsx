@@ -202,6 +202,16 @@ describe("RecipeReveal", () => {
     expect(regenerateButton.getAttribute("title")).toMatch(/saved recipe/i);
   });
 
+  it("plays the success celebration for a freshly generated recipe (not reopened)", () => {
+    renderRecipe({}, makeGroceryList(), makeFavorites(), false);
+    expect(screen.getByRole("status", { name: /freshly made/i })).toBeInTheDocument();
+  });
+
+  it("never plays the success celebration for a reopened recipe", () => {
+    renderRecipe({}, makeGroceryList(), makeFavorites(), true);
+    expect(screen.queryByRole("status", { name: /freshly made/i })).not.toBeInTheDocument();
+  });
+
   it("remains stable with a long dish name, many ingredients, and many steps", () => {
     renderRecipe({
       dishName:
