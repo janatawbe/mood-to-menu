@@ -1,3 +1,4 @@
+// Tests search/mood filtering for Favorites and Recipe History.
 import { describe, expect, it } from "vitest";
 import type { Recipe } from "../types/domain";
 import { filterSavedRecipes } from "./savedRecipeSearch";

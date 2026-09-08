@@ -1,3 +1,4 @@
+// Categorizes and groups grocery items by keyword match (e.g. "Produce", "Pantry").
 import type { GroceryItem } from "../types/domain";
 
 export type GroceryCategory = "Produce" | "Meat & Protein" | "Dairy & Eggs" | "Bakery" | "Pantry" | "Other";

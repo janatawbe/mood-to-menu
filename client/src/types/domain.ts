@@ -1,13 +1,10 @@
+// Shared client-side domain types for Vibe Check, Recipe, Grocery List, and Taste Memory.
 export type Mood = "calm" | "stressed" | "tired" | "happy" | "energetic" | "cozy";
 
 /**
- * The shape of a single Vibe Check submission — everything the mood-input screen
- * collects, sent as the request body to POST /api/recipes/generate (see
- * ../services/api.ts). Deliberately just data: no UI/phase state lives here.
- *
- * `tastePreferences` (Milestone 7) is optional so the request stays valid for a user
- * with no saved Taste Memory — see ../hooks/useVibeCheck.ts, which always fills it in
- * from the current live `useTasteMemory()` state when present.
+ * The shape of a single Vibe Check submission, sent as the request body to
+ * POST /api/recipes/generate. Deliberately just data: no UI/phase state lives here.
+ * `tastePreferences` is optional so the request stays valid with no saved Taste Memory.
  */
 export interface VibeCheck {
   selectedMood: Mood | null;
@@ -40,15 +37,10 @@ export interface RecipeNutrition {
   fiberG: number;
 }
 
-/** Mirrors server/src/types/domain.ts's `Recipe` — there is no shared package in this
- * workspace, so this shape is kept in sync by hand, the same way `Mood` already is.
- *
- * `servings`/`nutrition` (Milestone 9) are optional here — unlike the server's own
- * `Recipe`, where they're required — specifically for backward compatibility: this type
- * also describes Favorites/Recipe History entries already persisted in localStorage
- * from before this milestone, which predate both fields entirely and must keep loading,
- * opening, and working normally without them (see ../lib/favoritesStorage.ts and
- * ../lib/recipeHistoryStorage.ts). Every newly generated recipe always has both. */
+/** Mirrors server/src/types/domain.ts's `Recipe` — kept in sync by hand, the same way
+ * `Mood` already is. `servings`/`nutrition` are optional here (unlike the server's
+ * required fields) for backward compatibility with Favorites/Recipe History entries
+ * persisted before those fields existed; every freshly generated recipe has both. */
 export interface Recipe {
   id: string;
   detectedMood: Mood;
@@ -69,11 +61,8 @@ export interface GroceryItemSourceRecipe {
   dishName: string;
 }
 
-/**
- * A single persisted grocery-list entry. Independent of `Recipe`/`RecipeIngredient` —
- * this is Milestone 6's own long-lived record, not something regeneration or navigation
- * ever clears (see ../lib/groceryStorage.ts and ../hooks/useGroceryList.ts).
- */
+/** A single persisted grocery-list entry — independent of `Recipe`/`RecipeIngredient`,
+ * never cleared by regeneration or navigation. */
 export interface GroceryItem {
   id: string;
   name: string;
@@ -91,12 +80,8 @@ export interface TastePreferences {
   dietaryPreferences: string[];
 }
 
-/**
- * A saved Favorite (Milestone 8) — wraps the *complete* Recipe so it can be reopened
- * later with no Gemini call, keyed by the recipe's own stable `id` (never a duplicate
- * per id). Deliberately separate from TastePreferences — favoriting a recipe never
- * writes into Taste Memory, and vice versa.
- */
+/** A saved Favorite — wraps the *complete* Recipe so it can be reopened later with no
+ * Gemini call, keyed by the recipe's own stable `id` (never a duplicate per id). */
 export interface FavoriteRecipe {
   recipe: Recipe;
   /** ISO timestamp, set once when first saved. */

@@ -1,3 +1,4 @@
+// Global Vitest setup: DOM cleanup between tests plus jsdom polyfills Motion needs.
 import { cleanup } from "@testing-library/react";
 import { afterEach } from "vitest";
 import "@testing-library/jest-dom/vitest";

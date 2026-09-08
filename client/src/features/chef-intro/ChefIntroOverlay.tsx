@@ -7,14 +7,11 @@ interface ChefIntroOverlayProps {
 }
 
 /**
- * Centered onboarding popup shown on first open. The chef here shares a `layoutId` with
- * the sidebar's chef (ChefMascot) — when this overlay unmounts and the sidebar's chef
- * mounts in the same state update, Motion automatically animates the real position/size
- * difference between the two, a genuine shared-element transition now that both render
- * the identical chef.webp asset (a hand-drawn SVG couldn't be morphed this way without
- * risking distortion, but a single image can). The chef sits outside the message card's
- * own `overflow-hidden` (rather than removing it) so its layout animation is never
- * clipped, while the card keeps clipping its own decorative glow/sparkle as before.
+ * Centered onboarding popup shown on first open. The chef shares a `layoutId` with the
+ * sidebar's chef (ChefMascot) — when this overlay unmounts and the sidebar chef mounts
+ * in the same update, Motion animates the real position/size difference between them as
+ * one shared-element transition. It sits outside the card's own `overflow-hidden` so
+ * that transition is never clipped.
  */
 export function ChefIntroOverlay({ onDismiss }: ChefIntroOverlayProps) {
   const prefersReducedMotion = useReducedMotion();

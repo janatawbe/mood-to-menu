@@ -1,3 +1,4 @@
+// Renders one grocery-category group of items (e.g. "Produce").
 import type { GroceryItem } from "../../types/domain";
 import type { GroceryCategory } from "../../lib/groceryCategories";
 import { GroceryItemRow } from "./GroceryItemRow";

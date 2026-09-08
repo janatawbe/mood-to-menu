@@ -1,12 +1,10 @@
+// Sidebar chef mascot: idle breathing, status-driven gestures, and its speech bubble.
 import { motion, useReducedMotion, type Transition } from "motion/react";
 import { getMoodTheme, hexToRgba } from "../../lib/moodTheme";
 import type { Mood } from "../../types/domain";
 import { ChefCharacter } from "./ChefCharacter";
 import type { SectionKey } from "./navConfig";
 
-/** Subtle contextual state for the sidebar chef during a Vibe Check — deliberately
- * light-touch for Milestone 2; the fuller chef personality system is Milestone 9.
- * "served" (Milestone 5) is the chef's brief reaction once a recipe is on screen. */
 export type ChefStatus = "welcoming" | "attentive" | "cooking" | "served";
 
 interface ChefMascotProps {
@@ -16,10 +14,9 @@ interface ChefMascotProps {
   /** The selected mood, when status is "attentive" — picks the chef's reaction
    * personality and the tint of the glow behind him. Ignored for other statuses. */
   mood?: Mood | null;
-  /** The sidebar's active section (Milestone 9) — only consulted while `status` is
-   * "welcoming" (nothing more specific — cooking/served/a chosen mood — is going on),
-   * so the idle chef's speech bubble says something small and relevant to whatever the
-   * user is actually looking at instead of always "Ready to help!". */
+  /** The sidebar's active section — only consulted while `status` is "welcoming", so
+   * the idle chef's speech bubble says something relevant to what's on screen instead
+   * of always "Ready to help!". */
   section?: SectionKey;
 }
 

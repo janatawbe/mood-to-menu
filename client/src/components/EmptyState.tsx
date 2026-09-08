@@ -1,3 +1,4 @@
+// Shared empty-state card (icon + title + description) used across most screens.
 import type { ReactNode } from "react";
 
 interface EmptyStateProps {

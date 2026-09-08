@@ -1,12 +1,12 @@
+// Recipe History localStorage persistence: load/save with per-entry validation and a cap.
 import { z } from "zod";
 import { recipeSchema } from "../schemas/recipe";
 import type { RecipeHistoryEntry } from "../types/domain";
 
 export const RECIPE_HISTORY_STORAGE_KEY = "mood-to-menu:recipe-history:v1";
 
-/** Recipe History isn't allowed to grow forever (Milestone 8, Step 7) — once it exceeds
- * this many entries, the oldest are dropped, newest kept. Favorites has no such cap:
- * this limit only ever applies to History. */
+/** Once History exceeds this many entries, the oldest are dropped. Favorites has no
+ * such cap — this limit only ever applies to History. */
 export const RECIPE_HISTORY_LIMIT = 50;
 
 const historyEntrySchema = z.object({

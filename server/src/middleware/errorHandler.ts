@@ -1,3 +1,4 @@
+// Last-resort Express error handler: logs the error, never leaks details to the client.
 import type { NextFunction, Request, Response } from "express";
 
 export function errorHandler(

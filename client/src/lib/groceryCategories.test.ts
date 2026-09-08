@@ -1,3 +1,4 @@
+// Tests grouping grocery items by category.
 import { describe, expect, it } from "vitest";
 import type { GroceryItem } from "../types/domain";
 import { CATEGORY_ORDER, categorizeIngredient, groupGroceryItems } from "./groceryCategories";

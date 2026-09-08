@@ -36,24 +36,18 @@ interface PanelPosition {
 }
 
 /**
- * A small custom mood picker (Milestone 8 UI pass) shared by Favorites and Recipe
- * History, replacing a plain native `<select>`. Each option carries a small dot in that
- * mood's existing `moodThemes` accent color (Vibe Check's own mood identity, not a new
- * palette) — "All moods" stays neutral (an outlined ring, no fill).
+ * Custom mood picker shared by Favorites and Recipe History, replacing a native
+ * `<select>` so each option can show its `moodThemes` accent dot ("All moods" stays a
+ * neutral outlined ring).
  *
- * Follows the WAI-ARIA "collapsible dropdown listbox" pattern: the trigger button stays
- * focused the whole time; opening moves DOM focus onto the listbox (`tabIndex={-1}`, so
- * it's reachable via script but not via Tab), and the active option is tracked with
- * `aria-activedescendant` rather than moving focus per-option. Escape/outside-click close
- * without changing the selection; Enter/Space on the active option selects and closes.
- * Filtering behavior itself is untouched — this only changes how `mood` is chosen.
+ * Follows the WAI-ARIA "collapsible listbox" pattern: the listbox owns focus while open
+ * (`tabIndex={-1}`) and tracks the active option via `aria-activedescendant` rather than
+ * moving focus per-option; Escape/outside-click close without changing the selection.
  *
- * The panel renders through a portal to `document.body`, positioned with `fixed`
- * coordinates from the trigger's own bounding box — both Favorites and Recipe History
- * wrap this control in a panel with `overflow-hidden` (for their internal scroll area),
- * which would otherwise clip an absolutely-positioned popover. It fades/scales in on
- * open (skipped under reduced motion) and unmounts immediately on close rather than
- * animating out, so closing is always instant and never leaves a dangling element.
+ * Renders through a portal to `document.body` with `fixed` coordinates from the
+ * trigger's bounding box, since both hosts clip an absolutely-positioned popover via
+ * their own `overflow-hidden` scroll area. Unmounts immediately on close (no exit
+ * animation) rather than animating out.
  */
 export function MoodFilterPicker({ mood, onMoodChange }: MoodFilterPickerProps) {
   const [open, setOpen] = useState(false);

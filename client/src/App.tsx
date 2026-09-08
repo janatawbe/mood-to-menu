@@ -1,3 +1,4 @@
+// Root component: runs the intro animation, then mounts the app shell.
 import { useState } from "react";
 import { AppShell } from "./features/shell/AppShell";
 import { IntroAnimation } from "./features/intro/IntroAnimation";

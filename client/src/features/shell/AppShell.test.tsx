@@ -1,3 +1,4 @@
+// Integration tests for AppShell: navigation and cross-feature data flow.
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Recipe } from "../../types/domain";
@@ -345,7 +346,7 @@ describe("AppShell favorites & recipe history integration", () => {
     expect(regenerateButton).toBeDisabled();
   });
 
-  it("nutrition survives Favorites persistence and reopening, with no extra Gemini call (Milestone 9)", async () => {
+  it("nutrition survives Favorites persistence and reopening, with no extra Gemini call", async () => {
     generateRecipeMock.mockResolvedValueOnce(
       makeRecipe({ servings: 4, nutrition: { calories: 520, proteinG: 21, carbohydratesG: 62, fatG: 20, fiberG: 8 } }),
     );
@@ -364,7 +365,7 @@ describe("AppShell favorites & recipe history integration", () => {
     expect(generateRecipeMock).toHaveBeenCalledTimes(1);
   });
 
-  it("nutrition survives Recipe History persistence and reopening (Milestone 9)", async () => {
+  it("nutrition survives Recipe History persistence and reopening", async () => {
     generateRecipeMock.mockResolvedValueOnce(
       makeRecipe({ servings: 4, nutrition: { calories: 520, proteinG: 21, carbohydratesG: 62, fatG: 20, fiberG: 8 } }),
     );

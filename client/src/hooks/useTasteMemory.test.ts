@@ -1,3 +1,4 @@
+// Tests the useTasteMemory hook: preference add/remove and persistence.
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { useTasteMemory } from "./useTasteMemory";

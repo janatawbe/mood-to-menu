@@ -13,11 +13,10 @@ const DISLIKED_INGREDIENT_SUGGESTIONS = ["Mushrooms", "Olives", "Cilantro"];
 const DIETARY_SUGGESTIONS = ["Vegetarian", "Vegan", "Pescatarian", "Halal", "Gluten-conscious", "Dairy-free"];
 
 /**
- * Where the user teaches their chef what they love (Milestone 7) — a real screen, not a
- * settings form: chip-based entries throughout, matching the Vibe Check's own quick-pick
- * pattern. Persists immediately on every change (see useTasteMemory), so this screen
- * doesn't need a Save button — the small caption below the heading is what makes that
- * obvious instead (Step 32).
+ * Where the user teaches their chef what they love — chip-based entries throughout,
+ * matching Vibe Check's own quick-pick pattern. Persists immediately on every change
+ * (see useTasteMemory), so there's no Save button — the caption below the heading makes
+ * that clear instead.
  */
 export function TasteMemoryScreen({ tasteMemory }: TasteMemoryScreenProps) {
   const { preferences, isEmpty, addPreference, removePreference } = tasteMemory;
@@ -26,14 +25,9 @@ export function TasteMemoryScreen({ tasteMemory }: TasteMemoryScreenProps) {
     <Panel className="relative flex flex-col overflow-hidden lg:h-full">
       <SectionHeader title="Taste Memory" subtitle="Teach your chef what you love." />
 
-      {/* Horizontal padding + matching negative margin: this div's overflow-y-auto
-          forces its overflow-x to an effective auto/clipped value too (per the CSS
-          overflow spec, a non-visible Y axis forces the X axis out of "visible"), which
-          was clipping the LEFT edge of the focus outline on the inputs below (they sit
-          flush against this box's own left edge, with no padding to absorb the ~4px the
-          outline+outline-offset extends past the input's border). The padding gives the
-          outline room before the actual clip boundary; the negative margin cancels the
-          padding's own inward shift so the content still lines up with the heading above. */}
+      {/* px + matching -mx: overflow-y-auto also clips overflow-x, which was cutting off
+          the left edge of the inputs' focus outline. The padding gives the outline room;
+          the negative margin cancels its inward shift so content still lines up above. */}
       <div className="mt-3 min-h-0 flex-1 overflow-y-auto px-1.5 -mx-1.5">
         <div className="flex flex-col gap-5 pb-2">
           {isEmpty && (
@@ -55,10 +49,8 @@ export function TasteMemoryScreen({ tasteMemory }: TasteMemoryScreenProps) {
             onRemove={(value) => removePreference("favoriteComfortFoods", value)}
           />
 
-          {/* A plain inserted hairline, not a divide-y border — since it's a real sibling
-              in this flex-col gap-5 stack, the existing 20px gap already lands evenly on
-              both sides of it for free, rather than needing extra padding math to
-              balance a border-based divider (Milestone 9 polish). */}
+          {/* A plain hairline sibling in this flex-col gap-5 stack — the existing gap
+              already lands evenly on both sides of it, no extra padding math needed. */}
           <div aria-hidden className="h-px w-full shrink-0 bg-tan-200/80" />
 
           <TastePreferenceSection

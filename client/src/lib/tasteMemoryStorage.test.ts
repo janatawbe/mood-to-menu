@@ -1,3 +1,4 @@
+// Tests Taste Memory localStorage persistence and validation.
 import { beforeEach, describe, expect, it } from "vitest";
 import { emptyTasteMemory, loadTasteMemory, saveTasteMemory, TASTE_MEMORY_STORAGE_KEY } from "./tasteMemoryStorage";
 

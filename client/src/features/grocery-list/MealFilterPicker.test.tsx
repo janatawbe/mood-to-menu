@@ -1,3 +1,4 @@
+// Tests the Grocery List meal-filter dropdown: search, selection, and keyboard nav.
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { GroceryItemSourceRecipe } from "../../types/domain";

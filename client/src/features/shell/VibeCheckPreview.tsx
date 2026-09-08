@@ -1,3 +1,4 @@
+// Vibe Check screen: mood grid, quick inputs, and the free-text input card.
 import { Panel } from "../../components/Panel";
 import { SectionHeader } from "../../components/SectionHeader";
 import { SparkleIcon } from "../../components/icons";

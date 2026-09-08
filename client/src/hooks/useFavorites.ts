@@ -3,13 +3,10 @@ import { loadFavorites, saveFavorites } from "../lib/favoritesStorage";
 import type { FavoriteRecipe, Recipe } from "../types/domain";
 
 /**
- * Single source of truth for Favorites (Milestone 8) — instantiated once in AppShell and
- * shared by Today's Menu (favorite/unfavorite the current recipe) and the Favorites
- * screen (viewing/removing), so both always see the same live state. Persistence is
- * centralized here: loads once on mount, saves on every change.
- *
- * New favorites are prepended, so `favorites` is always newest-saved-first (Step 28) —
- * no separate sort needed at read time.
+ * Single source of truth for Favorites — instantiated once in AppShell and shared by
+ * Today's Menu and the Favorites screen, so both see the same live state. Loads once on
+ * mount, saves on every change. New favorites are prepended, so `favorites` is always
+ * newest-saved-first with no separate sort needed.
  */
 export function useFavorites() {
   const [favorites, setFavorites] = useState<FavoriteRecipe[]>(() => loadFavorites());

@@ -1,3 +1,4 @@
+// Renders the sidebar: logo, nav list, and the chef mascot.
 import { AppLogo } from "../../components/AppLogo";
 import { NavigationItem } from "../../components/NavigationItem";
 import { CloseIcon } from "../../components/icons";
@@ -49,10 +50,8 @@ export function Sidebar({
               label={entry.label}
               active={activeSection === entry.key}
               onClick={() => onSelectSection(entry.key)}
-              // The desktop <aside> Sidebar stays mounted at all times, and the mobile
-              // overlay Sidebar mounts alongside it while open — two simultaneously-
-              // mounted instances would otherwise fight over the same shared
-              // layoutId-animated active pill (Milestone 9), so each gets its own.
+              // Desktop and mobile Sidebar can both be mounted at once (mobile overlay
+              // open) — namespace the layoutId-animated pill per instance.
               layoutGroup={onCloseMobile ? "mobile" : "desktop"}
             />
           </li>

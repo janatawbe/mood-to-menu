@@ -1,16 +1,11 @@
 import type { Mood } from "../types/domain";
 
 /**
- * Central mood-atmosphere configuration for Milestone 3's "dynamic mood experience."
- *
- * Scope boundary (important): this file owns the *surrounding atmosphere* — ambient
- * background glow, the selected mood card's identity, and subtle accents on the input/
- * sidebar/chef. It deliberately does NOT own each mood character's own illustrated SVG
- * palette (the sparkle/cloud/Zzz/ray/spark/heart colors inside MoodCharacter.tsx) — those
- * are hand-tuned illustration detail, not atmosphere, and stay where they are.
- *
- * Any screen that needs "the current mood's colors" (Today's Menu, etc. in later
- * milestones) should import `getMoodTheme` from here rather than re-deriving colors.
+ * Central mood-atmosphere configuration: ambient background glow, the selected mood
+ * card's identity, and subtle accents on the input/sidebar/chef. Deliberately does NOT
+ * own each mood character's own illustrated SVG palette (see MoodCharacter.tsx) — that's
+ * hand-tuned illustration detail, not atmosphere. Any screen that needs "the current
+ * mood's colors" should import `getMoodTheme` from here rather than re-deriving colors.
  */
 export interface MoodTheme {
   mood: Mood;
@@ -31,8 +26,8 @@ export interface MoodTheme {
   driftSeconds: number;
 }
 
-/** The neutral Mood-to-Menu look, used whenever no mood is selected — this is the
- * existing Milestone 1 warm cream/orange atmosphere, unchanged, not one of the six. */
+/** The neutral Mood-to-Menu look, used whenever no mood is selected — the app's default
+ * warm cream/orange atmosphere, not one of the six mood themes. */
 export const defaultTheme = {
   glow: { primary: "#FFCB9C", secondary: "#FFE3C6" },
 } as const;
@@ -126,9 +121,8 @@ export function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-/** The app-shell ambient wash: one broad top-left glow + one softer bottom-right glow,
- * matching the shape of the original Milestone 1 gradient so the default and mood washes
- * cross-fade into the same "light source" composition rather than a different layout. */
+/** The app-shell ambient wash: one broad top-left glow + one softer bottom-right glow, so
+ * the default and mood washes cross-fade into the same "light source" composition. */
 export function ambientWash(primary: string, secondary: string, primaryAlpha = 0.35, secondaryAlpha = 0.2) {
   return `radial-gradient(120% 90% at 15% 0%, ${hexToRgba(primary, primaryAlpha)} 0%, ${hexToRgba(primary, 0)} 55%), radial-gradient(90% 70% at 100% 100%, ${hexToRgba(secondary, secondaryAlpha)} 0%, ${hexToRgba(secondary, 0)} 60%)`;
 }

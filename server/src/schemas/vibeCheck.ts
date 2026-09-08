@@ -1,10 +1,11 @@
+// Runtime validation for the incoming Vibe Check request body.
 import { z } from "zod";
 import { MOODS, QUICK_INPUTS, type Mood } from "../types/domain.js";
 
 export const VIBE_CHECK_TEXT_LIMIT = 200;
 
-/** Milestone 7 Taste Memory limits — generous enough for real use, bounded enough that
- * a malicious/buggy client can't send a huge payload into the prompt. */
+/** Taste Memory limits — generous enough for real use, bounded enough that a
+ * malicious/buggy client can't send a huge payload into the prompt. */
 export const TASTE_ENTRY_MAX_LENGTH = 40;
 export const TASTE_LIST_MAX_ENTRIES = 20;
 
@@ -12,9 +13,8 @@ const tasteEntrySchema = z.string().trim().min(1).max(TASTE_ENTRY_MAX_LENGTH);
 const tasteListSchema = z.array(tasteEntrySchema).max(TASTE_LIST_MAX_ENTRIES);
 
 /** Every field optional — a first-time user has no saved Taste Memory at all, and that
- * must remain a perfectly valid request (see Milestone 7, Step 15). Never trusts the
- * client: malformed entries (wrong type, too long, too many) fail validation the same
- * way the rest of this request does. */
+ * must remain a valid request. Never trusts the client: malformed entries (wrong type,
+ * too long, too many) fail validation the same way the rest of this request does. */
 const tastePreferencesSchema = z
   .object({
     favoriteComfortFoods: tasteListSchema.optional(),

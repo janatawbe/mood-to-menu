@@ -3,11 +3,10 @@ import type { Mood, Recipe } from "../types/domain";
 export type MoodFilter = Mood | "all";
 
 /**
- * Shared local search/filter for Favorites and Recipe History (Milestone 8, Steps 25-26)
- * — generic over anything shaped like `{ recipe: Recipe }` (FavoriteRecipe and
- * RecipeHistoryEntry both qualify) so the same logic isn't duplicated per screen. Search
+ * Shared local search/filter for Favorites and Recipe History — generic over anything
+ * shaped like `{ recipe: Recipe }` so the logic isn't duplicated per screen. Search
  * matches dish name, mood, or tags (case-insensitive substring); the mood filter is an
- * exact match. Purely local string matching — no Gemini call, no fuzzy-search library.
+ * exact match. Purely local string matching, no fuzzy-search library.
  */
 export function filterSavedRecipes<T extends { recipe: Recipe }>(
   entries: T[],

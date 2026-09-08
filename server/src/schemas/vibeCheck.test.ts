@@ -1,3 +1,4 @@
+// Tests Vibe Check request schema validation.
 import { describe, expect, it } from "vitest";
 import { TASTE_ENTRY_MAX_LENGTH, TASTE_LIST_MAX_ENTRIES, vibeCheckRequestSchema } from "./vibeCheck.js";
 

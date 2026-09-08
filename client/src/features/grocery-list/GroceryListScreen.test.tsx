@@ -1,3 +1,4 @@
+// Tests the Grocery List screen: item actions, summary, and meal filtering.
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { UseGroceryListReturn } from "../../hooks/useGroceryList";
@@ -149,7 +150,7 @@ describe("GroceryListScreen", () => {
     expect(screen.getByRole("heading", { name: "Meat & Protein" })).toBeInTheDocument();
   });
 
-  describe("Filter by meal (Milestone 9)", () => {
+  describe("Filter by meal", () => {
     function twoMealItems() {
       return [
         makeItem({ id: "1", name: "Carrots", sourceRecipe: { id: "r1", dishName: "Root Vegetable Stew" } }),

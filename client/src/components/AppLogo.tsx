@@ -1,3 +1,4 @@
+// Renders the app wordmark and chef-hat mark, with an optional tagline.
 import { BrandMark } from "./BrandMark";
 
 interface AppLogoProps {

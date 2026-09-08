@@ -1,3 +1,4 @@
+// Grocery List localStorage persistence: load/save with per-entry validation.
 import { z } from "zod";
 import type { GroceryItem } from "../types/domain";
 

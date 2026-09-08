@@ -1,3 +1,4 @@
+// Tests the sidebar chef mascot: arrival state and section-aware messages.
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { ChefMascot } from "./ChefMascot";

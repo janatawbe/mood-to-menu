@@ -17,36 +17,17 @@ function toVibeCheckError(err: unknown): VibeCheckError {
     : { code: "INTERNAL_ERROR", message: "Something went wrong in the kitchen. Please try again." };
 }
 
-/**
- * Owns the Vibe Check's interaction state — mood selection, free text, quick-input
- * chips, the submit/loading/captured/error phase, and the current recipe — so it can be
- * lifted to a common ancestor (AppShell) and shared between the Vibe Check card, the
- * Today's Menu screen, and the sidebar's chef, without reaching for a full
- * state-management library.
- *
- * `submit`/`retry` call the real POST /api/recipes/generate endpoint (see
- * ../services/api.ts) — loading starts when the request goes out and ends only when a
- * valid recipe arrives or the request fails. `onGenerated` fires once, right after a
- * successful *initial* generation (i.e. from the Vibe Check form, not a Today's Menu
- * regeneration) — AppShell uses it to switch the active nav section to Today's Menu.
- *
- * `regenerate` is a separate action (Milestone 5, driven from Today's Menu) with its own
- * `isRegenerating`/`regenerateError` state, deliberately kept apart from `phase`/`error`
- * so a failed regeneration never destroys or hides the recipe currently on screen.
- *
- * `tastePreferences` (Milestone 7) is the *current* live Taste Memory from
- * `useTasteMemory()`, passed in fresh on every render — both `submit`/`retry` and
- * `regenerate` read it via their `useCallback` dependency array, so an edit made on the
- * Taste Memory screen during the session is picked up by the very next generation (initial
- * or regenerate) with no refresh required, and never rewrites a recipe already on screen.
- *
- * `onRecipeGenerated` (Milestone 8) fires once per *successful API response* — both the
- * initial generation and every successful regenerate — imperatively, right at the point
- * the response is validated, never from an effect watching `recipe`. AppShell uses it to
- * record exactly one Recipe History entry per generation; calling it this way means a
- * React StrictMode dev-mode double-render can never produce a duplicate history row,
- * since nothing here re-runs on remount the way an effect would.
- */
+// Owns Vibe Check's interaction state (mood, text, quick chips, phase, recipe) so it can
+// be shared between the Vibe Check card, Today's Menu, and the sidebar chef via one hook.
+//
+// `onGenerated` fires only after a successful *initial* generation, not a regenerate —
+// AppShell uses it to switch the active nav section to Today's Menu. `regenerate` keeps
+// its own `isRegenerating`/`regenerateError` state so a failed regeneration never hides
+// the recipe already on screen. `tastePreferences` is read fresh via closure on every
+// call, so a Taste Memory edit applies to the very next generation with no refresh.
+// `onRecipeGenerated` is called imperatively at the point a response is validated (not
+// from an effect watching `recipe`), so a React StrictMode double-render can't record a
+// duplicate Recipe History entry.
 export function useVibeCheck(
   onGenerated?: () => void,
   tastePreferences?: TastePreferences,
@@ -60,10 +41,9 @@ export function useVibeCheck(
   const [error, setError] = useState<VibeCheckError | null>(null);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [regenerateError, setRegenerateError] = useState<VibeCheckError | null>(null);
-  // Milestone 8: true whenever the recipe currently on screen was opened from
-  // Favorites/History rather than produced by the current selectedMood/userText/
-  // quickInputs — regeneration is disabled in that state (see `canRegenerate` below)
-  // rather than silently regenerating against unrelated current Vibe Check state.
+  // True when the on-screen recipe came from Favorites/History rather than the current
+  // Vibe Check inputs — disables regeneration (see `canRegenerate`) rather than silently
+  // regenerating against unrelated state.
   const [isReopenedRecipe, setIsReopenedRecipe] = useState(false);
 
   const toggleMood = useCallback((mood: Mood) => {
@@ -146,10 +126,9 @@ export function useVibeCheck(
     setError(null);
   }, []);
 
-  /** Opens a complete, already-validated Recipe from Favorites/History (Milestone 8) —
-   * no Gemini call, just displays the stored object via the same Today's Menu rendering
-   * path as a live generation. Marks it as reopened so Regenerate stays disabled until a
-   * real generation (with known, current Vibe Check context) replaces it. */
+  /** Opens an already-validated Recipe from Favorites/History — no Gemini call, just
+   * displays it via the same Today's Menu path as a live generation. Marks it reopened
+   * so Regenerate stays disabled until a real generation replaces it. */
   const openRecipe = useCallback((savedRecipe: Recipe) => {
     setError(null);
     setRegenerateError(null);

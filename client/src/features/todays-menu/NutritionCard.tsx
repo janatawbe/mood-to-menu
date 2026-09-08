@@ -13,11 +13,9 @@ const NUTRITION_CELLS: Array<{ key: keyof RecipeNutrition; label: string; unit: 
 ];
 
 /**
- * Nutritional Facts (Milestone 9) — AI-estimated, per serving, never lab-measured.
- * `recipe.nutrition` is optional (see types/domain.ts): a recipe saved to Favorites or
- * Recipe History before this milestone simply won't have it, and this section quietly
- * omits itself for that case rather than showing an empty/broken-looking block — no
- * Gemini call is ever made to backfill it for an old recipe.
+ * Nutritional Facts — AI-estimated, per serving, never lab-measured. `recipe.nutrition`
+ * is optional (see types/domain.ts): an older saved recipe without it simply omits this
+ * section rather than showing an empty block — no Gemini call is made to backfill it.
  */
 export function NutritionCard({ recipe }: NutritionCardProps) {
   const { nutrition, servings } = recipe;

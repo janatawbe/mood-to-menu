@@ -1,3 +1,4 @@
+// Tests the Vibe Check input card: form, loading, and error phases.
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { UseVibeCheckReturn, VibeCheckError } from "../../hooks/useVibeCheck";

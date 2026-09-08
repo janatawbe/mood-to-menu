@@ -1,20 +1,7 @@
+// Typed fetch wrapper for the backend recipe-generation API.
 import { z } from "zod";
 import { recipeSchema } from "../schemas/recipe";
 import type { Recipe, VibeCheck } from "../types/domain";
-
-const healthResponseSchema = z.object({
-  status: z.literal("ok"),
-});
-
-export type HealthResponse = z.infer<typeof healthResponseSchema>;
-
-export async function fetchHealth(): Promise<HealthResponse> {
-  const response = await fetch("/api/health");
-  if (!response.ok) {
-    throw new Error(`Health check failed with status ${response.status}`);
-  }
-  return healthResponseSchema.parse(await response.json());
-}
 
 /** The frontend never trusts a 200 response's shape just because the backend already
  * validated it; this is cheap insurance against a future backend/frontend drift. */

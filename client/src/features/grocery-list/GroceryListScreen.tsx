@@ -18,19 +18,12 @@ interface GroceryListScreenProps {
   onGoToVibeCheck: () => void;
 }
 
-/**
- * The real, persistent Grocery List (Milestone 6) — replaces the "coming soon"
- * placeholder. Deliberately stays in the permanent warm cream/orange brand language
- * rather than tinting itself to whichever mood was last active (Step 27): this list can
- * hold ingredients from many recipes/moods over time, so it should read as a stable,
- * practical utility rather than another mood-themed screen.
- *
- * "Filter by meal" (Milestone 9) is purely a DISPLAY filter: `summary` (and every
- * action below — Clear Completed, Clear All) always reads from the full, unfiltered
- * `items`/`summary` from `useGroceryList`, never from `visibleItems` — selecting a meal
- * only changes what's rendered in the list below, never what a destructive action or the
- * counts operate on.
- */
+// Renders the persistent Grocery List, grouped by category with a meal filter.
+//
+// "Filter by meal" is purely a display filter: `summary` and every action below (Clear
+// Completed, Clear All) always read from the full, unfiltered `items`/`summary`, never
+// `visibleItems` — selecting a meal only changes what's rendered, not what counts or
+// destructive actions operate on.
 export function GroceryListScreen({ groceryList, hasRecipe, onGoToTodaysMenu, onGoToVibeCheck }: GroceryListScreenProps) {
   const { items, summary, toggleChecked, removeItem, clearCompleted, clearAll } = groceryList;
   const [mealFilter, setMealFilter] = useState<MealFilter>(ALL_MEALS);

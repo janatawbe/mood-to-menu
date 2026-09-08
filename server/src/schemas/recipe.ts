@@ -1,16 +1,13 @@
+// Runtime validation for Gemini's structured output — every field is re-validated here
+// before a recipe leaves the server, never trusted on structured-output request alone.
+// Field limits are generous but bounded, so a single pathological response can't balloon
+// the payload.
 import { Type, type Schema } from "@google/genai";
 import { z } from "zod";
 import { MOODS, type Mood } from "../types/domain.js";
 
 const PREP_EFFORTS = ["low", "medium", "high"] as const;
 
-/**
- * Runtime validation for Gemini's structured output. Requesting structured output (see
- * ../services/gemini/schema.ts) makes malformed JSON unlikely, but the provider is never
- * trusted solely on that basis — every field is re-validated here before a recipe is
- * allowed to leave the server. Field limits are generous but bounded, so a single
- * pathological response can't balloon the payload.
- */
 /** AI-estimated, per serving — never lab-measured. Bounded to plausible per-serving
  * ranges for a home-cooked meal, the same "generous but bounded" philosophy as every
  * other field here, so one pathological Gemini response can't slip through. */

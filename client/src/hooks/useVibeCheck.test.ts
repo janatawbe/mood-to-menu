@@ -1,3 +1,4 @@
+// Tests the useVibeCheck hook: state transitions and generation flow.
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Recipe, TastePreferences } from "../types/domain";
@@ -207,7 +208,7 @@ describe("useVibeCheck", () => {
     });
   });
 
-  describe("openRecipe (Milestone 8)", () => {
+  describe("openRecipe", () => {
     it("displays the given recipe with no API call and marks it as reopened", () => {
       const { result } = renderHook(() => useVibeCheck());
       const saved = makeRecipe({ dishName: "Saved From Favorites" });
@@ -242,7 +243,7 @@ describe("useVibeCheck", () => {
     });
   });
 
-  describe("onRecipeGenerated (Milestone 8, Recipe History recording)", () => {
+  describe("onRecipeGenerated (Recipe History recording)", () => {
     it("fires exactly once with the recipe after a successful initial submit", async () => {
       generateRecipeMock.mockResolvedValueOnce(makeRecipe());
       const onRecipeGenerated = vi.fn();

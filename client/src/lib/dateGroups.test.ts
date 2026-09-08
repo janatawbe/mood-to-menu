@@ -1,3 +1,4 @@
+// Tests grouping recipe history entries by date.
 import { describe, expect, it } from "vitest";
 import { formatSavedTimestamp, groupByRelativeDay, relativeDayGroup } from "./dateGroups";
 

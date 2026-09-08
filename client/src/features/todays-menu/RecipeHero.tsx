@@ -8,8 +8,7 @@ import { SuccessSparkle } from "./SuccessSparkle";
 interface RecipeHeroProps {
   recipe: Recipe;
   /** True for a genuinely fresh generation — plays a brief one-time celebratory accent
-   * next to the eyebrow label (Milestone 9, Step 13). False for a reopened Favorite/
-   * History recipe, which never celebrates a generation that didn't just happen. */
+   * next to the eyebrow label. False for a reopened Favorite/History recipe. */
   celebrate?: boolean;
 }
 

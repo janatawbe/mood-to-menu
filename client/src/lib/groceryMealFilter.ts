@@ -1,3 +1,4 @@
+// Derives the "Filter by meal" option list and applies it to Grocery List items.
 import type { GroceryItem, GroceryItemSourceRecipe } from "../types/domain";
 
 /** The one non-recipe-id value the meal filter can hold — "show everything." */
@@ -7,11 +8,9 @@ export type MealFilter = string;
 
 /**
  * The distinct source recipes currently represented in the Grocery List, in first-seen
- * order — the dynamic option list for the "Filter by meal" picker (Milestone 9). Recipe
- * id is the real identity (a dish name is never assumed unique); a recipe contributing
- * multiple grocery items still appears exactly once here. Derived fresh from `items`
- * every time, so it's always in sync with what's actually on the list — nothing here is
- * itself persisted.
+ * order. Recipe id is the real identity (a dish name is never assumed unique); a recipe
+ * contributing multiple items still appears exactly once. Derived fresh from `items`
+ * every time, so it's always in sync with what's on the list.
  */
 export function deriveMealOptions(items: GroceryItem[]): GroceryItemSourceRecipe[] {
   const seen = new Map<string, GroceryItemSourceRecipe>();

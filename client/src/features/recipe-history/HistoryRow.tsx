@@ -12,12 +12,9 @@ interface HistoryRowProps {
 }
 
 /**
- * Recipe History's own row (Milestone 8 UI pass) — compact and list-like rather than a
- * card, so a long history scans quickly: the generated time sits in its own fixed-width
- * column on the left (a "timeline" cue), the dish name and mood stay on one line, and
- * "Open recipe" is a small text control rather than a full button, to keep the row's
- * height minimal. Several of these sit stacked with dividers between them (see
- * RecipeHistoryScreen), not spaced out in a grid like Favorites' cards.
+ * Recipe History's row — compact and list-like rather than a card, so a long history
+ * scans quickly: a fixed-width time column, dish name and mood on one line, and "Open
+ * recipe" as a small text control to keep row height minimal.
  */
 export function HistoryRow({ recipe, timeLabel, onOpen, onRemove, removeLabel }: HistoryRowProps) {
   return (

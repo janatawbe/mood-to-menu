@@ -1,3 +1,4 @@
+// Shared surface card with tone/interactive variants.
 import type { HTMLAttributes } from "react";
 
 type CardTone = "surface" | "cream" | "accent-soft";

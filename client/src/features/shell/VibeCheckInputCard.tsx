@@ -17,15 +17,11 @@ interface VibeCheckInputCardProps {
 }
 
 /**
- * The Vibe Check card's interactive footer — swaps between the editable form, a short
- * "chef is cooking" transition, and an error state, all inside the same footprint (via
- * `min-h`) so switching phases never shifts the heading, mood grid, or food-line
- * decoration below it.
- *
- * The form also renders for `phase === "captured"` (not just "idle"): once a recipe
- * exists, the actual reveal lives on the Today's Menu screen (see
- * ../todays-menu/TodaysMenuScreen), so returning to this card just means "edit and
- * resubmit," not "look at a summary again."
+ * The Vibe Check card's interactive footer — swaps between the editable form, a
+ * "cooking" transition, and an error state, all within the same footprint (`min-h`) so
+ * switching phases never shifts the content above it. The form also renders for
+ * `phase === "captured"`, since the actual reveal lives on Today's Menu — returning here
+ * just means "edit and resubmit."
  */
 export function VibeCheckInputCard({ vibeCheck }: VibeCheckInputCardProps) {
   const {

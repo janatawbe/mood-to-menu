@@ -32,18 +32,14 @@ interface PanelPosition {
 }
 
 /**
- * "Filter by meal" (Milestone 9) — a custom accessible dropdown in the same family as
- * Favorites/Recipe History's MoodFilterPicker (same WAI-ARIA "collapsible listbox"
- * pattern, same portal-to-`document.body`-with-fixed-position technique, since this too
- * lives inside a panel with `overflow-hidden`), extended with a small search field
- * because the option list here is dynamic and can get long. The search field itself
- * behaves like a lightweight combobox: it owns `aria-activedescendant` pointing into the
- * listbox below it and handles all the same arrow/Enter/Escape keys MoodFilterPicker's
- * listbox does, so a keyboard user never has to move focus off the input to navigate.
+ * "Filter by meal" — the same custom accessible-dropdown family as MoodFilterPicker
+ * (WAI-ARIA collapsible listbox, portal to `document.body` with fixed positioning to
+ * escape an `overflow-hidden` host), plus a search field since this option list is
+ * dynamic. The search input owns `aria-activedescendant` into the listbox and handles
+ * the same arrow/Enter/Escape keys, so keyboard users never leave the input.
  *
- * `meals` is the current, already-deduped-by-recipe-id option list (see
- * ../../lib/groceryMealFilter.ts) — this component only renders it and lets the caller
- * search-filter/select from it; it never touches Grocery List data itself.
+ * `meals` is the already-deduped-by-recipe-id option list (see groceryMealFilter.ts) —
+ * this only renders/searches it and never touches Grocery List data itself.
  */
 export function MealFilterPicker({ meals, value, onChange }: MealFilterPickerProps) {
   const [open, setOpen] = useState(false);

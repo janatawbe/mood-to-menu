@@ -1,3 +1,4 @@
+// Tests the useFavorites hook: add/remove and persistence.
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { Recipe } from "../types/domain";

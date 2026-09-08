@@ -1,3 +1,4 @@
+// Tests environment variable validation at startup.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("validateEnv", () => {

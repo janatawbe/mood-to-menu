@@ -1,3 +1,4 @@
+// Maps API error codes to user-facing title/message copy.
 import type { RecipeErrorCode } from "../services/api";
 
 export interface RecipeErrorCopy {

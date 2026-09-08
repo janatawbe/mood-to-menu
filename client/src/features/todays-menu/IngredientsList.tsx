@@ -8,10 +8,8 @@ interface IngredientsListProps {
   onAdd: (ingredient: RecipeIngredient) => void;
 }
 
-/** Two-column on wider screens, single column on narrow ones — supports any realistic
- * ingredient count (5 to 12+) without the layout breaking. Each row also gets a
- * compact, keyboard-accessible add-to-grocery-list affordance (Milestone 6, Step 7) —
- * a single small button, not a cluttered row of controls. */
+/** Two-column on wider screens, single column on narrow ones. Each row gets a compact,
+ * keyboard-accessible add-to-grocery-list button. */
 export function IngredientsList({ ingredients, isAdded, onAdd }: IngredientsListProps) {
   const prefersReducedMotion = useReducedMotion();
   return (

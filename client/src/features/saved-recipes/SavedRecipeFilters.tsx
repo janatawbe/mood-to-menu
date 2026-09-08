@@ -9,12 +9,7 @@ interface SavedRecipeFiltersProps {
   searchLabel: string;
 }
 
-/**
- * Shared search + mood filter for Favorites and Recipe History (Milestone 8, Steps
- * 25-26). The mood control is `MoodFilterPicker` (Milestone 8 UI pass) — a custom
- * listbox styled with the app's own mood colors, rather than a generic native
- * `<select>`; the search input stays a plain text field either way.
- */
+// Shared search + mood filter row for Favorites and Recipe History.
 export function SavedRecipeFilters({ query, onQueryChange, mood, onMoodChange, searchLabel }: SavedRecipeFiltersProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">

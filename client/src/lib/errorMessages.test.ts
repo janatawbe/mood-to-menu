@@ -1,3 +1,4 @@
+// Tests mapping API error codes to display copy.
 import { describe, expect, it } from "vitest";
 import { getFriendlyErrorMessage, getRecipeErrorCopy } from "./errorMessages";
 

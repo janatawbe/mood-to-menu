@@ -18,12 +18,9 @@ interface FavoriteRecipeCardProps {
 }
 
 /**
- * Favorites' own recipe card (Milestone 8 UI pass) — deliberately larger and warmer than
- * Recipe History's compact row: a bigger dish name, more breathing room, and a solid
- * filled heart (rather than a plain X) as the remove affordance, since every card here
- * is already favorited by definition — the heart *is* the "remove from favorites"
- * control, making the favorited state visually the star of the card instead of an
- * incidental icon.
+ * Favorites' recipe card — larger and warmer than Recipe History's compact row, with a
+ * solid filled heart (not a plain X) as the remove affordance, since every card here is
+ * already favorited: the heart *is* the remove control.
  */
 export function FavoriteRecipeCard({ recipe, timestampLabel, onOpen, onRemove, removeLabel }: FavoriteRecipeCardProps) {
   return (

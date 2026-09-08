@@ -1,3 +1,4 @@
+// Shared server-side domain types for Vibe Check and Recipe.
 export type Mood = "calm" | "stressed" | "tired" | "happy" | "energetic" | "cozy";
 
 export const MOODS: readonly Mood[] = ["calm", "stressed", "tired", "happy", "energetic", "cozy"];
