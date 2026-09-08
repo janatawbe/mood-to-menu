@@ -1,0 +1,50 @@
+# Both service Dockerfiles build from this repo root as their context (npm workspaces
+# share one root lockfile), so this single .dockerignore covers server/ and client/ alike.
+
+# Dependencies (installed fresh inside the image via `npm ci`)
+node_modules
+**/node_modules
+
+# Build output (rebuilt inside the image)
+dist
+**/dist
+build
+**/build
+
+# Git
+.git
+.gitignore
+
+# Secrets — never sent to the Docker build context
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Tests / coverage
+coverage
+**/coverage
+
+# Logs
+*.log
+npm-debug.log*
+logs
+**/logs
+
+# Editor / OS junk
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# TypeScript build cache
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# Sibling milestone worktrees, if this is ever built from the main checkout instead of
+# the docker-support worktree — would otherwise balloon the build context enormously.
+milestones
+
+# Not needed inside the image
+design-reference
+README.md
