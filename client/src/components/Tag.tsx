@@ -1,3 +1,4 @@
+// Shared pill-shaped chip/tag button, with optional mood-colored selected/hover state.
 import { useState, type ButtonHTMLAttributes, type CSSProperties, type FocusEvent, type MouseEvent } from "react";
 import { getMoodTheme, hexToRgba } from "../lib/moodTheme";
 import type { Mood } from "../types/domain";

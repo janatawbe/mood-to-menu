@@ -18,11 +18,7 @@ interface FavoritesScreenProps {
   onGoToVibeCheck: () => void;
 }
 
-/**
- * The real, persistent Favorites screen (Milestone 8) — replaces the "coming soon"
- * placeholder. Ordered newest-saved-first (useFavorites' own contract), with local
- * search + mood filtering; no ingredients/instructions here, cards stay scannable.
- */
+// Favorites screen: newest-saved-first, with local search + mood filtering.
 export function FavoritesScreen({ favorites, hasRecipe, onOpenRecipe, onGoToTodaysMenu, onGoToVibeCheck }: FavoritesScreenProps) {
   const [query, setQuery] = useState("");
   const [mood, setMood] = useState<MoodFilter>("all");
@@ -44,18 +40,9 @@ export function FavoritesScreen({ favorites, hasRecipe, onOpenRecipe, onGoToToda
             <SavedRecipeFilters query={query} onQueryChange={setQuery} mood={mood} onMoodChange={setMood} searchLabel="Search favorites" />
           </div>
 
-          {/* overflow-y-auto clips at THIS element's own top edge — so pt-2 here gives
-              real interior room (a genuine cushion inside the scrollport, not cancelled
-              by anything on a child) for the first row's hover lift to render into
-              without its top border being clipped/anti-aliased away. mt-2 (instead of
-              the original mt-4) on this same element keeps the total visual gap below
-              the toolbar unchanged (2(mt) + 2(pt) = 4, the original mt-4), so resting
-              spacing is identical to before — unlike a padding+negative-margin-on-a-
-              child pairing (which cancels the child's own benefit to zero; that's NOT
-              what TastePreferenceSection.tsx's px/-mx fix does — there, both classes
-              sit on the one scrolling element itself, so its children still get the
-              full padding as real slack while the element's own outer footprint is
-              corrected via its margin instead of a child's). */}
+          {/* pt-2 gives the first card's hover lift room to render before this element's
+              own overflow-y-auto clips at its top edge; mt-2 (down from mt-4) keeps the
+              total gap below the toolbar unchanged. */}
           <div className="mt-2 min-h-0 flex-1 overflow-y-auto pr-1 pt-2">
             {visible.length === 0 ? (
               <NoSearchResults

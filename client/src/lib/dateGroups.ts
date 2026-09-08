@@ -1,3 +1,4 @@
+// Groups Recipe History entries into Today/Yesterday/Earlier and formats timestamps.
 export type RelativeDayGroup = "Today" | "Yesterday" | "Earlier";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -7,10 +8,9 @@ function startOfDay(date: Date): number {
 }
 
 /**
- * Deterministic calendar-day grouping for Recipe History (Milestone 8, Step 16) — no
- * date library, just local Date math comparing calendar-day boundaries (not a raw
- * 24-hour window, so "yesterday at 11pm" and "today at 1am" group correctly even though
- * they're less than a day apart).
+ * Deterministic calendar-day grouping — no date library, just local Date math comparing
+ * calendar-day boundaries (not a raw 24-hour window), so "yesterday at 11pm" and "today
+ * at 1am" group correctly even though they're less than a day apart.
  */
 export function relativeDayGroup(iso: string, now: Date = new Date()): RelativeDayGroup {
   const diffDays = Math.round((startOfDay(now) - startOfDay(new Date(iso))) / DAY_MS);

@@ -1,3 +1,4 @@
+// Tests Recipe History localStorage persistence and validation.
 import { beforeEach, describe, expect, it } from "vitest";
 import type { Recipe, RecipeHistoryEntry } from "../types/domain";
 import { RECIPE_HISTORY_LIMIT, RECIPE_HISTORY_STORAGE_KEY, loadRecipeHistory, saveRecipeHistory } from "./recipeHistoryStorage";
@@ -41,7 +42,7 @@ describe("loadRecipeHistory", () => {
     expect(loadRecipeHistory()).toEqual(entries);
   });
 
-  it("round-trips nutrition/servings for a history entry that has them (Milestone 9)", () => {
+  it("round-trips nutrition/servings for a history entry that has them", () => {
     const entry = makeEntry({
       recipe: makeRecipe({ servings: 4, nutrition: { calories: 520, proteinG: 21, carbohydratesG: 62, fatG: 20, fiberG: 8 } }),
     });

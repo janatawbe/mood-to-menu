@@ -1,3 +1,4 @@
+// Tests the recipe reveal: sections rendered, nutrition, and success celebration.
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { UseFavoritesReturn } from "../../hooks/useFavorites";
@@ -225,7 +226,7 @@ describe("RecipeReveal", () => {
     expect(screen.getByText("09")).toBeInTheDocument();
   });
 
-  describe("Nutritional Facts (Milestone 9)", () => {
+  describe("Nutritional Facts", () => {
     it("shows the Nutritional Facts section for a recipe that has nutrition", () => {
       renderRecipe({
         servings: 4,

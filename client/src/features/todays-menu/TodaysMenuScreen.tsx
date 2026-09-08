@@ -14,16 +14,11 @@ interface TodaysMenuScreenProps {
 }
 
 /**
- * Today's Menu owns the polished recipe reveal (Milestone 5) — unlike the Vibe Check
- * panel, this screen's content can legitimately be taller than the viewport (a full
- * recipe), so it scrolls internally rather than trying to shrink to fit (see the
- * `overflow-y-auto` wrapper below, and `lg:h-screen` on the app shell in AppShell.tsx
- * that gives this panel a definite height to scroll within without ever stretching or
- * distorting the sidebar).
- *
- * Milestone 8: this is also where a Favorite/History recipe gets rendered once reopened
- * (see useVibeCheck's `openRecipe`) — `vibeCheck.recipe` is the same single source of
- * truth either way, so no separate recipe-detail UI is needed.
+ * Today's Menu: the recipe reveal, cooking state, or empty state. Content can be taller
+ * than the viewport, so it scrolls internally (`overflow-y-auto`, paired with
+ * `lg:h-screen` on AppShell) rather than shrinking to fit. Also renders a reopened
+ * Favorite/History recipe — `vibeCheck.recipe` is the same source of truth either way,
+ * so no separate recipe-detail UI is needed.
  */
 export function TodaysMenuScreen({ vibeCheck, groceryList, favorites, onGoToVibeCheck }: TodaysMenuScreenProps) {
   const { recipe, phase, isRegenerating, regenerateError, canRegenerate, isReopenedRecipe, regenerate } = vibeCheck;

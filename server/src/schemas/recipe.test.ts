@@ -1,3 +1,4 @@
+// Tests recipe response schema validation, including nutrition/servings.
 import { describe, expect, it } from "vitest";
 import { recipeContentSchema } from "./recipe.js";
 
@@ -82,7 +83,7 @@ describe("recipeContentSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  describe("nutrition and servings (Milestone 9)", () => {
+  describe("nutrition and servings", () => {
     it("rejects a missing nutrition object", () => {
       const recipe: Record<string, unknown> = validRecipe();
       delete recipe.nutrition;

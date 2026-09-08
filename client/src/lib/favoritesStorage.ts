@@ -1,3 +1,4 @@
+// Favorites localStorage persistence: load/save with per-entry validation.
 import { z } from "zod";
 import { recipeSchema } from "../schemas/recipe";
 import type { FavoriteRecipe } from "../types/domain";

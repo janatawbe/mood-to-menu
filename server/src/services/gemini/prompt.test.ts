@@ -1,3 +1,4 @@
+// Tests the Gemini prompt builder.
 import { describe, expect, it } from "vitest";
 import type { VibeCheckRequest } from "../../schemas/vibeCheck.js";
 import { buildUserContent, EMPATHETIC_CHEF_SYSTEM_PROMPT } from "./prompt.js";

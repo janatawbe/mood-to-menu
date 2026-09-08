@@ -1,3 +1,4 @@
+// One-time splash screen shown on first open per session, then dismissed automatically.
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { BrandMark } from "../../components/BrandMark";

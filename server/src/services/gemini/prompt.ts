@@ -1,3 +1,4 @@
+// Builds the Gemini system prompt and per-request user content for recipe generation.
 import type { VibeCheckRequest } from "../../schemas/vibeCheck.js";
 
 /**
@@ -63,10 +64,9 @@ Respond with ONLY the structured JSON described by the response schema — no ex
  * from whatever made the previous attempt fail validation.
  *
  * The "USER TASTE MEMORY" block is only appended when at least one saved preference
- * list is non-empty — a brand-new user with no Taste Memory yet gets no extra section
- * at all, not an empty/noisy one (Milestone 7, Step 39). Wording deliberately echoes the
- * system prompt's own precedence framing (soft preference vs. avoid/respect) so the
- * intent is unambiguous right next to the actual saved values. */
+ * list is non-empty — a brand-new user gets no extra section at all, not an empty one.
+ * Wording echoes the system prompt's own precedence framing (soft preference vs.
+ * avoid/respect) so the intent is unambiguous next to the actual saved values. */
 export function buildUserContent(input: VibeCheckRequest, correctionNote?: string): string {
   const lines: string[] = [];
   if (input.selectedMood) lines.push(`Selected mood: ${input.selectedMood}`);

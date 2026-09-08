@@ -12,11 +12,10 @@ interface NavigationItemProps {
   layoutGroup?: string;
 }
 
-/** Milestone 9: the active-item fill is its own layered `motion.span` sharing a
- * `layoutId` with every other NavigationItem in the same `layoutGroup` — Motion animates
- * it sliding from the previous active item to this one instead of an instant color
- * swap. Falls back to a plain instant swap under reduced motion (no `layoutId`, so
- * nothing slides). */
+/** Sidebar nav button. The active-item fill is a layered `motion.span` sharing a
+ * `layoutId` with every other item in the same `layoutGroup`, so Motion slides it
+ * between items instead of an instant color swap (falls back to an instant swap under
+ * reduced motion). */
 export function NavigationItem({ icon, label, active = false, onClick, layoutGroup = "default" }: NavigationItemProps) {
   const prefersReducedMotion = useReducedMotion();
 
@@ -30,13 +29,9 @@ export function NavigationItem({ icon, label, active = false, onClick, layoutGro
       }`}
     >
       {active && (
-        // No z-index here (in particular, NOT a negative one) — the icon/label spans
-        // below already paint on top of this thanks to plain DOM order (they come
-        // after it in the JSX), so this just needs to be a normal stacking-context
-        // layer. A negative z-index previously sent it stacking behind the sidebar
-        // <nav>'s own translucent bg-surface/95 background instead, which washed the
-        // solid brand-accent-strong orange down to a much fainter tint — restoring
-        // the original active-state color meant fixing this, not the color itself.
+        // No z-index here — DOM order alone puts the icon/label spans on top. A
+        // negative z-index previously sank this behind the sidebar's own translucent
+        // background, washing out the brand-accent orange.
         <motion.span
           layoutId={prefersReducedMotion ? undefined : `active-nav-pill-${layoutGroup}`}
           className="absolute inset-0 rounded-2xl bg-brand-accent-strong shadow-lift"

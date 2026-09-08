@@ -17,11 +17,8 @@ interface RecipeHistoryScreenProps {
   onGoToVibeCheck: () => void;
 }
 
-/**
- * The real, persistent Recipe History screen (Milestone 8) — replaces the "coming soon"
- * placeholder. Newest-generated-first, grouped into Today/Yesterday/Earlier sections
- * (Step 16), with the same local search + mood filtering as Favorites.
- */
+// Recipe History screen: newest-first, grouped by Today/Yesterday/Earlier, with the
+// same local search + mood filtering as Favorites.
 export function RecipeHistoryScreen({ history, onOpenRecipe, onGoToVibeCheck }: RecipeHistoryScreenProps) {
   const [query, setQuery] = useState("");
   const [mood, setMood] = useState<MoodFilter>("all");

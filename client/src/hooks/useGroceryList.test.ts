@@ -1,3 +1,4 @@
+// Tests the useGroceryList hook: item actions and derived summary.
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { GROCERY_STORAGE_KEY } from "../lib/groceryStorage";

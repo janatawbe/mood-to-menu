@@ -1,3 +1,4 @@
+// Tests Favorites localStorage persistence and validation.
 import { beforeEach, describe, expect, it } from "vitest";
 import type { FavoriteRecipe, Recipe } from "../types/domain";
 import { FAVORITES_STORAGE_KEY, loadFavorites, saveFavorites } from "./favoritesStorage";
@@ -41,7 +42,7 @@ describe("loadFavorites", () => {
     expect(loadFavorites()).toEqual(favorites);
   });
 
-  it("round-trips nutrition/servings for a favorite that has them (Milestone 9)", () => {
+  it("round-trips nutrition/servings for a favorite that has them", () => {
     const favorite = makeFavorite({
       recipe: makeRecipe({ servings: 4, nutrition: { calories: 520, proteinG: 21, carbohydratesG: 62, fatG: 20, fiberG: 8 } }),
     });
@@ -51,7 +52,7 @@ describe("loadFavorites", () => {
 
   it("still loads an old favorite with no nutrition/servings at all (backward compatibility)", () => {
     // No `nutrition`/`servings` keys present at all — simulates a favorite persisted
-    // before Milestone 9 introduced those fields.
+    // before those fields existed.
     const oldFavorite = { recipe: makeRecipe(), savedAt: "2025-06-01T00:00:00.000Z" };
     window.localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify([oldFavorite]));
 

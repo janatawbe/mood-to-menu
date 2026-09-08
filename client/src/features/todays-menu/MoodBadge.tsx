@@ -7,10 +7,9 @@ const sizeClasses = {
   sm: "gap-1 px-2 py-0.5 text-xs",
 };
 
-/** The recipe's own `detectedMood` is always a real value (never null), so this always
- * has a theme to draw from — unlike the Vibe Check card, which may have no mood
- * selected at all. `size="sm"` (Milestone 8) is a smaller variant for compact contexts
- * like Recipe History's rows — the default stays exactly as before everywhere else. */
+/** The recipe's own `detectedMood` is always a real value (never null), unlike the Vibe
+ * Check card's `selectedMood`. `size="sm"` is a smaller variant for compact contexts
+ * like Recipe History's rows. */
 export function MoodBadge({ mood, size = "md" }: { mood: Mood; size?: "sm" | "md" }) {
   const theme = moodThemes[mood];
   const label = moodPreviewEntries.find((entry) => entry.mood === mood)?.label ?? mood;

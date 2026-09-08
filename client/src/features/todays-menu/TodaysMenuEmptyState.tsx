@@ -1,3 +1,4 @@
+// Empty state shown on Today's Menu before any recipe has been generated.
 import { Button } from "../../components/Button";
 import { EmptyState } from "../../components/EmptyState";
 import { CalendarIcon } from "../../components/icons";

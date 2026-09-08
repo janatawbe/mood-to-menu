@@ -4,10 +4,9 @@ import type { TastePreferences } from "../types/domain";
 
 export type TasteListKey = keyof TastePreferences;
 
-/** Adding to one side of a like/dislike pair removes it from the other — the simplest
- * predictable conflict behavior (Milestone 7, Step 12): the same normalized ingredient
- * can never sit in both lists at once. Only these two lists conflict with each other;
- * comfort foods and dietary preferences don't conflict with anything. */
+/** Adding to one side of a like/dislike pair removes it from the other, so the same
+ * normalized ingredient can never sit in both lists at once. Comfort foods and dietary
+ * preferences don't conflict with anything. */
 const CONFLICTING_LIST: Partial<Record<TasteListKey, TasteListKey>> = {
   likedIngredients: "dislikedIngredients",
   dislikedIngredients: "likedIngredients",
@@ -43,12 +42,10 @@ function computeRemove(current: TastePreferences, key: TasteListKey, value: stri
 }
 
 /**
- * Single source of truth for Taste Memory (Milestone 7) — instantiated once in AppShell
- * and shared by the Taste Memory screen (editing) and `useVibeCheck` (reading the
- * current preferences into every generation/regeneration request), so both always see
- * the same live state, and edits during the session take effect on the very next
- * generation with no refresh needed. Persistence is centralized here: loads once on
- * mount, saves on every change.
+ * Single source of truth for Taste Memory — instantiated once in AppShell and shared by
+ * the Taste Memory screen (editing) and `useVibeCheck` (reading current preferences into
+ * every generation), so an edit during the session applies to the very next generation
+ * with no refresh needed.
  */
 export function useTasteMemory() {
   const [preferences, setPreferences] = useState<TastePreferences>(() => loadTasteMemory());

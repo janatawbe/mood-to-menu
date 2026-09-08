@@ -4,32 +4,25 @@ import { CartIcon, CheckIcon, HeartIcon, RefreshIcon } from "../../components/ic
 import type { VibeCheckError } from "../../hooks/useVibeCheck";
 import { getFriendlyErrorMessage } from "../../lib/errorMessages";
 
+// The Today's Menu action row: add ingredients, favorite, and regenerate.
 interface RecipeActionsProps {
   isRegenerating: boolean;
   canRegenerate: boolean;
   /** True while viewing a reopened Favorite/History recipe — Regenerate is disabled and
    * explains why via its title, rather than silently regenerating against unrelated
-   * current Vibe Check state (Milestone 8, Step 19). */
+   * current Vibe Check state. */
   isReopenedRecipe: boolean;
   regenerateError: VibeCheckError | null;
   onRegenerate: () => void;
-  /** True once every ingredient in the current recipe is already on the Grocery List —
-   * recomputed live from shared grocery state, so removing one on the Grocery List
-   * screen flips this back to false here too (Milestone 6, Step 22). */
+  /** True once every ingredient is already on the Grocery List — recomputed live from
+   * shared grocery state, so a removal on that screen flips this back to false here. */
   allIngredientsAdded: boolean;
   onAddAllIngredients: () => void;
-  /** Real, persistent Favorites state (Milestone 8) — recomputed live from shared
-   * favorites state by recipe id, so unfavoriting from the Favorites screen flips this
-   * back to false here too, the same way Grocery List's `allIngredientsAdded` does. */
+  /** Recomputed live from shared Favorites state by recipe id, so unfavoriting from the
+   * Favorites screen flips this back to false here too. */
   isFavorited: boolean;
   onToggleFavorite: () => void;
 }
-
-/**
- * Add to Grocery List, Save to Favorites, and Regenerate are all fully real: Grocery
- * List is backed by the shared `useGroceryList` state (Milestone 6), Favorites by the
- * shared `useFavorites` state (Milestone 8), Regenerate by the real Gemini request.
- */
 export function RecipeActions({
   isRegenerating,
   canRegenerate,

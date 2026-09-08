@@ -1,3 +1,4 @@
+// Ambient background wash and the hanging-plant decorative accent.
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import plantImage from "../../assets/decorations/plant.webp";
 import { ambientWash, getMoodTheme, hexToRgba } from "../../lib/moodTheme";
@@ -12,11 +13,10 @@ interface AmbientBackgroundProps {
 
 /**
  * Ambient glow behind the shell — a soft light-source wash plus three blurred blobs.
- * With no mood selected this renders exactly the original Milestone 1 warm wash (static,
- * unanimated). Selecting a mood cross-fades the wash into that mood's own glow colors and
- * starts a very slow, mood-paced drift on the two largest blobs — "the page feels
- * illuminated by the mood" rather than recolored. The third (sage) blob stays a constant,
- * unthemed anchor so the app never fully loses its own identity under a mood tint.
+ * With no mood selected this renders the default warm wash (static, unanimated).
+ * Selecting a mood cross-fades the wash into that mood's own glow colors and starts a
+ * slow, mood-paced drift on the two largest blobs. The third (sage) blob stays a
+ * constant, unthemed anchor so the app never fully loses its own identity.
  */
 export function AmbientBackground({ mood = null }: AmbientBackgroundProps) {
   const prefersReducedMotion = useReducedMotion();

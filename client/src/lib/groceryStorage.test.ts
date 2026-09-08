@@ -1,3 +1,4 @@
+// Tests Grocery List localStorage persistence and validation.
 import { beforeEach, describe, expect, it } from "vitest";
 import type { GroceryItem } from "../types/domain";
 import { GROCERY_STORAGE_KEY, loadGroceryItems, saveGroceryItems } from "./groceryStorage";

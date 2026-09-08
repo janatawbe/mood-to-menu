@@ -12,12 +12,9 @@ function dedupeKey(name: string, amount: string): string {
 
 /**
  * Single source of truth for the grocery list — instantiated once in AppShell and
- * shared by Today's Menu (adding ingredients) and the Grocery List screen (viewing/
- * checking/removing them), so both always see the same live state (Milestone 6, Step
- * 23). Persistence is centralized here: loads once on mount, saves on every change.
- *
- * Independent of the current recipe on purpose (Step 25) — nothing here is cleared by
- * regenerating or navigating away from Today's Menu.
+ * shared by Today's Menu and the Grocery List screen, so both see the same live state.
+ * Loads once on mount, saves on every change. Independent of the current recipe on
+ * purpose: nothing here is cleared by regenerating or navigating away.
  */
 export function useGroceryList() {
   const [items, setItems] = useState<GroceryItem[]>(() => loadGroceryItems());
@@ -27,16 +24,11 @@ export function useGroceryList() {
   }, [items]);
 
   /**
-   * Adds any ingredients not already present *from that same source recipe* (exact
-   * name+amount match, case/whitespace-insensitive) — repeated "Add all" clicks, or an
-   * individual add followed by "Add all", never produce duplicate rows, and existing
-   * items (including their checked state) are left completely untouched. Ingredients
-   * from a *different* recipe are always kept as separate entries, even if the name and
-   * amount happen to match — see Step 15's "2 tomatoes vs 3 tomatoes" case: merging
-   * those would require unsafe unit arithmetic this app doesn't attempt.
-   *
-   * Returns how many new items were actually added, so callers can give accurate
-   * feedback ("Added" vs "already on your list").
+   * Adds ingredients not already present *from that same source recipe* (exact
+   * name+amount match, case/whitespace-insensitive) — repeated "Add all" clicks never
+   * produce duplicates, and existing items keep their checked state. Ingredients from a
+   * *different* recipe are always kept separate even if name/amount match, since merging
+   * them would require unsafe unit arithmetic. Returns how many items were added.
    */
   const addIngredients = useCallback(
     (ingredients: RecipeIngredient[], sourceRecipe: GroceryItemSourceRecipe): number => {
@@ -79,8 +71,8 @@ export function useGroceryList() {
   );
 
   /** Whether this exact ingredient (from this exact recipe) is already on the list —
-   * reads live `items` state, so removing it from the Grocery List screen is reflected
-   * back on Today's Menu immediately (Step 22), no separate/stale copy of the data. */
+   * reads live `items` state, so a removal on the Grocery List screen is reflected back
+   * on Today's Menu immediately. */
   const isIngredientAdded = useCallback(
     (ingredient: RecipeIngredient, sourceRecipeId: string): boolean => {
       const key = dedupeKey(ingredient.name, ingredient.amount);

@@ -1,3 +1,4 @@
+// Shared eyebrow/title/subtitle heading used at the top of each screen.
 import type { ReactNode } from "react";
 
 interface SectionHeaderProps {

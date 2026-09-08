@@ -4,11 +4,9 @@ interface NoMealResultsProps {
   onShowAllMeals: () => void;
 }
 
-/** Distinct from GroceryListEmptyState (Milestone 9, Step "SEARCH + FILTER EMPTY
- * STATE") — shown only when the Grocery List has items but the selected meal filter
- * currently matches none of them (normally just a brief instant before the filter
- * auto-resets to "All meals" once that meal's last item disappears; kept as a real state
- * too, in case a caller ever lands here another way). */
+/** Distinct from GroceryListEmptyState — shown when the list has items but the selected
+ * meal filter matches none of them (usually just an instant before it auto-resets to
+ * "All meals"). */
 export function NoMealResults({ onShowAllMeals }: NoMealResultsProps) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-tan-200 bg-cream-soft px-6 py-12 text-center">

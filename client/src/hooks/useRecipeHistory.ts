@@ -3,12 +3,11 @@ import { loadRecipeHistory, RECIPE_HISTORY_LIMIT, saveRecipeHistory } from "../l
 import type { Recipe, RecipeHistoryEntry } from "../types/domain";
 
 /**
- * Single source of truth for Recipe History (Milestone 8) — instantiated once in
- * AppShell. `recordGeneration` is called exactly once per successful Gemini response
- * (see useVibeCheck's `onRecipeGenerated`, invoked imperatively at the point a request
- * succeeds — never from a `useEffect` watching the current recipe, which is what would
- * risk a duplicate row under React StrictMode's dev-mode double-invoke). New entries are
- * prepended, so `history` is always newest-generated-first (Step 29) with no extra sort.
+ * Single source of truth for Recipe History — instantiated once in AppShell.
+ * `recordGeneration` is called imperatively, once per successful Gemini response (see
+ * useVibeCheck's `onRecipeGenerated`), never from an effect — that would risk a
+ * duplicate row under React StrictMode's double-invoke. Entries are prepended, so
+ * `history` is always newest-first.
  */
 export function useRecipeHistory() {
   const [history, setHistory] = useState<RecipeHistoryEntry[]>(() => loadRecipeHistory());

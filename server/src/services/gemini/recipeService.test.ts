@@ -1,3 +1,4 @@
+// Tests recipe generation: validation, retries, and error handling.
 import { ApiError } from "@google/genai";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { VibeCheckRequest } from "../../schemas/vibeCheck.js";

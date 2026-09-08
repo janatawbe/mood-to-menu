@@ -1,3 +1,4 @@
+// Tests the Taste Memory screen: adding/removing preferences across sections.
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { UseTasteMemoryReturn } from "../../hooks/useTasteMemory";

@@ -1,3 +1,4 @@
+// GET /api/health — used by the Docker healthcheck and local diagnostics.
 import { Router } from "express";
 import { z } from "zod";
 

@@ -1,3 +1,4 @@
+// Tests the loading-state chef line copy.
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { LoadingChefLine } from "./LoadingChefLine";

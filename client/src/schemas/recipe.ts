@@ -12,18 +12,13 @@ const nutritionSchema = z.object({
 });
 
 /**
- * The one shared definition of "what a valid Recipe object looks like" on the client —
- * mirrors the server's recipeContentSchema (server/src/schemas/recipe.ts) plus the
- * server-generated `id`. Reused by the API response parser (services/api.ts) and by
- * Favorites/Recipe History storage validation (Milestone 8), so there's exactly one
- * place that defines this shape instead of drifting duplicate copies.
+ * The one shared definition of a valid Recipe on the client — mirrors the server's
+ * recipeContentSchema plus the server-generated `id`. Used by the API response parser
+ * and by Favorites/Recipe History storage validation.
  *
- * `servings`/`nutrition` are `.optional()` — unlike the server's own required fields —
- * specifically so this same schema keeps validating Favorites/Recipe History entries
- * already persisted in localStorage from before Milestone 9, which predate both fields
- * entirely. A live API response always has them (the server never omits them for a
- * fresh generation), so making them optional here costs nothing for new recipes and
- * only relaxes what's tolerated for old ones.
+ * `servings`/`nutrition` are `.optional()` here (unlike the server's required fields) so
+ * this same schema still validates Favorites/History entries persisted before those
+ * fields existed — a live API response always includes them.
  */
 export const recipeSchema = z.object({
   id: z.string().min(1),

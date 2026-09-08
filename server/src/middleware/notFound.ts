@@ -1,3 +1,4 @@
+// Fallback 404 handler for unmatched /api routes.
 import type { Request, Response } from "express";
 
 export function notFoundHandler(req: Request, res: Response): void {

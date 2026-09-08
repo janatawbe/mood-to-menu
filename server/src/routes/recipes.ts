@@ -1,3 +1,4 @@
+// POST /api/recipes/generate — validates the request, then calls the Gemini service.
 import { Router } from "express";
 import { vibeCheckRequestSchema } from "../schemas/vibeCheck.js";
 import { generateRecipe } from "../services/gemini/recipeService.js";

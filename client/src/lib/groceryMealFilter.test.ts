@@ -1,3 +1,4 @@
+// Tests deriving and applying the Grocery List meal filter.
 import { describe, expect, it } from "vitest";
 import type { GroceryItem } from "../types/domain";
 import { ALL_MEALS, deriveMealOptions, filterGroceryItemsByMeal } from "./groceryMealFilter";

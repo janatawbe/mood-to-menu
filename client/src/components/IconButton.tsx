@@ -7,8 +7,8 @@ interface IconButtonProps
   label: string;
 }
 
-/** Milestone 9: a small tactile press state (skipped under reduced motion) — icon-only
- * buttons (remove/close/add controls throughout the app) funnel through this component. */
+/** Shared icon-only button (remove/close/add controls) with a tactile press state,
+ * skipped under reduced motion. */
 export function IconButton({ icon, label, className = "", ...props }: IconButtonProps) {
   const prefersReducedMotion = useReducedMotion();
   return (

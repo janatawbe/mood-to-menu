@@ -1,3 +1,4 @@
+// Taste Memory localStorage persistence: load/save with per-entry validation.
 import { z } from "zod";
 import type { TastePreferences } from "../types/domain";
 

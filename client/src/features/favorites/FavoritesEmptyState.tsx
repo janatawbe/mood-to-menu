@@ -8,12 +8,10 @@ interface FavoritesEmptyStateProps {
 }
 
 /**
- * A bespoke empty state (Milestone 8 UI pass) — leans into the "personal cookbook"
- * framing with a larger filled heart badge, unlike the plain icon used by History/
- * Grocery List's shared `EmptyState`. Its outer card now matches that shared
- * component's container language exactly (rounded-3xl, dashed tan border, no shadow)
- * so it reads as the same card family at a glance, even though the icon/copy stay
- * Favorites-specific.
+ * A bespoke empty state that leans into the "personal cookbook" framing with a larger
+ * filled heart badge, unlike the plain icon used by History/Grocery List's shared
+ * `EmptyState`. The outer card still matches that shared component's container language
+ * (rounded-3xl, dashed tan border, no shadow) so it reads as the same card family.
  */
 export function FavoritesEmptyState({ hasRecipe, onGoToTodaysMenu, onGoToVibeCheck }: FavoritesEmptyStateProps) {
   return (

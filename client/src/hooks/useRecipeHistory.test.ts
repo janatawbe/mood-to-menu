@@ -1,3 +1,4 @@
+// Tests the useRecipeHistory hook: recording and clearing entries.
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { RECIPE_HISTORY_LIMIT } from "../lib/recipeHistoryStorage";

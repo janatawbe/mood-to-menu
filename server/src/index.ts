@@ -1,3 +1,4 @@
+// Express app entry point: wires up middleware and routes, then starts listening.
 import express from "express";
 import { env, validateEnv } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";

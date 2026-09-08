@@ -1,3 +1,4 @@
+// A single selectable mood tile in the Vibe Check mood grid.
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { moodGlowShadow, moodThemes } from "../../lib/moodTheme";

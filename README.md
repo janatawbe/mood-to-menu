@@ -1,121 +1,143 @@
 # Mood-to-Menu
 
-Mood-to-Menu is an AI culinary companion. Once complete, it will let a user describe how
-they're feeling, analyze that mood with the Gemini API, and recommend meals that match the
-vibe — along with ingredients, reasoning, and cooking instructions.
+An AI-powered culinary companion that turns mood, cravings, and personal taste
+preferences into personalized meal ideas — mood in, a real recipe out, with reasoning,
+ingredients, and cooking instructions.
 
-**This repository is currently at Milestone 0: Project Foundation & Architecture.** No mood
-analysis, AI integration, or recipe features exist yet — see [Milestone 0 Status](#milestone-0-status)
-below for exactly what's implemented.
+## Features
 
-## Architecture
+- **Vibe Check** — pick a mood, add free text, or use quick prompts to describe how
+  you're feeling
+- **Dynamic mood-based interface** — the app's colors, ambient background, and chef
+  reactions shift with the selected mood
+- **Gemini-powered recipe generation** — a personalized, cookable recipe with reasoning
+  tied to your mood and request
+- **Today's Menu** — the full recipe reveal: ingredients, instructions, prep time, and a
+  chef's tip
+- **Nutritional Facts** — an AI-estimated, per-serving nutrition breakdown
+- **Grocery List** — add ingredients straight from a recipe, check them off, and clear
+  completed/all items
+- **Grocery List meal filtering & search** — filter the list down to one recipe's
+  ingredients via a searchable picker
+- **Taste Memory** — save comfort foods, liked/disliked ingredients, and dietary
+  preferences that influence future recipes
+- **Favorites** — save recipes to revisit later, with search and mood filtering
+- **Recipe History** — a chronological record of every recipe you've generated
+- **Chef personality & delight** — a sidebar chef mascot with contextual messages,
+  loading-state personality, and subtle success/favorite feedback
+- **Persistent local storage** — Favorites, Recipe History, Grocery List, and Taste
+  Memory all persist across sessions in the browser
+- **Responsive & accessible** — works down to mobile widths, with keyboard-navigable
+  custom dropdowns, visible focus states, and full `prefers-reduced-motion` support
+- **Docker support** — run the whole app with one command via Docker Compose
 
-```
-React Frontend  →  /api/*  →  Express Backend  →  Gemini API (future milestone)
-```
-
-- The browser only ever talks to the Express backend, via same-origin `/api/*` requests.
-- In development, Vite proxies `/api/*` to the Express server so the frontend never
-  hardcodes a backend URL.
-- The Gemini API key will live server-side only when it's introduced in a later milestone —
-  the browser will never call Gemini directly.
-
-## Technology Stack
+## Tech Stack
 
 **Frontend**
 
-- React + Vite + TypeScript
+- React
+- TypeScript
+- Vite
 - Tailwind CSS
 - Motion (Framer Motion)
 - Zod (runtime validation)
 
 **Backend**
 
-- Node.js + Express + TypeScript
+- Node.js
+- Express
+- TypeScript
 - Zod (runtime validation)
+- Google Gemini via `@google/genai`
 
-**Tooling**
+**Infrastructure**
 
+- Docker
+- Docker Compose
+- Nginx
+
+**Testing & Tooling**
+
+- Vitest
+- React Testing Library
 - ESLint + Prettier
-- npm workspaces + `concurrently` for a single-command dev environment
+- npm workspaces + `concurrently`
+
+## Architecture
+
+```
+Browser → React frontend → /api/* → Express backend → Gemini API
+```
+
+- The browser only ever talks to one origin, via same-origin `/api/*` requests — it
+  never calls Gemini directly and never sees the API key.
+- **Local development:** Vite's dev server proxies `/api/*` to the Express backend.
+- **Docker/production:** Nginx serves the built frontend and proxies `/api/*` to the
+  Express container over Docker's internal network (see [Docker](#docker) below).
 
 ## Project Structure
 
 ```
 mood-to-menu/
-├── client/                  # React + Vite + TypeScript frontend
-│   ├── src/
-│   │   ├── components/      # (empty for now — reusable UI components)
-│   │   ├── features/        # (empty for now — feature-scoped modules)
-│   │   ├── hooks/           # (empty for now — custom React hooks)
-│   │   ├── lib/             # (empty for now — general utilities)
-│   │   ├── services/        # api.ts — typed fetch wrapper for the backend
-│   │   ├── types/           # domain.ts — Mood, Ingredient, Recipe, TastePreferences
-│   │   ├── App.tsx          # temporary API health-check verification screen
-│   │   └── main.tsx
-│   └── .env.example
+├── client/
+│   └── src/
+│       ├── components/   # Shared UI primitives (Button, Card, icons, ...)
+│       ├── features/     # Screens and feature-specific components, by domain
+│       ├── hooks/        # Shared state hooks (useFavorites, useGroceryList, ...)
+│       ├── lib/          # Storage, search/filter, and other pure utilities
+│       ├── schemas/      # Client-side Zod validation
+│       ├── services/     # Backend API client
+│       └── types/        # Shared domain types
 │
-├── server/                  # Express + TypeScript backend
-│   ├── src/
-│   │   ├── config/          # env.ts — environment variable loading
-│   │   ├── middleware/      # notFound.ts, errorHandler.ts
-│   │   ├── routes/          # health.ts — GET /api/health
-│   │   ├── services/        # (empty for now — e.g. future Gemini service)
-│   │   ├── types/           # domain.ts — Mood, Ingredient, Recipe, TastePreferences
-│   │   └── index.ts         # Express app entry point
-│   └── .env.example
+├── server/
+│   └── src/
+│       ├── config/       # Environment variable loading/validation
+│       ├── middleware/   # Express error/404 handling
+│       ├── routes/       # /api/health, /api/recipes/generate
+│       ├── schemas/      # Request/response Zod validation
+│       ├── services/     # Gemini prompt, client, and recipe generation
+│       └── types/        # Shared domain types
 │
-├── package.json             # npm workspaces root — dev/build/lint/typecheck scripts
-└── README.md
+├── docker-compose.yml
+├── client/Dockerfile
+├── server/Dockerfile
+└── package.json          # npm workspaces root — dev/build/lint/typecheck scripts
 ```
 
-**Note on shared types:** `client/src/types/domain.ts` and `server/src/types/domain.ts`
-currently hold identical domain types (`Mood`, `Ingredient`, `Recipe`, `TastePreferences`).
-They're intentionally duplicated rather than pulled from a shared package — a shared
-workspace package would need its own build/type-emit step for `tsc` to consume from the
-server, which is more tooling than four small interfaces justify at this stage. If the type
-surface grows in a later milestone, this is the natural point to introduce a `shared/`
-workspace package.
+## Local Development
 
-## Prerequisites
+**Prerequisites**
 
 - Node.js 20+ (developed against Node 22)
 - npm 10+
 
-## Installation
-
-From the repository root (this project uses npm workspaces, so one install covers both
-`client` and `server`):
+**Install** (from the repository root — npm workspaces cover both `client` and `server`
+with one install):
 
 ```bash
 npm install
 ```
 
-## Environment Variables
-
-Copy the example env file and fill in values as needed:
+**Environment**
 
 ```bash
 cp server/.env.example server/.env
 ```
 
-`server/.env`:
+Then fill in `server/.env`:
 
 ```env
 PORT=3001
-GEMINI_API_KEY=
+GEMINI_API_KEY=your_api_key_here
+GEMINI_MODEL=
 ```
 
-- `PORT` — port the Express server listens on (defaults to `3001` if unset).
-- `GEMINI_API_KEY` — reserved for a later milestone. Leave empty for now; do not commit a
-  real key. It is only ever read on the server.
+- `GEMINI_API_KEY` is required — the server fails fast at startup without it.
+- `GEMINI_MODEL` is optional; it overrides the default Gemini model.
+- The client has no environment variables of its own — it talks to the backend through
+  the relative `/api` path.
 
-The client has no environment variables of its own yet (see `client/.env.example`) — it
-talks to the backend through the relative `/api` path.
-
-## Development
-
-Run both the frontend and backend together:
+**Run**
 
 ```bash
 npm run dev
@@ -125,59 +147,32 @@ npm run dev
 - Backend (Express): http://localhost:3001
 - The frontend's `/api/*` requests are proxied to the backend automatically.
 
-Run them individually if needed:
+Or run them individually:
 
 ```bash
 npm run dev:client
 npm run dev:server
 ```
 
-## Other Commands
-
-```bash
-npm run build       # type-checks and builds both client and server for production
-npm run typecheck   # runs the TypeScript compiler (no emit) for both workspaces
-npm run lint         # runs ESLint for both workspaces
-npm run format       # formats the repo with Prettier
-npm run format:check # checks formatting without writing changes
-```
-
 ## Docker
 
 The app can also be run as two containers — an Nginx-served frontend and an Express
-backend — via Docker Compose. This is purely a deployment/setup convenience; it does not
-replace normal local development (`npm run dev` above still works exactly as before).
-
-```
-Browser → http://localhost:8080 → Nginx (client container) → /api/* → server:3001 (backend container) → Gemini API
-```
-
-Nginx serves the built React app and proxies any `/api/*` request to the backend
-container over Docker's internal network — the browser only ever talks to one origin
-(`localhost:8080`), the same relative-`/api`-path pattern the app already uses in dev.
+backend — via Docker Compose. This is a deployment/setup convenience; it does not
+replace local development (`npm run dev` above still works exactly as before).
 
 **Prerequisites**
 
-- Docker Desktop (Docker Engine + Compose v2 — the `docker compose` subcommand, not the
-  legacy standalone `docker-compose`)
+- Docker Desktop (Docker Engine + Compose v2 — the `docker compose` subcommand)
 
 **Environment**
 
-Docker reads the same `server/.env` file normal local development uses — create it if you
-haven't already:
-
-```bash
-cp server/.env.example server/.env
-```
-
-Fill in `GEMINI_API_KEY` (and `GEMINI_MODEL` if you want to override the default model).
-This file is never copied into an image — Compose loads it into the `server` container's
-environment at startup only, so the key never gets baked into a build.
+Docker reads the same `server/.env` file local development uses — create it first if
+you haven't (see [Local Development](#local-development) above).
 
 **Run**
 
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
 
 Then open:
@@ -186,16 +181,10 @@ Then open:
 http://localhost:8080
 ```
 
-**Stop**
+Health check (through Nginx to Express):
 
-```bash
-docker compose down
 ```
-
-**Rebuild** (after dependency or code changes)
-
-```bash
-docker compose up --build
+http://localhost:8080/api/health
 ```
 
 **Logs**
@@ -204,47 +193,49 @@ docker compose up --build
 docker compose logs -f
 ```
 
+**Stop**
+
+```bash
+docker compose down
+```
+
 **Notes**
 
 - The frontend is served entirely by Nginx (static files) — the Vite dev server never
   runs in the Docker image.
 - `/api/*` is proxied by Nginx to the Express container; the backend container does not
-  publish a port to the host, since nothing outside the Nginx container needs to reach it
-  directly.
+  publish a port to the host.
 - The Gemini API key is supplied at container runtime only, via `server/.env` — it is
   never present in a Dockerfile, `docker-compose.yml`, or a built image layer.
-- `GET /api/health` (already used by the app) doubles as the backend's Docker
-  healthcheck; the client container waits for it to report healthy before starting.
 
-## Milestone 0 Status
+## Testing & Quality Checks
 
-Implemented:
+```bash
+npm run test         # runs server and client test suites (Vitest + React Testing Library)
+npm run typecheck    # runs the TypeScript compiler (no emit) for both workspaces
+npm run lint         # runs ESLint for both workspaces
+npm run build        # type-checks and builds both client and server for production
+```
 
-- React + Vite + TypeScript frontend scaffold, with unused Vite demo content removed.
-- Express + TypeScript backend scaffold with a clean structure for future config,
-  middleware, routes, and services.
-- Tailwind CSS configured and working.
-- Motion and Zod installed and ready for later milestones (not yet used for animations or
-  schema validation beyond a minimal health-check response).
-- `GET /api/health` implemented on the backend, returning `{ "status": "ok" }`.
-- Vite dev proxy forwards `/api/*` to the Express backend — no hardcoded backend URL in the
-  frontend.
-- A temporary, minimally styled screen that calls `/api/health` on load and displays
-  "API Status: Connected" or "Disconnected" — this verifies the frontend and backend can
-  communicate. It is not the real Mood-to-Menu interface.
-- Initial domain types for `Mood`, `Ingredient`, `Recipe`, and `TastePreferences`.
-- `.env.example` files for both client and server; real `.env` files and other secrets are
-  git-ignored. No Gemini API key exists anywhere in this repository.
-- ESLint + Prettier configured for both workspaces.
-- Root-level `npm run dev` / `build` / `lint` / `typecheck` scripts.
+To run a single workspace, add `--workspace=client` or `--workspace=server` to any of
+the above.
 
-Not implemented (intentionally out of scope for Milestone 0):
+## Environment & Security
 
-- Gemini API integration, mood analysis, or AI prompts.
-- Recipe generation, recipe cards, or recipe images.
-- The real Mood Entrance / Vibe Check UI, mood cards, dynamic mood colors, or chef mascot.
-- Grocery list, favorites, recipe history, or taste memory.
-- `localStorage` persistence.
-- Polished animations or final responsive design.
+- The Gemini API key lives server-side only — the frontend never receives it and never
+  calls Gemini directly.
+- All Gemini requests go through the Express backend, which validates every request and
+  response with Zod before it reaches the client.
+- `server/.env` is git-ignored and is never baked into a Docker image.
 
-These belong to later milestones.
+## Data Storage
+
+Favorites, Recipe History, Grocery List, and Taste Memory are all stored locally in the
+browser via versioned `localStorage` keys — there is no backend database or user
+account system. Clearing browser storage clears this data.
+
+## AI-Generated Content
+
+Recipes, reasoning, and nutritional information are generated by an AI model and are
+estimates, not verified facts. Nutritional values are approximate. Always use your own
+judgment for dietary restrictions, allergies, or medical needs.

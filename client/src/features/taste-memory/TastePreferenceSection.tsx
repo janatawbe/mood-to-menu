@@ -1,3 +1,4 @@
+// One reusable Taste Memory section: suggestion chips, custom entry, and saved chips.
 import { useState, type FormEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { IconButton } from "../../components/IconButton";

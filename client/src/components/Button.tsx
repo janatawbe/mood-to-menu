@@ -22,8 +22,8 @@ const sizeClasses: Record<ButtonSize, string> = {
   sm: "px-3.5 py-1.5 text-xs",
 };
 
-/** Milestone 9: a small tactile press state (skipped under reduced motion) on every
- * button in the app, since they all funnel through this one component. */
+/** Shared button — every button in the app funnels through this for a consistent
+ * tactile press state (skipped under reduced motion). */
 export function Button({
   variant = "primary",
   size = "md",

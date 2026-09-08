@@ -1,3 +1,4 @@
+// Calls Gemini to generate a recipe, validating and retrying once on a malformed response.
 import { randomUUID } from "node:crypto";
 import { ApiError } from "@google/genai";
 import { env } from "../../config/env.js";

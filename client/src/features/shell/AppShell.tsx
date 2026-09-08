@@ -1,3 +1,4 @@
+// Top-level layout: sidebar, active section routing, and the shared feature hooks.
 import { useCallback, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { AppLogo } from "../../components/AppLogo";
@@ -30,8 +31,7 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
   const prefersReducedMotion = useReducedMotion();
   const [activeSection, setActiveSection] = useState<SectionKey>("vibe-check");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  // Not persisted (by design, for now — see ChefIntroOverlay) so the intro replays on
-  // every open/refresh. Swap in a sessionStorage-backed flag here if that should change.
+  // Intentionally not persisted, so the intro replays on every open/refresh.
   const [chefIntroDismissed, setChefIntroDismissed] = useState(false);
 
   function handleSelectSection(section: SectionKey) {
@@ -39,32 +39,26 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
     setMobileNavOpen(false);
   }
 
-  // Fires once, right after a *successful initial* generation (Vibe Check submit/retry,
-  // not a Today's Menu regeneration) — the recipe reveal's real destination is Today's
-  // Menu, so a successful generation should take the user straight there.
+  // Fires only after a successful *initial* generation, not a regeneration — takes the
+  // user straight to Today's Menu.
   const handleGenerated = useCallback(() => handleSelectSection("todays-menu"), []);
-  // One shared instance (Milestone 7) — read by every generation/regeneration request
-  // below, and edited on its own screen; nothing else holds a separate copy.
+  // Shared instances: each hook is read/written from multiple screens, so state stays
+  // consistent everywhere (e.g. an add/remove on Grocery List reflects on Today's Menu).
   const tasteMemory = useTasteMemory();
-  // One shared instance (Milestone 8) — Recipe History records itself imperatively via
-  // `recordGeneration`, fired once per successful response inside useVibeCheck (never
-  // from an effect watching `recipe`, which would risk a StrictMode double-record).
+  // Recipe History records itself imperatively via `recordGeneration`, called once per
+  // successful response inside useVibeCheck rather than from an effect, so a React
+  // StrictMode double-render can't record a duplicate entry.
   const recipeHistory = useRecipeHistory();
   const vibeCheck = useVibeCheck(
     handleGenerated,
     tasteMemory.preferences,
     recipeHistory.recordGeneration,
   );
-  // One shared instance (Step 23) — Today's Menu and the Grocery List screen both read
-  // and write this same state, so an add/remove/check on one is reflected on the other
-  // immediately, and it's never cleared by regenerating or navigating away.
   const groceryList = useGroceryList();
-  // One shared instance (Milestone 8) — Today's Menu, Favorites, and Recipe History all
-  // read/write the same favorited state via recipe id, so it's consistent everywhere.
   const favorites = useFavorites();
 
-  // Opening a saved Favorite/History recipe reuses the existing Today's Menu rendering
-  // entirely (Step 20) — no separate recipe-detail screen, and no Gemini call.
+  // Opening a saved Favorite/History recipe reuses the existing Today's Menu rendering —
+  // no separate recipe-detail screen, and no Gemini call.
   const handleOpenRecipe = useCallback(
     (recipe: Recipe) => {
       vibeCheck.openRecipe(recipe);
@@ -141,11 +135,9 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
         )}
 
         <main id="main-content" className="min-w-0 flex-1">
-          {/* Milestone 9: a quick, restrained fade+shift when switching sections. This is
-              a fade-IN only (no `exit`, no AnimatePresence) — the incoming screen mounts
-              immediately/synchronously on click, same as before this milestone, and just
-              animates its own opacity/position in; nothing ever delays becoming visible
-              or interactive while the animation plays. Skipped under reduced motion. */}
+          {/* Fade-in only (no `exit`/AnimatePresence) — the incoming screen still mounts
+              synchronously on click and just animates its own opacity/position in, so
+              nothing delays becoming visible or interactive. Skipped under reduced motion. */}
           <motion.div
             key={activeSection}
             className="h-full"

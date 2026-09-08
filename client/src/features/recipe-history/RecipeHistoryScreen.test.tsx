@@ -1,3 +1,4 @@
+// Tests the Recipe History screen: rendering, filtering, and reopening a recipe.
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { UseRecipeHistoryReturn } from "../../hooks/useRecipeHistory";

@@ -1,3 +1,4 @@
+// Shared translucent surface panel used as each screen's outer container.
 import type { HTMLAttributes } from "react";
 
 export function Panel({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
