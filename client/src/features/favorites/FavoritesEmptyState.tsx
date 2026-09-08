@@ -8,15 +8,17 @@ interface FavoritesEmptyStateProps {
 }
 
 /**
- * A bespoke, warmer empty state (Milestone 8 UI pass) — unlike the plain dashed-border
- * `EmptyState` used by History/Grocery List, this one leans into the "personal cookbook"
- * framing with a solid warm card and a larger filled heart, so even an empty Favorites
- * screen still feels inviting rather than utilitarian.
+ * A bespoke empty state (Milestone 8 UI pass) — leans into the "personal cookbook"
+ * framing with a larger filled heart badge, unlike the plain icon used by History/
+ * Grocery List's shared `EmptyState`. Its outer card now matches that shared
+ * component's container language exactly (rounded-3xl, dashed tan border, no shadow)
+ * so it reads as the same card family at a glance, even though the icon/copy stay
+ * Favorites-specific.
  */
 export function FavoritesEmptyState({ hasRecipe, onGoToTodaysMenu, onGoToVibeCheck }: FavoritesEmptyStateProps) {
   return (
     <div className="flex h-full flex-col items-center justify-center py-8">
-      <div className="flex max-w-sm flex-col items-center gap-3 rounded-4xl border border-tan-200/60 bg-cream-soft px-8 py-10 text-center shadow-soft">
+      <div className="flex max-w-sm flex-col items-center gap-3 rounded-3xl border border-dashed border-tan-200 bg-cream-soft px-6 py-16 text-center">
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-accent-soft text-brand-accent-strong">
           <HeartIcon width={28} height={28} fill="currentColor" />
         </span>
