@@ -4,16 +4,20 @@ import { CartIcon, CheckIcon, HeartIcon, RefreshIcon } from "../../components/ic
 import type { VibeCheckError } from "../../hooks/useVibeCheck";
 import { getFriendlyErrorMessage } from "../../lib/errorMessages";
 
-// The Today's Menu action row: add ingredients, favorite, and regenerate.
+// The Today's Menu action row: add ingredients, favorite, and (when supported)
+// regenerate. Regenerate is entirely optional — omitting `onRegenerate` hides that
+// button and its related error box, so this same row can be reused for a public
+// "Recently Generated" recipe, which can never be regenerated (no Vibe Check/Gemini
+// context to regenerate from).
 interface RecipeActionsProps {
-  isRegenerating: boolean;
-  canRegenerate: boolean;
+  isRegenerating?: boolean;
+  canRegenerate?: boolean;
   /** True while viewing a reopened Favorite/History recipe — Regenerate is disabled and
    * explains why via its title, rather than silently regenerating against unrelated
    * current Vibe Check state. */
-  isReopenedRecipe: boolean;
-  regenerateError: VibeCheckError | null;
-  onRegenerate: () => void;
+  isReopenedRecipe?: boolean;
+  regenerateError?: VibeCheckError | null;
+  onRegenerate?: () => void;
   /** True once every ingredient is already on the Grocery List — recomputed live from
    * shared grocery state, so a removal on that screen flips this back to false here. */
   allIngredientsAdded: boolean;
@@ -24,10 +28,10 @@ interface RecipeActionsProps {
   onToggleFavorite: () => void;
 }
 export function RecipeActions({
-  isRegenerating,
-  canRegenerate,
-  isReopenedRecipe,
-  regenerateError,
+  isRegenerating = false,
+  canRegenerate = false,
+  isReopenedRecipe = false,
+  regenerateError = null,
   onRegenerate,
   allIngredientsAdded,
   onAddAllIngredients,
@@ -58,15 +62,17 @@ export function RecipeActions({
           </motion.span>
           {isFavorited ? "Saved to Favorites" : "Save to Favorites"}
         </Button>
-        <Button
-          variant="secondary"
-          onClick={onRegenerate}
-          disabled={!canRegenerate || isRegenerating}
-          title={isReopenedRecipe ? "Regenerate isn't available for a saved recipe you're viewing." : undefined}
-        >
-          <RefreshIcon width={16} height={16} className={isRegenerating && !prefersReducedMotion ? "animate-spin" : ""} />
-          {isRegenerating ? "Regenerating…" : "Regenerate"}
-        </Button>
+        {onRegenerate && (
+          <Button
+            variant="secondary"
+            onClick={onRegenerate}
+            disabled={!canRegenerate || isRegenerating}
+            title={isReopenedRecipe ? "Regenerate isn't available for a saved recipe you're viewing." : undefined}
+          >
+            <RefreshIcon width={16} height={16} className={isRegenerating && !prefersReducedMotion ? "animate-spin" : ""} />
+            {isRegenerating ? "Regenerating…" : "Regenerate"}
+          </Button>
+        )}
       </div>
 
       <span className="sr-only" aria-live="polite">
@@ -74,7 +80,7 @@ export function RecipeActions({
         {isFavorited && " Recipe saved to favorites."}
       </span>
 
-      {regenerateError && (
+      {onRegenerate && regenerateError && (
         <div
           role="alert"
           className="rounded-2xl border border-tan-200 bg-cream-soft px-3.5 py-2.5 text-sm text-ink-soft"

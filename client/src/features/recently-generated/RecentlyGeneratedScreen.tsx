@@ -1,15 +1,22 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Panel } from "../../components/Panel";
 import { SectionHeader } from "../../components/SectionHeader";
+import type { UseGroceryListReturn } from "../../hooks/useGroceryList";
+import type { UsePublicFavoritesReturn } from "../../hooks/usePublicFavorites";
 import type { UsePublicRecipesReturn } from "../../hooks/usePublicRecipes";
+import type { MoodFilter } from "../../lib/savedRecipeSearch";
 import type { PublicRecipe } from "../../types/domain";
+import { MoodFilterPicker } from "../saved-recipes/MoodFilterPicker";
 import { PublicRecipeCard } from "./PublicRecipeCard";
 import { PublicRecipeDetail } from "./PublicRecipeDetail";
 import { RecentlyGeneratedEmptyState } from "./RecentlyGeneratedEmptyState";
 import { RecentlyGeneratedErrorState } from "./RecentlyGeneratedErrorState";
+import { RecentlyGeneratedNoMoodResults } from "./RecentlyGeneratedNoMoodResults";
 
 interface RecentlyGeneratedScreenProps {
   publicRecipes: UsePublicRecipesReturn;
+  groceryList: UseGroceryListReturn;
+  publicFavorites: UsePublicFavoritesReturn;
 }
 
 /**
@@ -18,16 +25,34 @@ interface RecentlyGeneratedScreenProps {
  * shared across users/devices. Opening a card swaps this screen's own local view to
  * `PublicRecipeDetail`; it never touches AppShell's `SectionKey`, `useVibeCheck`, or
  * Gemini in any way.
+ *
+ * The mood filter runs entirely on the already-fetched `recipes` array (no extra
+ * request) — it reuses Favorites/Recipe History's `MoodFilterPicker` and `MoodFilter`
+ * type as-is; the filtering itself is a small local `.filter()` rather than their shared
+ * `filterSavedRecipes`, since that helper expects `{ recipe: Recipe }`-wrapped entries
+ * and `PublicRecipe` is flat. Local `useState` means the filter naturally resets to "All
+ * moods" whenever this screen unmounts (navigating away) and remounts.
  */
-export function RecentlyGeneratedScreen({ publicRecipes }: RecentlyGeneratedScreenProps) {
+export function RecentlyGeneratedScreen({ publicRecipes, groceryList, publicFavorites }: RecentlyGeneratedScreenProps) {
   const [openRecipe, setOpenRecipe] = useState<PublicRecipe | null>(null);
+  const [moodFilter, setMoodFilter] = useState<MoodFilter>("all");
   const { status, recipes, errorMessage, refetch } = publicRecipes;
+
+  const filteredRecipes = useMemo(
+    () => (moodFilter === "all" ? recipes : recipes.filter((recipe) => recipe.detectedMood === moodFilter)),
+    [recipes, moodFilter],
+  );
 
   if (openRecipe) {
     return (
       <Panel className="relative flex flex-col overflow-hidden lg:h-full">
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-          <PublicRecipeDetail recipe={openRecipe} onBack={() => setOpenRecipe(null)} />
+          <PublicRecipeDetail
+            recipe={openRecipe}
+            onBack={() => setOpenRecipe(null)}
+            groceryList={groceryList}
+            publicFavorites={publicFavorites}
+          />
         </div>
       </Panel>
     );
@@ -35,7 +60,12 @@ export function RecentlyGeneratedScreen({ publicRecipes }: RecentlyGeneratedScre
 
   return (
     <Panel className="relative flex flex-col overflow-hidden lg:h-full">
-      <SectionHeader title="Recently Generated" subtitle="A peek at what the community has been cooking up." />
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <SectionHeader title="Recently Generated" subtitle="A peek at what the community has been cooking up." />
+        {status === "success" && recipes.length > 0 && (
+          <MoodFilterPicker mood={moodFilter} onMoodChange={setMoodFilter} />
+        )}
+      </div>
 
       <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
         {status === "loading" ? (
@@ -44,9 +74,11 @@ export function RecentlyGeneratedScreen({ publicRecipes }: RecentlyGeneratedScre
           <RecentlyGeneratedErrorState message={errorMessage ?? "Something went wrong."} onRetry={refetch} />
         ) : recipes.length === 0 ? (
           <RecentlyGeneratedEmptyState />
+        ) : filteredRecipes.length === 0 ? (
+          <RecentlyGeneratedNoMoodResults onClear={() => setMoodFilter("all")} />
         ) : (
           <div className="grid grid-cols-1 gap-4 pb-2 sm:grid-cols-2">
-            {recipes.map((recipe) => (
+            {filteredRecipes.map((recipe) => (
               <PublicRecipeCard key={recipe.id} recipe={recipe} onOpen={() => setOpenRecipe(recipe)} />
             ))}
           </div>

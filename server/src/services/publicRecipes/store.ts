@@ -11,7 +11,7 @@ import { publicRecipeSchema } from "../../schemas/publicRecipe.js";
 import type { PublicRecipe, Recipe } from "../../types/domain.js";
 
 export const MAX_STORED_PUBLIC_RECIPES = 50;
-export const DEFAULT_PUBLIC_RECIPES_LIMIT = 10;
+export const DEFAULT_PUBLIC_RECIPES_LIMIT = 20;
 
 // Resolved from this module's own location (not `process.cwd()`, which differs between
 // `npm run dev --workspace=server` and the Docker CMD `node server/dist/index.js`) —
