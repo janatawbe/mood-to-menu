@@ -55,8 +55,16 @@ export function ChefIntroOverlay({ onDismiss }: ChefIntroOverlayProps) {
           }}
           transition={{ duration: prefersReducedMotion ? 0.15 : 0.5, ease: [0.34, 1.56, 0.64, 1] }}
         >
+          {/* `top-8` (32px) sits inside the padding gutter above the heading on desktop
+              (p-9 = 36px top padding there), but on mobile the card only has p-7 = 28px
+              padding, so the same 32px offset fell 4px into the heading's own box and
+              overlapped its first line whenever it wrapped. `top-1` (4px) keeps the
+              star's bottom edge (4px + 22px icon height = 26px) a couple of pixels above
+              that 28px padding boundary — a purely vertical guarantee that holds at any
+              mobile width, independent of how the heading text wraps. `sm:top-8` restores
+              the original, already-correct desktop position unchanged. */}
           <motion.span
-            className="pointer-events-none absolute right-8 top-8 text-brand-accent"
+            className="pointer-events-none absolute top-1 right-8 text-brand-accent sm:top-8"
             aria-hidden
             initial={{ opacity: 0, scale: 0, rotate: -20 }}
             animate={{ opacity: 1, scale: 1, rotate: 0 }}

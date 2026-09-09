@@ -97,3 +97,26 @@ export interface RecipeHistoryEntry {
   /** ISO timestamp, set once when the generation succeeded. */
   generatedAt: string;
 }
+
+/**
+ * A recipe shared in the public "Recently Generated" feed — mirrors the server's own
+ * `PublicRecipe` (server/src/types/domain.ts), fetched from GET /api/public-recipes.
+ * Deliberately its own type, not a variant of `Recipe`: it never carries `reasoning`
+ * (which may reference the mood/request that produced it), so it is never passed to a
+ * component expecting a full `Recipe`.
+ */
+export interface PublicRecipe {
+  id: string;
+  dishName: string;
+  detectedMood: Mood;
+  mealIntent: MealIntent;
+  ingredients: RecipeIngredient[];
+  instructions: string[];
+  prepTime: string;
+  tags: string[];
+  chefTip: string;
+  servings: number;
+  nutrition: RecipeNutrition;
+  /** ISO timestamp, set by the server when the public copy was saved. */
+  generatedAt: string;
+}

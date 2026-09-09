@@ -112,7 +112,7 @@ export function RecipeReveal({
         <InstructionsList instructions={recipe.instructions} />
       </RevealItem>
       <RevealItem>
-        <NutritionCard recipe={recipe} />
+        <NutritionCard nutrition={recipe.nutrition} servings={recipe.servings} />
       </RevealItem>
       <RevealItem>
         <ChefTipCard chefTip={recipe.chefTip} />

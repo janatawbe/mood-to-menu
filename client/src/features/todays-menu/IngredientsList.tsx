@@ -4,12 +4,15 @@ import type { RecipeIngredient } from "../../types/domain";
 
 interface IngredientsListProps {
   ingredients: RecipeIngredient[];
-  isAdded: (ingredient: RecipeIngredient) => boolean;
-  onAdd: (ingredient: RecipeIngredient) => void;
+  /** Both omitted together for a read-only context (e.g. a public recipe view) — each
+   * row then renders with no add-to-grocery-list button rather than one wired to
+   * nothing. */
+  isAdded?: (ingredient: RecipeIngredient) => boolean;
+  onAdd?: (ingredient: RecipeIngredient) => void;
 }
 
 /** Two-column on wider screens, single column on narrow ones. Each row gets a compact,
- * keyboard-accessible add-to-grocery-list button. */
+ * keyboard-accessible add-to-grocery-list button, when `onAdd` is provided. */
 export function IngredientsList({ ingredients, isAdded, onAdd }: IngredientsListProps) {
   const prefersReducedMotion = useReducedMotion();
   return (
@@ -19,7 +22,7 @@ export function IngredientsList({ ingredients, isAdded, onAdd }: IngredientsList
       </h2>
       <ul className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1.5 sm:grid-cols-2">
         {ingredients.map((ingredient, index) => {
-          const added = isAdded(ingredient);
+          const added = isAdded?.(ingredient) ?? false;
           return (
             <li
               key={`${ingredient.name}-${index}`}
@@ -28,24 +31,26 @@ export function IngredientsList({ ingredients, isAdded, onAdd }: IngredientsList
               <span aria-hidden className="mb-0.5 h-1.5 w-1.5 shrink-0 self-center rounded-full bg-brand-accent" />
               <span className="font-semibold text-ink">{ingredient.amount}</span>
               <span className="flex-1 text-ink-soft">{ingredient.name}</span>
-              <motion.button
-                type="button"
-                onClick={() => onAdd(ingredient)}
-                disabled={added}
-                aria-label={added ? `${ingredient.name} is on your grocery list` : `Add ${ingredient.name} to grocery list`}
-                aria-pressed={added}
-                title={added ? "On your grocery list" : "Add to grocery list"}
-                whileTap={prefersReducedMotion || added ? undefined : { scale: 0.85 }}
-                animate={{ scale: added ? 1.15 : 1 }}
-                transition={prefersReducedMotion ? { duration: 0.01 } : { type: "spring", stiffness: 500, damping: 15 }}
-                className={`inline-flex h-6 w-6 shrink-0 items-center justify-center self-center rounded-full transition-colors duration-150 ${
-                  added
-                    ? "bg-brand-accent-soft text-brand-accent-strong"
-                    : "text-ink-muted hover:bg-tan-100 hover:text-brand-accent-strong disabled:cursor-not-allowed"
-                }`}
-              >
-                {added ? <CheckIcon width={12} height={12} /> : <PlusIcon width={12} height={12} />}
-              </motion.button>
+              {onAdd && (
+                <motion.button
+                  type="button"
+                  onClick={() => onAdd(ingredient)}
+                  disabled={added}
+                  aria-label={added ? `${ingredient.name} is on your grocery list` : `Add ${ingredient.name} to grocery list`}
+                  aria-pressed={added}
+                  title={added ? "On your grocery list" : "Add to grocery list"}
+                  whileTap={prefersReducedMotion || added ? undefined : { scale: 0.85 }}
+                  animate={{ scale: added ? 1.15 : 1 }}
+                  transition={prefersReducedMotion ? { duration: 0.01 } : { type: "spring", stiffness: 500, damping: 15 }}
+                  className={`inline-flex h-6 w-6 shrink-0 items-center justify-center self-center rounded-full transition-colors duration-150 ${
+                    added
+                      ? "bg-brand-accent-soft text-brand-accent-strong"
+                      : "text-ink-muted hover:bg-tan-100 hover:text-brand-accent-strong disabled:cursor-not-allowed"
+                  }`}
+                >
+                  {added ? <CheckIcon width={12} height={12} /> : <PlusIcon width={12} height={12} />}
+                </motion.button>
+              )}
             </li>
           );
         })}

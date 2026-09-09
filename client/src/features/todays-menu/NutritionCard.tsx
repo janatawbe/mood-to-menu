@@ -1,7 +1,10 @@
-import type { Recipe, RecipeNutrition } from "../../types/domain";
+import type { RecipeNutrition } from "../../types/domain";
 
 interface NutritionCardProps {
-  recipe: Recipe;
+  /** `undefined` for an older saved recipe with no nutrition on record — not for a
+   * `PublicRecipe`, which (like a fresh generation) always has one. */
+  nutrition: RecipeNutrition | undefined;
+  servings: number | undefined;
 }
 
 const NUTRITION_CELLS: Array<{ key: keyof RecipeNutrition; label: string; unit: string }> = [
@@ -13,12 +16,11 @@ const NUTRITION_CELLS: Array<{ key: keyof RecipeNutrition; label: string; unit: 
 ];
 
 /**
- * Nutritional Facts — AI-estimated, per serving, never lab-measured. `recipe.nutrition`
- * is optional (see types/domain.ts): an older saved recipe without it simply omits this
+ * Nutritional Facts — AI-estimated, per serving, never lab-measured. `nutrition` is
+ * optional (see types/domain.ts): an older saved recipe without it simply omits this
  * section rather than showing an empty block — no Gemini call is made to backfill it.
  */
-export function NutritionCard({ recipe }: NutritionCardProps) {
-  const { nutrition, servings } = recipe;
+export function NutritionCard({ nutrition, servings }: NutritionCardProps) {
   if (!nutrition) return null;
 
   return (

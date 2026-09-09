@@ -1,18 +1,33 @@
 import type { ReactNode } from "react";
 import { SparkleIcon } from "../../components/icons";
-import type { Recipe } from "../../types/domain";
+import type { MealIntent, Mood } from "../../types/domain";
 import { moodPreviewEntries } from "../shell/moodPreviewData";
 import { MoodBadge } from "./MoodBadge";
 import { SuccessSparkle } from "./SuccessSparkle";
 
+/** The minimal shape this hero needs — satisfied by both a full `Recipe` and a
+ * `PublicRecipe` (which carries no `reasoning`), so a public recipe can be presented
+ * here without pretending it's a complete `Recipe`. */
+interface RecipeHeroRecipe {
+  dishName: string;
+  detectedMood: Mood;
+  mealIntent: MealIntent;
+  tags: string[];
+  prepTime: string;
+}
+
 interface RecipeHeroProps {
-  recipe: Recipe;
+  recipe: RecipeHeroRecipe;
   /** True for a genuinely fresh generation — plays a brief one-time celebratory accent
    * next to the eyebrow label. False for a reopened Favorite/History recipe. */
   celebrate?: boolean;
+  /** Overrides for the "Today's Menu" / "Made for your mood" copy — used by the public
+   * recipe detail view, which isn't the viewer's own menu. */
+  eyebrowLabel?: string;
+  subtitle?: string;
 }
 
-const effortLabel: Record<Recipe["mealIntent"]["prepEffort"], string> = {
+const effortLabel: Record<MealIntent["prepEffort"], string> = {
   low: "Low effort",
   medium: "Medium effort",
   high: "High effort",
@@ -32,7 +47,7 @@ function MetaPill({ children }: { children: ReactNode }) {
  * meal style already shown there. Falls back to the meal style itself if every tag is
  * redundant (or there are no tags at all), so the row always has exactly 4 items.
  */
-function pickHighlightTag(recipe: Recipe, moodLabel: string): string {
+function pickHighlightTag(recipe: RecipeHeroRecipe, moodLabel: string): string {
   const normalize = (value: string) => value.trim().toLowerCase();
   const redundant = new Set(
     [
@@ -54,7 +69,12 @@ function pickHighlightTag(recipe: Recipe, moodLabel: string): string {
  * returns one — this screen always has a mood to theme itself around. Deliberately has
  * no mood-colored background wash of its own — the card underneath it stays the normal
  * cream surface; mood identity comes through only via the mood badge below. */
-export function RecipeHero({ recipe, celebrate = false }: RecipeHeroProps) {
+export function RecipeHero({
+  recipe,
+  celebrate = false,
+  eyebrowLabel = "Today's Menu",
+  subtitle = "Made for your mood",
+}: RecipeHeroProps) {
   const moodLabel = moodPreviewEntries.find((entry) => entry.mood === recipe.detectedMood)?.label ?? recipe.detectedMood;
   const highlightTag = pickHighlightTag(recipe, moodLabel);
 
@@ -62,10 +82,10 @@ export function RecipeHero({ recipe, celebrate = false }: RecipeHeroProps) {
     <div className="relative">
       <div className="relative flex items-center gap-2 text-lg font-bold uppercase tracking-[0.2em] text-brand-accent-strong sm:text-xl">
         <SparkleIcon width={20} height={20} />
-        Today&apos;s Menu
+        {eyebrowLabel}
         <SuccessSparkle active={celebrate} />
       </div>
-      <p className="relative mt-1 text-sm text-ink-muted">Made for your mood</p>
+      <p className="relative mt-1 text-sm text-ink-muted">{subtitle}</p>
       <h1 className="relative mt-2 break-words font-display text-3xl font-bold leading-tight text-ink sm:text-4xl">
         {recipe.dishName}
       </h1>

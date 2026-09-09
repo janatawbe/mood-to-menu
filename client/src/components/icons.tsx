@@ -155,3 +155,23 @@ export function PlusIcon(props: IconProps) {
     </svg>
   );
 }
+
+/** "Recently Generated" nav icon — a globe, reading as "shared with everyone" rather
+ * than the personal-collection icons (heart, history, food bowl) beside it. */
+export function GlobeIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M4 12h16" />
+      <path d="M12 4c2.5 2.3 3.8 5 3.8 8s-1.3 5.7-3.8 8c-2.5-2.3-3.8-5-3.8-8s1.3-5.7 3.8-8Z" />
+    </svg>
+  );
+}
+
+export function ArrowLeftIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M19 12H5M5 12l6-6M5 12l6 6" />
+    </svg>
+  );
+}

@@ -24,3 +24,6 @@ Thumbs.db
 
 # TypeScript build info
 *.tsbuildinfo
+
+# Runtime-generated public-recipes JSON store (server/src/services/publicRecipes/store.ts)
+server/data/
