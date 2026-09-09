@@ -120,3 +120,17 @@ export interface PublicRecipe {
   /** ISO timestamp, set by the server when the public copy was saved. */
   generatedAt: string;
 }
+
+/**
+ * A public recipe a user has saved to their own Favorites. Deliberately a separate type
+ * from `FavoriteRecipe` (which wraps a full `Recipe`, requiring `reasoning`) rather than
+ * a union — `PublicRecipe` has no `reasoning` at all, so it can never satisfy `Recipe`'s
+ * contract, and none should be faked just to reuse `FavoriteRecipe`'s storage. See
+ * `usePublicFavorites`/`publicFavoritesStorage.ts` for the parallel (but independent)
+ * storage this type uses — the original Favorites data/storage are untouched.
+ */
+export interface PublicFavoriteRecipe {
+  recipe: PublicRecipe;
+  /** ISO timestamp, set once when first saved. */
+  savedAt: string;
+}

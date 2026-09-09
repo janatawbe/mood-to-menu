@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { Panel } from "../../components/Panel";
 import { SectionHeader } from "../../components/SectionHeader";
+import type { UseGroceryListReturn } from "../../hooks/useGroceryList";
+import type { UsePublicFavoritesReturn } from "../../hooks/usePublicFavorites";
 import type { UsePublicRecipesReturn } from "../../hooks/usePublicRecipes";
 import type { MoodFilter } from "../../lib/savedRecipeSearch";
 import type { PublicRecipe } from "../../types/domain";
@@ -13,6 +15,8 @@ import { RecentlyGeneratedNoMoodResults } from "./RecentlyGeneratedNoMoodResults
 
 interface RecentlyGeneratedScreenProps {
   publicRecipes: UsePublicRecipesReturn;
+  groceryList: UseGroceryListReturn;
+  publicFavorites: UsePublicFavoritesReturn;
 }
 
 /**
@@ -29,7 +33,7 @@ interface RecentlyGeneratedScreenProps {
  * and `PublicRecipe` is flat. Local `useState` means the filter naturally resets to "All
  * moods" whenever this screen unmounts (navigating away) and remounts.
  */
-export function RecentlyGeneratedScreen({ publicRecipes }: RecentlyGeneratedScreenProps) {
+export function RecentlyGeneratedScreen({ publicRecipes, groceryList, publicFavorites }: RecentlyGeneratedScreenProps) {
   const [openRecipe, setOpenRecipe] = useState<PublicRecipe | null>(null);
   const [moodFilter, setMoodFilter] = useState<MoodFilter>("all");
   const { status, recipes, errorMessage, refetch } = publicRecipes;
@@ -43,7 +47,12 @@ export function RecentlyGeneratedScreen({ publicRecipes }: RecentlyGeneratedScre
     return (
       <Panel className="relative flex flex-col overflow-hidden lg:h-full">
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-          <PublicRecipeDetail recipe={openRecipe} onBack={() => setOpenRecipe(null)} />
+          <PublicRecipeDetail
+            recipe={openRecipe}
+            onBack={() => setOpenRecipe(null)}
+            groceryList={groceryList}
+            publicFavorites={publicFavorites}
+          />
         </div>
       </Panel>
     );

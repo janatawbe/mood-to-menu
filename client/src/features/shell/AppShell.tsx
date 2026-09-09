@@ -6,6 +6,7 @@ import { IconButton } from "../../components/IconButton";
 import { MenuIcon } from "../../components/icons";
 import { useFavorites } from "../../hooks/useFavorites";
 import { useGroceryList } from "../../hooks/useGroceryList";
+import { usePublicFavorites } from "../../hooks/usePublicFavorites";
 import { usePublicRecipes } from "../../hooks/usePublicRecipes";
 import { useRecipeHistory } from "../../hooks/useRecipeHistory";
 import { useTasteMemory } from "../../hooks/useTasteMemory";
@@ -61,6 +62,9 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
   // Fetches independently of everything else on mount — a failure here never affects
   // Vibe Check, Today's Menu, or any other section (see usePublicRecipes).
   const publicRecipes = usePublicRecipes();
+  // Favorites for public recipes — a separate, small store from `favorites` above,
+  // since a PublicRecipe (no `reasoning`) can't satisfy FavoriteRecipe's Recipe contract.
+  const publicFavorites = usePublicFavorites();
 
   // Opening a saved Favorite/History recipe reuses the existing Today's Menu rendering —
   // no separate recipe-detail screen, and no Gemini call.
@@ -183,7 +187,11 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
                 onGoToVibeCheck={() => handleSelectSection("vibe-check")}
               />
             ) : (
-              <RecentlyGeneratedScreen publicRecipes={publicRecipes} />
+              <RecentlyGeneratedScreen
+                publicRecipes={publicRecipes}
+                groceryList={groceryList}
+                publicFavorites={publicFavorites}
+              />
             )}
           </motion.div>
         </main>
