@@ -23,4 +23,4 @@ COPY client/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
-# The official nginx image's own entrypoint/CMD (nginx -g "daemon off;") is used as-is.
+CMD ["nginx", "-g", "daemon off;"]
