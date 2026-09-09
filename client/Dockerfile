@@ -20,6 +20,8 @@ FROM nginx:1.27-alpine AS runtime
 
 COPY --from=build /app/client/dist /usr/share/nginx/html
 COPY client/nginx.conf /etc/nginx/conf.d/default.conf
+COPY client/start.sh /start.sh
+RUN chmod +x /start.sh
 
 EXPOSE 80
 
