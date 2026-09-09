@@ -82,13 +82,13 @@ describe("publicRecipeStore", () => {
     expect(recent.map((r) => r.dishName)).toEqual(["Third", "Second", "First"]);
   });
 
-  it("limits listRecent to the requested count (default 10)", () => {
+  it("limits listRecent to the requested count (default 20)", () => {
     const store = createPublicRecipeStore(filePath);
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 25; i++) {
       store.save(makeRecipe({ id: `r${i}`, dishName: `Dish ${i}` }));
     }
 
-    expect(store.listRecent()).toHaveLength(10);
+    expect(store.listRecent()).toHaveLength(20);
     expect(store.listRecent(3)).toHaveLength(3);
   });
 

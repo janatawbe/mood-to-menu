@@ -116,4 +116,72 @@ describe("RecentlyGeneratedScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: /back to recently generated/i }));
     expect(screen.getByRole("button", { name: /open recipe/i })).toBeInTheDocument();
   });
+
+  describe("mood filter", () => {
+    it("does not show the mood filter while loading, on error, or when the feed is truly empty", () => {
+      const { rerender } = render(<RecentlyGeneratedScreen publicRecipes={makeState({ status: "loading" })} />);
+      expect(screen.queryByRole("button", { name: /all moods/i })).not.toBeInTheDocument();
+
+      rerender(<RecentlyGeneratedScreen publicRecipes={makeState({ status: "error", errorMessage: "Oops" })} />);
+      expect(screen.queryByRole("button", { name: /all moods/i })).not.toBeInTheDocument();
+
+      rerender(<RecentlyGeneratedScreen publicRecipes={makeState({ status: "success", recipes: [] })} />);
+      expect(screen.queryByRole("button", { name: /all moods/i })).not.toBeInTheDocument();
+    });
+
+    it("shows the mood filter, defaulted to 'All moods', once recipes have loaded", () => {
+      const recipes = [makePublicRecipe({ id: "pr-1" })];
+      render(<RecentlyGeneratedScreen publicRecipes={makeState({ recipes })} />);
+      expect(screen.getByRole("button", { name: /all moods/i })).toBeInTheDocument();
+    });
+
+    it("filtering by mood shows only matching cards, entirely from already-fetched data (no extra fetch)", () => {
+      const fetchSpy = vi.fn();
+      vi.stubGlobal("fetch", fetchSpy);
+
+      const recipes = [
+        makePublicRecipe({ id: "pr-1", dishName: "Cozy Root Stew", detectedMood: "cozy" }),
+        makePublicRecipe({ id: "pr-2", dishName: "Happy Citrus Salad", detectedMood: "happy" }),
+      ];
+      render(<RecentlyGeneratedScreen publicRecipes={makeState({ recipes })} />);
+
+      fireEvent.click(screen.getByRole("button", { name: /all moods/i }));
+      fireEvent.click(screen.getByRole("option", { name: /^happy$/i }));
+
+      expect(screen.getByText("Happy Citrus Salad")).toBeInTheDocument();
+      expect(screen.queryByText("Cozy Root Stew")).not.toBeInTheDocument();
+      expect(fetchSpy).not.toHaveBeenCalled();
+
+      vi.unstubAllGlobals();
+    });
+
+    it("shows a no-results state (not the main empty state) when the selected mood matches nothing", () => {
+      const recipes = [makePublicRecipe({ id: "pr-1", dishName: "Cozy Root Stew", detectedMood: "cozy" })];
+      render(<RecentlyGeneratedScreen publicRecipes={makeState({ recipes })} />);
+
+      fireEvent.click(screen.getByRole("button", { name: /all moods/i }));
+      fireEvent.click(screen.getByRole("option", { name: /^energetic$/i }));
+
+      expect(screen.getByText(/no recipes match that mood yet/i)).toBeInTheDocument();
+      expect(screen.queryByText(/no recipes shared yet/i)).not.toBeInTheDocument();
+      expect(screen.queryByText("Cozy Root Stew")).not.toBeInTheDocument();
+    });
+
+    it("'Show all moods' clears the filter and restores every card", () => {
+      const recipes = [
+        makePublicRecipe({ id: "pr-1", dishName: "Cozy Root Stew", detectedMood: "cozy" }),
+        makePublicRecipe({ id: "pr-2", dishName: "Happy Citrus Salad", detectedMood: "happy" }),
+      ];
+      render(<RecentlyGeneratedScreen publicRecipes={makeState({ recipes })} />);
+
+      fireEvent.click(screen.getByRole("button", { name: /all moods/i }));
+      fireEvent.click(screen.getByRole("option", { name: /^energetic$/i }));
+      expect(screen.getByText(/no recipes match that mood yet/i)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /show all moods/i }));
+
+      expect(screen.getByText("Cozy Root Stew")).toBeInTheDocument();
+      expect(screen.getByText("Happy Citrus Salad")).toBeInTheDocument();
+    });
+  });
 });
