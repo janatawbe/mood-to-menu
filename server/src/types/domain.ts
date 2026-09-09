@@ -75,3 +75,27 @@ export interface TastePreferences {
   dislikedIngredients: string[];
   dietaryPreferences: string[];
 }
+
+/**
+ * The safe, shareable subset of a generated `Recipe` shown in the public "Recently
+ * Generated" feed. Deliberately an explicit allow-list of fields (never `Omit<Recipe,
+ * ...>`), so a field later added to `Recipe` can never leak into a public copy without a
+ * deliberate change here. Never carries `reasoning` (may reference the user's mood/
+ * request) or anything from the originating `VibeCheck` (userText, quickInputs,
+ * tastePreferences) or any request metadata (IP, identity, device).
+ */
+export interface PublicRecipe {
+  id: string;
+  dishName: string;
+  detectedMood: Mood;
+  mealIntent: MealIntent;
+  ingredients: RecipeIngredient[];
+  instructions: string[];
+  prepTime: string;
+  tags: string[];
+  chefTip: string;
+  servings: number;
+  nutrition: RecipeNutrition;
+  /** ISO timestamp, set once when the public copy is saved. */
+  generatedAt: string;
+}

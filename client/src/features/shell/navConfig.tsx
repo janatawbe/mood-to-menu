@@ -1,6 +1,6 @@
 // Sidebar navigation entries: section keys, labels, and icons.
 import type { ReactNode } from "react";
-import { CalendarIcon, CartIcon, FoodBowlIcon, HeartIcon, HistoryIcon, HomeIcon } from "../../components/icons";
+import { CalendarIcon, CartIcon, FoodBowlIcon, GlobeIcon, HeartIcon, HistoryIcon, HomeIcon } from "../../components/icons";
 
 export type SectionKey =
   | "vibe-check"
@@ -8,7 +8,8 @@ export type SectionKey =
   | "grocery-list"
   | "taste-memory"
   | "favorites"
-  | "recipe-history";
+  | "recipe-history"
+  | "recently-generated";
 
 export interface NavEntry {
   key: SectionKey;
@@ -26,4 +27,5 @@ export const navEntries: NavEntry[] = [
   { key: "taste-memory", label: "Taste Memory", icon: <FoodBowlIcon {...iconSize} /> },
   { key: "favorites", label: "Favorites", icon: <HeartIcon {...iconSize} /> },
   { key: "recipe-history", label: "Recipe History", icon: <HistoryIcon {...iconSize} /> },
+  { key: "recently-generated", label: "Recently Generated", icon: <GlobeIcon {...iconSize} /> },
 ];

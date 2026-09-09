@@ -48,3 +48,6 @@ milestones
 # Not needed inside the image
 design-reference
 README.md
+
+# Runtime-generated public-recipes JSON store — created fresh inside the container
+server/data

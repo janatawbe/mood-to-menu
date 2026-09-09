@@ -3,6 +3,7 @@ import { Router } from "express";
 import { vibeCheckRequestSchema } from "../schemas/vibeCheck.js";
 import { generateRecipe } from "../services/gemini/recipeService.js";
 import { RecipeServiceError } from "../services/gemini/errors.js";
+import { publicRecipeStore } from "../services/publicRecipes/store.js";
 
 export const recipesRouter = Router();
 
@@ -20,6 +21,14 @@ recipesRouter.post("/recipes/generate", async (req, res) => {
 
   try {
     const recipe = await generateRecipe(parsed.data);
+    try {
+      publicRecipeStore.save(recipe);
+    } catch (err) {
+      // publicRecipeStore.save() already catches its own failures internally — this is
+      // pure belt-and-suspenders so a public-feed problem can never fail the user's own
+      // successful generation, which is about to be returned below regardless.
+      console.error("[recipes] failed to save public recipe copy", err);
+    }
     res.json({ recipe });
   } catch (err) {
     if (err instanceof RecipeServiceError) {

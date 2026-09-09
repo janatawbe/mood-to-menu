@@ -1,6 +1,6 @@
 // Integration tests for AppShell: navigation and cross-feature data flow.
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Recipe } from "../../types/domain";
 import { AppShell } from "./AppShell";
 
@@ -37,6 +37,14 @@ async function generateFromVibeCheck() {
 beforeEach(() => {
   generateRecipeMock.mockReset();
   window.localStorage.clear();
+  // AppShell also mounts usePublicRecipes (Recently Generated), which fetches
+  // GET /api/public-recipes on its own — stubbed here so these tests never depend on
+  // real network behavior, independent of the generateRecipe mock above.
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ recipes: [] }) } as Response));
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 describe("AppShell navigation", () => {

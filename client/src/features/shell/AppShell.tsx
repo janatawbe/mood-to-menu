@@ -6,12 +6,14 @@ import { IconButton } from "../../components/IconButton";
 import { MenuIcon } from "../../components/icons";
 import { useFavorites } from "../../hooks/useFavorites";
 import { useGroceryList } from "../../hooks/useGroceryList";
+import { usePublicRecipes } from "../../hooks/usePublicRecipes";
 import { useRecipeHistory } from "../../hooks/useRecipeHistory";
 import { useTasteMemory } from "../../hooks/useTasteMemory";
 import { useVibeCheck } from "../../hooks/useVibeCheck";
 import type { Recipe } from "../../types/domain";
 import { FavoritesScreen } from "../favorites/FavoritesScreen";
 import { GroceryListScreen } from "../grocery-list/GroceryListScreen";
+import { RecentlyGeneratedScreen } from "../recently-generated/RecentlyGeneratedScreen";
 import { RecipeHistoryScreen } from "../recipe-history/RecipeHistoryScreen";
 import { TasteMemoryScreen } from "../taste-memory/TasteMemoryScreen";
 import { TodaysMenuScreen } from "../todays-menu/TodaysMenuScreen";
@@ -56,6 +58,9 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
   );
   const groceryList = useGroceryList();
   const favorites = useFavorites();
+  // Fetches independently of everything else on mount — a failure here never affects
+  // Vibe Check, Today's Menu, or any other section (see usePublicRecipes).
+  const publicRecipes = usePublicRecipes();
 
   // Opening a saved Favorite/History recipe reuses the existing Today's Menu rendering —
   // no separate recipe-detail screen, and no Gemini call.
@@ -171,12 +176,14 @@ export function AppShell({ chefIntroReady }: AppShellProps) {
                 onGoToTodaysMenu={() => handleSelectSection("todays-menu")}
                 onGoToVibeCheck={() => handleSelectSection("vibe-check")}
               />
-            ) : (
+            ) : activeSection === "recipe-history" ? (
               <RecipeHistoryScreen
                 history={recipeHistory}
                 onOpenRecipe={handleOpenRecipe}
                 onGoToVibeCheck={() => handleSelectSection("vibe-check")}
               />
+            ) : (
+              <RecentlyGeneratedScreen publicRecipes={publicRecipes} />
             )}
           </motion.div>
         </main>
